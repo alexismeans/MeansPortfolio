@@ -1,0 +1,107 @@
+---
+title: "Describing my Data"
+author: "Alexis Means"
+date: "2025-01-27"
+categories: [news, code, analysis]
+image: "C:/Users/Alexis Means/Documents/School/BCB520/MeansPortfolio/posts/post-with-code/transect.jpg"
+code-fold: TRUE
+---
+
+![](transect.jpg)
+
+## My Data
+
+The dataset I’m using consists of vegetation monitoring data I collected during the summer of 2024 for my project. It includes multiple linked databases with varying types of information. Ultimately, these databases will be combined to create a nutritional landscape map of my study area, highlighting areas with different levels of nutritional quality.
+
+## Data Collection
+
+My data consists of multiple linked databases containing detailed information about unique species/phenology plant pairs sampled across different transects during my field season. These databases include:
+
+-   **Vegetation communities**: The different vegetation communities sampled in my study.
+
+-   **Species and phenology**: The species identified in each transect along with their phenology stages.
+
+-   **Percent aerial cover**: The contribution of each unique species/phenology plant pair to the total percent aerial cover within each quadrat.
+
+-   **Biomass weight**: The weight of clipped and unclipped biomass for each unique plant.
+
+In the future, I’ll also include quality information for these unique pairs, though that analysis is still in progress.
+
+## Importing my Data
+
+Each of my datasets is saved as a separate CSV file. To load them, I first set my working directory to the folder containing these files and used the base R function `read.csv` to import each one. After loading, I assigned each dataset to a new object so I can easily reference them later. To confirm that each dataset loaded correctly, I used the `head` function to preview the first few rows. To get a better understanding of how the information is structured within each dataset, I used the `glimpse` function from the `tidyverse` package.
+
+```{r}
+#| echo: TRUE
+#| warning: FALSE
+
+# Set Working Directory
+setwd("C:/Users/Alexis Means/Documents/School/RDS/final.project/")
+
+# Load in each database and assign them to an object
+biomass <- read.csv("processed.data/biomass_clean.csv")
+comp <- read.csv("processed.data/composition_clean.csv")
+pheno <- read.csv("processed.data/phenology_clean.csv")
+plants <- read.csv("processed.data/plant_list_clean.csv")
+quality <- read.csv("processed.data/quality_clean.csv")
+transect <-read.csv("processed.data/transect_clean.csv")
+
+# Load tidyverse
+library(tidyverse)
+
+```
+
+### Biomass
+
+```{r}
+# Check that each database has been loaded correctly  
+# Use glimpse command to summarize each of my dataframes 
+head(biomass)
+glimpse(biomass)
+```
+
+### Composition
+
+```{r}
+head(comp) 
+glimpse(comp)
+```
+
+### Phenology
+
+```{r}
+head(pheno) 
+glimpse(pheno)
+```
+
+### Species List
+
+```{r}
+head(plants) 
+glimpse(plants)
+```
+
+### Quality
+
+```{r}
+head(quality) 
+glimpse(quality) 
+```
+
+### Transects
+
+```{r}
+head(transect) 
+glimpse(transect)
+```
+
+## Describing my Data
+
+These datasets come together to create a multidimensional table with all kinds of information about the species observed in my transects. Each table focuses on a unique combination of species ID and phenology stage, which is what I’m using as the main unit of observation. To describe each of these unique combinations, I’ve included several attributes. The quantitative ones include things like biomass weight, percent aerial cover, and nutritional quality. There are also some categorical attributes, like the vegetation community where the species was found and the season it was observed. For now, I’m working with this data as a table to calculate summary statistics, but eventually, I’ll convert it into spatial data. I’ve also included a table that lists and explains all the attributes—some are repeated across datasets, so I’ve only described them once. Going through this process has made me realize my data isn’t as tidy as I thought, which has been a good learning experience!
+
+```{r}
+#| echo: TRUE  
+
+table<- read.csv("C:/Users/Alexis Means/Documents/School/BCB520/2A/attributes.csv") 
+knitr::kable(table)
+```
