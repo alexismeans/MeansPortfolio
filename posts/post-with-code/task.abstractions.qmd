@@ -72,9 +72,13 @@ ggplot(top_fam, aes(x = fct_reorder(Family, -proportions), y = proportions, fill
 
 ### Proportion of Observed Species
 
+Along with the action-target pairs that I mentioned from the first graph, this graph also identifies attributes of each species by highlighting invasive species in **red** and native species in **blue**.
+
 1.  identify attributes (top observed species)
 
 2.  Compare attributes (# of observations for each species, as well as native vs invasive species)
+
+3.  identify attributes (native species and invasive species)
 
 ```{r}
 
