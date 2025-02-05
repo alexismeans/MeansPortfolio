@@ -1,0 +1,131 @@
+---
+title: "Task Abstraction"
+author: "Alexis Means"
+code-fold: TRUE
+---
+
+```{r}
+#| echo: FALSE
+#| warning: FALSE
+#load packages####
+library(dplyr)
+library(tidyverse)
+library(forcats)
+```
+
+```{r}
+#| echo: FALSE
+# Set Working Directory
+setwd("C:/Users/Alexis Means/Documents/School/RDS/final.project/")
+
+# Load Datasets
+biomass <- read.csv("processed.data/biomass_clean.csv")
+comp <- read.csv("processed.data/composition_clean.csv")
+pheno <- read.csv("processed.data/phenology_clean.csv")
+plants <- read.csv("processed.data/plant_list_clean.csv")
+quality <- read.csv("processed.data/quality_clean.csv")
+transect <-read.csv("processed.data/transect_clean.csv")
+```
+
+## Action-Target Pairs
+
+### Proportion of Observed Families
+
+identify attributes (top observed families)
+
+Compare attributes (# of observations in each family)
+
+```{r}
+
+#Clean the comp dataset and create a new column for family proportions
+fam_prop<- comp %>%
+  mutate(spp_code = str_trim(spp_code)) %>%             
+  filter(!str_to_lower(spp_code) %in%                   
+           str_to_lower(c("Litter", "Water", "Lichen", "Rocks", "Earth"))) %>% 
+  left_join(plants, by = "spp_code") %>% 
+  count(Family) %>% 
+  arrange(n) %>% 
+  mutate(proportions = n/sum(n)* 100) %>% 
+  rename(fam_count = n)
+
+#create a new object with the top 10 species in descending order
+top_fam <-  fam_prop %>% 
+  arrange(desc(proportions)) %>% 
+  slice_head(n = 10)
+
+#create boxplot of the top 10 families
+ggplot(top_fam, aes(x = fct_reorder(Family, -proportions), y = proportions, fill = Family)) +
+  geom_bar(stat = "identity") +
+  scale_fill_viridis_d(option = "viridis") + 
+  labs(
+    x = "Family",
+    y = "Proportion (%)",
+    title = "Top 10 Families by Proportion"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "none")
+```
+
+### Proportion of Observed Species
+
+identify attributes (top observed species)
+
+Compare attributes (# of observations for each species, as well as native vs invasive species)
+
+```{r}
+
+#Clean the comp dataset and create a new column for species proportions
+spp_num <- comp %>%
+  mutate(spp_code = str_trim(spp_code)) %>%              
+  filter(!str_to_lower(spp_code) %in%                   
+           str_to_lower(c("Litter", "Water", "Lichen", "Rocks", "Earth"))) %>%
+  count(spp_code) %>%
+  arrange(n) %>%
+  left_join(plants, by = "spp_code") %>%
+  mutate(proportion = (n / sum(n)) * 100) %>% 
+  rename(spp_count = n, spp_code_prop = proportion) 
+
+#Create new object with the top 10 species observed in descending order
+top_spp <- spp_num %>%
+  arrange(desc(spp_code_prop)) %>%
+  slice_head(n = 10)
+
+#Create a boxplot of the top 10 species 
+ggplot(top_spp, aes(x = fct_reorder(spp_code, -spp_code_prop), y = spp_code_prop, fill = status)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  labs(
+    x = "Species Code",
+    y = "Proportion (%)",
+    title = "Top 20 Species by Proportion",
+    fill = "status"
+  )+
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "none")
+```
+
+### Status of Observed Species
+
+compare features (invasive vs native species)
+
+```{r}
+#Clean the comp dataset and create a new column for status proportions
+inv <- comp %>%
+  mutate(spp_code = str_trim(spp_code)) %>%             
+  filter(!str_to_lower(spp_code) %in%                   
+           str_to_lower(c("Litter", "Water", "Lichen", "Rocks", "Earth"))) %>%
+  left_join(plants, by = "spp_code") %>%
+  count(status) %>%
+  arrange(n) %>% 
+  mutate(proportion = (n / sum(n)) * 100)
+
+#Create a piechart comparing the native vs invasive species
+ggplot(inv, aes(x = "", y = proportion, fill = status)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y") +
+  labs(title = "Species Status") +
+  theme_void()
+```
