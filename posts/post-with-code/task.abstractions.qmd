@@ -31,9 +31,11 @@ transect <-read.csv("processed.data/transect_clean.csv")
 
 ### Proportion of Observed Families
 
-identify attributes (top observed families)
+The first two action-target pairs that I want to achieve are similar. With the first I want to identify attributes of my sampled vegetation by identifying how many counts of each family were observed throughout the course of my field season. I also want to compare the attributes by recognizing how many were observed in each family and which of these families has the most observations. My second graph will do something similar, however instead of identifying and comparing families, I want to observe and compare the species.
 
-Compare attributes (# of observations in each family)
+1.  identify attributes (top observed families)
+
+2.  Compare attributes (# of observations in each family)
 
 ```{r}
 
@@ -70,9 +72,9 @@ ggplot(top_fam, aes(x = fct_reorder(Family, -proportions), y = proportions, fill
 
 ### Proportion of Observed Species
 
-identify attributes (top observed species)
+1.  identify attributes (top observed species)
 
-Compare attributes (# of observations for each species, as well as native vs invasive species)
+2.  Compare attributes (# of observations for each species, as well as native vs invasive species)
 
 ```{r}
 
@@ -109,7 +111,9 @@ ggplot(top_spp, aes(x = fct_reorder(spp_code, -spp_code_prop), y = spp_code_prop
 
 ### Status of Observed Species
 
-compare features (invasive vs native species)
+For my last action-target pair I would like to compare the features of the species that I observed throughout the summer. Specifically I want to know the proportion of native vs invasive species that were observed in total.
+
+1.  compare features (invasive vs native species)
 
 ```{r}
 #Clean the comp dataset and create a new column for status proportions
