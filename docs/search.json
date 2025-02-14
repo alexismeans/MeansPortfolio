@@ -18,7 +18,7 @@
     "href": "about.html",
     "title": "Alexis Means",
     "section": "",
-    "text": "The goal of this blog is to explore vegetation monitoring data collected in 2024. We will be using aerial percent cover/ biomass pairs to assess how differing species and phenological stages vary throughout multiple vegetation communities and seasons."
+    "text": "My name is Alexis Means! I’m a research assistant working with the University of Idaho and the Oregon Department of Fish and Wildlife to study one of Oregon’s most successful bighorn sheep populations. My research focuses on how these sheep navigate their environment and make tough decisions about what to eat when faced with difficult tradeoffs.\nEarly on, I’ll be analyzing vegetation data to see how different plant species and growth stages change across multiple vegetation communities and seasons. In the long run, I’ll use this information to build a model that maps the nutritional landscape, helping us better understand bighorn sheep movement."
   },
   {
     "objectID": "posts/post-with-code/index.html",
@@ -32,7 +32,7 @@
     "href": "index.html",
     "title": "Means Portfolio",
     "section": "",
-    "text": "Task Abstraction\n\n\n\n\n\n\n\n\n\n\n\nAlexis Means\n\n\n\n\n\n\n\n\n\n\n\n\nDescribing my Data\n\n\n\n\n\n\nnews\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\n\n\nJan 27, 2025\n\n\nAlexis Means\n\n\n\n\n\n\n\n\n\n\n\n\nFrom Forage to Fitness: Impacts of the Foodscape on Bighorn Sheep Demographics\n\n\n\n\n\n\nnews\n\n\n\n\n\n\n\n\n\nJan 20, 2025\n\n\nAlexis Means\n\n\n\n\n\n\nNo matching items"
+    "text": "Task Abstraction\n\n\n\n\n\n\n\n\n\n\n\nAlexis Means\n\n\n\n\n\n\n\n\n\n\n\n\nDescribing my Data\n\n\n\n\n\n\nnews\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\n\n\nJan 27, 2025\n\n\nAlexis Means\n\n\n\n\n\n\n\n\n\n\n\n\nFrom Forage to Fitness: Impacts of the Foodscape on Bighorn Sheep Demographics\n\n\n\n\n\n\nnews\n\n\n\n\n\n\n\n\n\nJan 20, 2025\n\n\nAlexis Means\n\n\n\n\n\n\n\n\n\n\n\n\nAssignment 4\n\n\nMarks and Channels\n\n\nWelcome to the fascinating world of biomass and percent cover\n\n\n\n\n\nJan 25, 2023\n\n\nAlexis Means\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "posts/post-with-code/index.html#my-data",
@@ -103,5 +103,26 @@
     "title": "Task Abstraction",
     "section": "",
     "text": "The first two action-target pairs that I want to achieve are similar. With the first I want to identify attributes of my sampled vegetation by identifying how many counts of each family were observed throughout the course of my field season. I also want to compare the attributes by recognizing how many were observed in each family and which of these families has the most observations. My second graph will do something similar, however instead of identifying and comparing families, I want to observe and compare the species.\n\nidentify attributes (top observed families)\nCompare attributes (# of observations in each family)\n\n\n\nCode\n#Clean the comp dataset and create a new column for family proportions\nfam_prop&lt;- comp %&gt;%\n  mutate(spp_code = str_trim(spp_code)) %&gt;%             \n  filter(!str_to_lower(spp_code) %in%                   \n           str_to_lower(c(\"Litter\", \"Water\", \"Lichen\", \"Rocks\", \"Earth\"))) %&gt;% \n  left_join(plants, by = \"spp_code\") %&gt;% \n  count(Family) %&gt;% \n  arrange(n) %&gt;% \n  mutate(proportions = n/sum(n)* 100) %&gt;% \n  rename(fam_count = n)\n\n#create a new object with the top 10 species in descending order\ntop_fam &lt;-  fam_prop %&gt;% \n  arrange(desc(proportions)) %&gt;% \n  slice_head(n = 10)\n\n#create boxplot of the top 10 families\nggplot(top_fam, aes(x = fct_reorder(Family, -proportions), y = proportions, fill = Family)) +\n  geom_bar(stat = \"identity\") +\n  scale_fill_viridis_d(option = \"viridis\") + \n  labs(\n    x = \"Family\",\n    y = \"Proportion (%)\",\n    title = \"Top 10 Families by Proportion\"\n  ) +\n  theme_minimal() +\n  theme(\n    axis.text.x = element_text(angle = 45, hjust = 1),\n    legend.position = \"none\")\n\n\n\n\n\n\n\n\n\n\n\n\nAlong with the action-target pairs that I mentioned from the first graph, this graph also identifies attributes of each species by highlighting invasive species in red and native species in blue.\n\nidentify attributes (top observed species)\nCompare attributes (# of observations for each species, as well as native vs invasive species)\nidentify attributes (native species and invasive species)\n\n\n\nCode\n#Clean the comp dataset and create a new column for species proportions\nspp_num &lt;- comp %&gt;%\n  mutate(spp_code = str_trim(spp_code)) %&gt;%              \n  filter(!str_to_lower(spp_code) %in%                   \n           str_to_lower(c(\"Litter\", \"Water\", \"Lichen\", \"Rocks\", \"Earth\"))) %&gt;%\n  count(spp_code) %&gt;%\n  arrange(n) %&gt;%\n  left_join(plants, by = \"spp_code\") %&gt;%\n  mutate(proportion = (n / sum(n)) * 100) %&gt;% \n  rename(spp_count = n, spp_code_prop = proportion) \n\n#Create new object with the top 10 species observed in descending order\ntop_spp &lt;- spp_num %&gt;%\n  arrange(desc(spp_code_prop)) %&gt;%\n  slice_head(n = 10)\n\n#Create a boxplot of the top 10 species \nggplot(top_spp, aes(x = fct_reorder(spp_code, -spp_code_prop), y = spp_code_prop, fill = status)) +\n  geom_bar(stat = \"identity\") +\n  theme_minimal() +\n  labs(\n    x = \"Species Code\",\n    y = \"Proportion (%)\",\n    title = \"Top 20 Species by Proportion\",\n    fill = \"status\"\n  )+\n  theme(\n    axis.text.x = element_text(angle = 45, hjust = 1),\n    legend.position = \"none\")\n\n\n\n\n\n\n\n\n\n\n\n\nFor my last action-target pair I would like to compare the features of the species that I observed throughout the summer. Specifically I want to know the proportion of native vs invasive species that were observed in total.\n\ncompare features (invasive vs native species)\n\n\n\nCode\n#Clean the comp dataset and create a new column for status proportions\ninv &lt;- comp %&gt;%\n  mutate(spp_code = str_trim(spp_code)) %&gt;%             \n  filter(!str_to_lower(spp_code) %in%                   \n           str_to_lower(c(\"Litter\", \"Water\", \"Lichen\", \"Rocks\", \"Earth\"))) %&gt;%\n  left_join(plants, by = \"spp_code\") %&gt;%\n  count(status) %&gt;%\n  arrange(n) %&gt;% \n  mutate(proportion = (n / sum(n)) * 100)\n\n#Create a piechart comparing the native vs invasive species\nggplot(inv, aes(x = \"\", y = proportion, fill = status)) +\n  geom_bar(stat = \"identity\", width = 1) +\n  coord_polar(\"y\") +\n  labs(title = \"Species Status\") +\n  theme_void()"
+  },
+  {
+    "objectID": "about.html#about-me",
+    "href": "about.html#about-me",
+    "title": "Alexis Means",
+    "section": "",
+    "text": "My name is Alexis Means! I’m a research assistant working with the University of Idaho and the Oregon Department of Fish and Wildlife to study one of Oregon’s most successful bighorn sheep populations. My research focuses on how these sheep navigate their environment and make tough decisions about what to eat when faced with difficult tradeoffs.\nEarly on, I’ll be analyzing vegetation data to see how different plant species and growth stages change across multiple vegetation communities and seasons. In the long run, I’ll use this information to build a model that maps the nutritional landscape, helping us better understand bighorn sheep movement."
+  },
+  {
+    "objectID": "about.html#education",
+    "href": "about.html#education",
+    "title": "Alexis Means",
+    "section": "Education",
+    "text": "Education\nUniversity of Idaho | Moscow, ID\nMS Thesis\nAugust 2023 - Present\nBoise State University | Boise, ID\nBS in Biology - Emphasis in Ecology, Environment, and Behavior\nAugust 2017 - May 2021"
+  },
+  {
+    "objectID": "about.html#experience",
+    "href": "about.html#experience",
+    "title": "Alexis Means",
+    "section": "Experience",
+    "text": "Experience"
   }
 ]
