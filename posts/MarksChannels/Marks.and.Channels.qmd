@@ -155,6 +155,9 @@ comp1 <- comp1 %>%
   mutate(n.FunctionalGroup = sum(!is.na(FunctionalGroup))) %>% 
   ungroup()
 
+comp1 <- comp1 %>% 
+  rename(julian = Julian_Day.x)
+
 
 ```
 
@@ -338,7 +341,7 @@ it changes along an elevation gradient. I also colored the each point by
 the vegetation community that it was sampled within.
 
 ```{r}
-
+#| warning: FALSE
 filtered_data <- comp1 %>% filter(DryWeight.g. <= 75)
 
 ggplot(filtered_data, aes(x = elev, y = DryWeight.g., color = PVT)) +
@@ -347,6 +350,7 @@ ggplot(filtered_data, aes(x = elev, y = DryWeight.g., color = PVT)) +
   labs(title = "Biomass trends by Elevation",
        x = "Elevation", y = "Biomass (g)", color = "PVT") +
   theme_minimal()
+
 ```
 
 **Figure 5** Here I chose to use a scatterplot to demonstrate any trends
@@ -359,6 +363,7 @@ differences as well, but some of the colors are slightly muted and hard
 to tell the difference.
 
 ```{r}
+#| warning: FALSE
 totalbio <- comp1 %>% 
   group_by(PlotID) %>% 
   mutate(biomass = sum(DryWeight.g.)) 
@@ -387,7 +392,9 @@ elevation. I also made the colors for each of my PVTs more bold.
 I want to see what species has the greatest overall percent cover
 throughout my transects. I can specifically highlight something useful
 within this graph because it is going to be a ton of data points unless
-I group it.
+I group it. To my knowledge, bromus tectorum was the species that was
+observed the most throughout the season. That does not mean that it has
+the greatest biomass value or percent cover.
 
 ```{r}
 weight <- comp1 %>% 
@@ -395,17 +402,9 @@ weight <- comp1 %>%
   mutate(totalbiomass = mean(DryWeight.g., na.rm = TRUE)) %>% 
 ungroup()
 
-biomass1 <- comp1 %>%
-  group_by(ActualName.x) %>%
-  mutate(totalbiomass = mean(DryWeight.g., na.rm = TRUE)) %>%  
-  ungroup() %>%
-  slice_max(totalbiomass, n = 10) 
-cover1 <- comp1 %>% 
-  group_by(ActualName.x) %>%
-  summarise(totalcover = mean(Percent, na.rm = TRUE)) %>%  
-  ungroup() %>%
-  slice_max(totalcover, n = 10)
 
+
+View(weight)
 
 
 
@@ -420,85 +419,73 @@ ggplot(weight, aes(x = ActualName.x, y = totalbiomass, color = ActualName.x == "
   xlab(NULL) +
  theme_minimal()
 
-
-#ggplot(cover1, aes(x = ActualName.x, y = totalcover, group = PVT, color = PVT)) +
-#  geom_line(linewidth = 1.2) +
-#  geom_point(size = 3) +  # Add points for clarity
-#  labs(
-#    title = "Total Percent Cover by Species",
-#    x = "Species (ActualName.x)",
-#    y = "Total Percent Cover"
-#  ) +
-#  scale_color_viridis_d(name = "Plot ID") +
-#  theme_minimal() +
-#  theme(
-#    axis.text.x = element_text(angle = 45, hjust = 1)
-#  )
   
 ```
 
-Cheatgrass is the most common species observed amount all vegetation
-communities (should I do a different graph to figure this out?) I want
-to see how its biomass changes overall throughout the course of my field
-season.
+**Figure 5** shows the total biomass observed for each species
+throughout my field season. Since there is no way to tell apart the
+names on the x axis, and I was curious about cheatgrass, I highlighted
+my cheatgrass observations. This graph is almost good, except for not
+being able to read the x axis. I could limit this to my top 10 species
+(because who really cares about the tiny insignificant ones anyway) and
+it would make it easier to read.
 
 ```{r}
-cheat <- comp1 %>%
-  filter(Spp == "BRTE") %>%  
-  group_by(PlotID) %>%       
-  mutate(TotalDryWeight = sum(DryWeight.g., na.rm = TRUE))  
+biomass1 <- comp1 %>%
+  group_by(ActualName.x) %>%
+  mutate(totalbiomass = mean(DryWeight.g., na.rm = TRUE)) %>%
+  filter(totalbiomass > 10)
 
-cheat2 <- comp1 %>%
-  filter(Spp == "BRTE") %>%  
-  group_by(PlotID) %>%       
-  mutate(TotalCover = sum(Percent, na.rm = TRUE))  
-
-View(cheat)
-
-ggplot(cheat, aes(x = Julian_Day.x, y = TotalDryWeight))+
-         geom_point()+
-         geom_smooth(method = "lm", se = FALSE, color = "black") +
-         labs(Title = "Cheatgrass Biomass",
-              x = "Julian Day",
-              y = "Total Biomass (g)")+
-         theme_minimal()
-
-ggplot(cheat2, aes(x = Julian_Day.x, y = Percent))+
-         geom_point()+
-         geom_smooth(method = "lm", se = FALSE, color = "black") +
-         labs(Title = "Cheatgrass Cover",
-              x = "Julian Day",
-              y = "Cover (%)")+
-         theme_minimal()
-
-
-
-totalbio <- comp1 %>% 
-  group_by(PlotID) %>% 
-  mutate(biomass = sum(DryWeight.g.)) 
-totalbio$PVT <- factor(totalbio$PVT)
-
-View(totalbio)
-
-ggplot(totalbio, aes(x = Julian_Day.x, y = biomass, color = PVT)) +
-  geom_point(alpha = 1) +  
-  geom_smooth(method = "loess", span = 0.5, color = "blue", fill = "lightblue")+ 
-  labs(title = "Biomass trends by Elevation",
-       x = "Julian Day", y = "Biomass (g)", color = "PVT") +
-  scale_color_manual(values = c("668" = "violet", "669" = "red", "674" = "yellow", "682"= "blue", "672" = "green"))+
-  theme_gray()
+ggplot(biomass1, aes(x = Spp, y = totalbiomass, color = ActualName.x == "BROMUS TECTORUM")) +
+  geom_point(size = 3, alpha = 0.8, position = position_jitter(width = 0.2, height = 0)) +  
+  labs(
+   title = "Total Biomass by Species",
+    x = "Species ",
+    y = "Total Biomass"
+  ) +
+  scale_color_manual(values = c("black", "red"), guide = "none") +  
+  xlab(NULL) +
+ theme_minimal()+
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+  
 ```
 
-```{r}
-ggplot(comp1, aes(x = Percent, y = DryWeight.g., color = FunctionalGroup)) +
-  geom_boxplot() +
-  labs(title = "Relationship Between Percent Cover and Biomass",
-       x = "Percent Cover (%)", y = "Biomass (g)") +
-  theme_minimal()
+ignore this
 
-ggplot(comp1, aes(x = Percent, y = DryWeight.g., color = FunctionalGroup)) +
-  geom_point(alpha = 0.7) +
-  labs(title = "Relationship Between Percent Cover and Biomass",
-       x = "Percent Cover (%)", y = "Biomass (g)") +
-  theme_minimal()
+```{r}
+#totalbiomass <- comp1 %>% 
+#  left_join(y=transect,
+#            by = "PlotID") %>% 
+#    mutate(Season = case_when(
+#    Julian_Day.x >= 75 & Julian_Day.x <= 153 ~ "SP",
+#    Julian_Day.x >= 154 & Julian_Day.x <= 228 ~ "SU",
+#    TRUE ~ NA_character_  # Assign NA for values outside these ranges
+# )) %>% 
+# group_by(Season, PVT.x) %>% 
+#  mutate(bio = mean(DryWeight.g.))
+         
+#  totalbiomass$PVT.x <- factor(totalbiomass$PVT.x)
+#View(totalbiomass)
+
+#ggplot(totalbiomass, aes(x = Season, y = bio, fill = PVT.x)) +
+# geom_bar(stat = "identity",position = "dodge") +   
+#  labs(
+#    title = "Biomass by PVT",
+#    x = "PVT",
+#   y = "Total Biomass (g)"
+#  ) +
+#  theme_minimal()+
+#  theme(legend.position = "none")
+
+#ggplot(totalbiomass, aes(x = Season, y = bio, fill = Season)) +
+#  geom_bar(stat = "identity", position = "dodge") +  
+#  facet_wrap(~ PVT.x, scales = "free_x", strip.position = "bottom") +  # Creates separate panels for each PVT
+#  labs(
+#    title = "Biomass by PVT and Season",
+#    x = "PVT",
+#    y = "Total Biomass (g)"
+#  ) +
+#  theme_minimal()
+#View(comp2)
 ```
