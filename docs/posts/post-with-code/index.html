@@ -8,6 +8,7 @@
 
 <meta name="author" content="Alexis Means">
 <meta name="dcterms.date" content="2025-01-27">
+<meta name="description" content="In this assignment I walk through the various types of data that I collected in the field and describe their purpose and how they interact">
 
 <title>Describing my Data – Means Portfolio</title>
 <style>
@@ -150,7 +151,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
       <h1 class="title">Describing my Data</h1>
-                                <div class="quarto-categories">
+                  <div>
+        <div class="description">
+          In this assignment I walk through the various types of data that I collected in the field and describe their purpose and how they interact
+        </div>
+      </div>
+                          <div class="quarto-categories">
                 <div class="quarto-category">news</div>
                 <div class="quarto-category">code</div>
                 <div class="quarto-category">analysis</div>
@@ -237,13 +243,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(biomass)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>  DryWeight.g.                comp_id
-1        31.11   24-672-020_60_BRTE_N
-2         4.03  24-672-020_60_AMME_FL
-3         0.64  24-672-020_60_LIPA_FL
-4         6.17 24-672-020_100_BRTE_FL
-5         5.09  24-672-020_100_LOGR_N
-6         5.10 24-672-020_100_PSSP6_N</code></pre>
+<pre><code>  X DryWeight.g.                comp_id
+1 1        31.11   24-672-020_60_BRTE_N
+2 2         4.03  24-672-020_60_AMME_FL
+3 3         0.64  24-672-020_60_LIPA_FL
+4 4         6.17 24-672-020_100_BRTE_FL
+5 5         5.09  24-672-020_100_LOGR_N
+6 6         5.10 24-672-020_100_PSSP6_N</code></pre>
 </div>
 <details class="code-fold">
 <summary>Code</summary>
@@ -251,7 +257,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Rows: 5,563
-Columns: 2
+Columns: 3
+$ X            &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17…
 $ DryWeight.g. &lt;dbl&gt; 31.11, 4.03, 0.64, 6.17, 5.09, 5.10, 0.34, 0.22, 1.25, 1.…
 $ comp_id      &lt;chr&gt; "24-672-020_60_BRTE_N", "24-672-020_60_AMME_FL", "24-672-…</code></pre>
 </div>
@@ -336,20 +343,13 @@ $ spp_id  &lt;chr&gt; "BRTE_FL_ENTIRE", "ERCI6_FL_ENTIRE", "LOGR_FL_ENTIRE", "BR
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(plants) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>  spp_code       Family       Genus        Spp           CommonName  Duration
-1    ARRI2   ASTERACEAE   ARTEMISIA     RIGIDA      STIFF SAGEBRUSH PERENNIAL
-2    ARTRT   ASTERACEAE   ARTEMISIA TRIDENTATA  BASIN BIG SAGEBRUSH PERENNIAL
-3    GUSA2   ASTERACEAE GUTIERREZIA  SAROTHRAE      BROOM SNAKEWEED PERENNIAL
-4    ERCI6     GERANIUM     ERODIUM CICUTARIUM   REDSTEM STORKSBILL    ANNUAL
-5     LODI     APIACEAE    LOMATIUM  DISSECTUM FERNLEAF BISCUITROOT PERENNIAL
-6     AMME BORAGINACEAE   AMSINCKIA  MENZIESII    COMMON FIDDLENECK    ANNUAL
-    status
-1   NATIVE
-2   NATIVE
-3   NATIVE
-4 INVASIVE
-5   NATIVE
-6   NATIVE</code></pre>
+<pre><code>  X spp_code       Family       Genus        Spp           CommonName  Duration
+1 1    ARRI2   ASTERACEAE   ARTEMISIA     RIGIDA      STIFF SAGEBRUSH PERENNIAL
+2 2    ARTRT   ASTERACEAE   ARTEMISIA TRIDENTATA  BASIN BIG SAGEBRUSH PERENNIAL
+3 3    GUSA2   ASTERACEAE GUTIERREZIA  SAROTHRAE      BROOM SNAKEWEED PERENNIAL
+4 4    ERCI6     GERANIUM     ERODIUM CICUTARIUM   REDSTEM STORKSBILL    ANNUAL
+5 5     LODI     APIACEAE    LOMATIUM  DISSECTUM FERNLEAF BISCUITROOT PERENNIAL
+6 6     AMME BORAGINACEAE   AMSINCKIA  MENZIESII    COMMON FIDDLENECK    ANNUAL</code></pre>
 </div>
 <details class="code-fold">
 <summary>Code</summary>
@@ -358,13 +358,13 @@ $ spp_id  &lt;chr&gt; "BRTE_FL_ENTIRE", "ERCI6_FL_ENTIRE", "LOGR_FL_ENTIRE", "BR
 <div class="cell-output cell-output-stdout">
 <pre><code>Rows: 101
 Columns: 7
+$ X          &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, …
 $ spp_code   &lt;chr&gt; "ARRI2", "ARTRT", "GUSA2", "ERCI6", "LODI", "AMME", "LIPA",…
 $ Family     &lt;chr&gt; "ASTERACEAE", "ASTERACEAE", "ASTERACEAE", "GERANIUM", "APIA…
 $ Genus      &lt;chr&gt; "ARTEMISIA", "ARTEMISIA", "GUTIERREZIA", "ERODIUM", "LOMATI…
 $ Spp        &lt;chr&gt; "RIGIDA", "TRIDENTATA", "SAROTHRAE", "CICUTARIUM", "DISSECT…
 $ CommonName &lt;chr&gt; "STIFF SAGEBRUSH", "BASIN BIG SAGEBRUSH", "BROOM SNAKEWEED"…
-$ Duration   &lt;chr&gt; "PERENNIAL", "PERENNIAL", "PERENNIAL", "ANNUAL", "PERENNIAL…
-$ status     &lt;chr&gt; "NATIVE", "NATIVE", "NATIVE", "INVASIVE", "NATIVE", "NATIVE…</code></pre>
+$ Duration   &lt;chr&gt; "PERENNIAL", "PERENNIAL", "PERENNIAL", "ANNUAL", "PERENNIAL…</code></pre>
 </div>
 </div>
 </section>
@@ -376,13 +376,13 @@ $ status     &lt;chr&gt; "NATIVE", "NATIVE", "NATIVE", "INVASIVE", "NATIVE", "NA
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(quality) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>  Code season PVT         spp_id quality_id
-1 BRTE     NA 672 BRTE_FL_ENTIRE         NA
-2 BRTE     NA 672 BRTE_FL_ENTIRE         NA
-3 BRTE     NA 672 BRTE_FR_ENTIRE         NA
-4 BRTE     NA 672 BRTE_FL_ENTIRE         NA
-5 BRTE     NA 672 BRTE_FL_ENTIRE         NA
-6 BRTE     NA 672 BRTE_FL_ENTIRE         NA</code></pre>
+<pre><code>  X Code season PVT         spp_id quality_id
+1 1 BRTE     NA 672 BRTE_FL_ENTIRE         NA
+2 2 BRTE     NA 672 BRTE_FL_ENTIRE         NA
+3 3 BRTE     NA 672 BRTE_FR_ENTIRE         NA
+4 4 BRTE     NA 672 BRTE_FL_ENTIRE         NA
+5 5 BRTE     NA 672 BRTE_FL_ENTIRE         NA
+6 6 BRTE     NA 672 BRTE_FL_ENTIRE         NA</code></pre>
 </div>
 <details class="code-fold">
 <summary>Code</summary>
@@ -390,7 +390,8 @@ $ status     &lt;chr&gt; "NATIVE", "NATIVE", "NATIVE", "INVASIVE", "NATIVE", "NA
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Rows: 631
-Columns: 5
+Columns: 6
+$ X          &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, …
 $ Code       &lt;chr&gt; "BRTE", "BRTE", "BRTE", "BRTE", "BRTE", "BRTE", "BRTE", "BR…
 $ season     &lt;lgl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
 $ PVT        &lt;int&gt; 672, 672, 672, 672, 672, 672, 672, 672, 672, 672, 672, 672,…

@@ -3,8 +3,8 @@ title: "Describing my Data"
 author: "Alexis Means"
 date: "2025-01-27"
 categories: [news, code, analysis]
-image: "C:/Users/Alexis Means/Documents/School/BCB520/MeansPortfolio/posts/post-with-code/transect.jpg"
 code-fold: TRUE
+description: In this assignment I walk through the various types of data that I collected in the field and describe their purpose and how they interact
 ---
 
 ![](transect.jpg)

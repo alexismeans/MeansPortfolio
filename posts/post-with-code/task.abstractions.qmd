@@ -2,6 +2,8 @@
 title: "Task Abstraction"
 author: "Alexis Means"
 code-fold: TRUE
+date: 2025-02-05
+description: In this assignment I create action-target pairs to help me visualize different aspects of my data. 
 ---
 
 ```{r}
