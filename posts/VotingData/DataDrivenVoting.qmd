@@ -20,12 +20,6 @@ Individual.Skater.Rookie <- read.csv("RookieSkaterindividual.csv")
 OnIce.Skater.Rookie <- read.csv("RookieSkaterOnIce.csv")
 Rookie.Goalie <- read.csv("RookieGoalies.csv")
 
-View(Indivdual.Skater)
-View(OnIce.Skater)
-View(Goalie)
-View(Individual.Skater.Rookie)
-View(OnIce.Skater.Rookie)
-View(Rookie.Goalie)
 ```
 
 # Hart Memorial Trophy
@@ -50,7 +44,7 @@ ggplot(top_players, aes(x = reorder(Player,-CF.), y = CF.)) +
 
 ```
 
-However, it arguable that individuals with less time on the ice or do not play as many games are not contributing as much to their teams success. I decided to show a scatterplot of the Corsi percentage compared to the players time spent on the ice during the game. This showed that some of the individuals with the highest Corsi score did not spend as much time on the ice.
+However, its arguable that individuals with less time on the ice or do not play as many games are not contributing as much to their teams success. I decided to show a scatterplot of the Corsi percentage compared to the players time spent on the ice during the game. This showed that some of the individuals with the highest Corsi score did not spend as much time on the ice.
 
 ```{r}
 OnIce.Skater <- OnIce.Skater %>%

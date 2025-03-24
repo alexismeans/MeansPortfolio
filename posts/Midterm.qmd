@@ -1,0 +1,91 @@
+---
+title: "Midterm"
+subtitle: "FRESH Model Visualization"
+author: "Alexis Means"
+description: I will be visualizing different values associated with "suitable biomass" from my FRESH model that will be used a covariate to create a GAM in my later models 
+code-fold: TRUE
+---
+
+# Project Description:
+
+## **Understanding Bighorn Sheep Nutrition and Movement in the John Day Canyon**
+
+Nestled within the Columbia Plateau, the John Day Canyon is a steep, rugged landscape where sagebrush and grasses dominate the hillsides. This dynamic environment supports a unique population of bighorn sheep (BHS)—one that, remarkably, has avoided the disease outbreaks that often devastate other herds.
+
+My research focuses on understanding the nutritional requirements of these bighorn sheep and how those needs shift throughout their reproductive cycle due to changing metabolic demands. The ultimate goal is to develop a predictive model that links their nutritional requirements to movement patterns. By doing so, we can identify potential threats, such as areas where bighorn sheep may come into contact with domestic livestock, and pinpoint critical habitats essential for their survival.
+
+To achieve this, I am collecting vegetation data to calculate a measure of “**suitable biomass**”—essentially, the portion of available forage that meaningfully contributes to the sheep’s energy needs at different reproductive stages. Using this metric, I will develop a Generalized Additive Model (GAM) to map areas of high and low nutritional quality across the landscape.
+
+In the final phase of my project, this GAM will be incorporated into resource selection functions (RSFs)or integrated step selection analyses (iSSFs). These techniques will help determine which resources most influence bighorn sheep movement and allow us to predict future movement patterns—a critical step in ensuring their continued success in this landscape. By bridging nutritional ecology with movement ecology, this research will contribute valuable insights into how bighorn sheep navigate their environment and help inform conservation strategies for this unique, disease-free population.
+
+```{r}
+#| warning: FALSE
+
+library(lpSolve)
+library(openxlsx)
+library(tools)
+library(dplyr)
+
+#* Set your path to FRESH Data *#
+#* 
+excelpath="C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/FRESH/processed.data/" 
+
+#* Define the file in the above path to locate *#
+#* 
+habs = list.files(path=excelpath, pattern=".xlsx", all.files=F, full.names=F, recursive=FALSE, ignore.case=T,include.dirs=FALSE) 
+
+#* Define the file path *#
+#* 
+excel.file = paste0(c(excelpath,habs),collapse="")
+
+#* Load it *#
+#* 
+habitat=loadWorkbook(excel.file)
+data = data.frame(openxlsx::readWorkbook(excel.file, sheet="FRESH Data", startRow=1, colNames=TRUE))
+
+```
+
+First I want to start by seeing if there is any correlation between the digestible energy and digestible protein values of the species that I observed.
+
+```{r}
+library(tidyverse)
+ggplot(data, aes(x = DP, y = DE)) +
+  geom_point(color = "blue", alpha = 0.6) +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +  # Linear trend line
+  labs(title = "Relationship Between DE and DP",
+       x = "Digestible Protein (DP)",
+       y = "Digestible Energy (DE)") +
+  theme_minimal()
+```
+
+```{r}
+ggplot(data, aes(x = Plant.Code, y = DE)) +
+  geom_boxplot(fill = "lightblue", color = "black") + 
+  labs(
+    title = "Range of Digestible Energy (DE) by Plant Species",
+    x = "Plant Code",
+    y = "Digestible Energy (DE)"
+  ) +
+  theme_minimal() +  
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+    axis.title = element_text(size = 12),
+    axis.text.x = element_text(angle = 90, hjust = 1, size = 5),
+  )
+```
+
+```{r}
+ggplot(data, aes(x = Plant.Code, y = DP)) +
+  geom_boxplot(fill = "lightblue", color = "black") + 
+  labs(
+    title = "Range of Digestible Energy (DE) by Plant Species",
+    x = "Plant Code",
+    y = "Digestible Energy (DE)"
+  ) +
+  theme_minimal() +  
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+    axis.title = element_text(size = 12),
+    axis.text.x = element_text(angle = 90, hjust = 1, size = 5) 
+  )
+```
