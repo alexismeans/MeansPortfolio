@@ -2,7 +2,8 @@
 title: "Midterm"
 subtitle: "Biomass Visualization"
 author: "Alexis Means"
-description: I will be visualizing different values associated with "suitable biomass" from my FRESH model that will be used a covariate to create a GAM in my later models 
+date: 2025-03-26
+description: I will be using quality and biomass data to help visualize how forage quality changes throughout my study area over time. 
 code-fold: TRUE
 ---
 

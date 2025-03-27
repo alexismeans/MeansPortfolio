@@ -2,7 +2,7 @@
 title: "Assignment 4"
 subtitle: Marks and Channels
 author: Alexis Means
-date: 2-13-25
+date: 2025-01-25
 code-fold: true
 code-tools: true
 description: Welcome to the fascinating world of biomass and percent cover
