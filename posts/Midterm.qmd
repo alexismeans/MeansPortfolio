@@ -1,6 +1,6 @@
 ---
 title: "Midterm"
-subtitle: "FRESH Model Visualization"
+subtitle: "Biomass Visualization"
 author: "Alexis Means"
 description: I will be visualizing different values associated with "suitable biomass" from my FRESH model that will be used a covariate to create a GAM in my later models 
 code-fold: TRUE
@@ -10,13 +10,15 @@ code-fold: TRUE
 
 ## **Understanding Bighorn Sheep Nutrition and Movement in the John Day Canyon**
 
-Nestled within the Columbia Plateau, the John Day Canyon is a steep, rugged landscape where sagebrush and grasses dominate the hillsides. This dynamic environment supports a unique population of bighorn sheep (BHS)—one that, remarkably, has avoided the disease outbreaks that often devastate other herds.
+Located within the Columbia Plateau, the John Day Canyon is a steep, rugged landscape where sagebrush and grasses dominate the hillsides. This dynamic environment supports a unique population of bighorn sheep — one that, remarkably, has avoided the disease outbreaks that often devastate other herds.
 
 My research focuses on understanding the nutritional requirements of these bighorn sheep and how those needs shift throughout their reproductive cycle due to changing metabolic demands. The ultimate goal is to develop a predictive model that links their nutritional requirements to movement patterns. By doing so, we can identify potential threats, such as areas where bighorn sheep may come into contact with domestic livestock, and pinpoint critical habitats essential for their survival.
 
-To achieve this, I am collecting vegetation data to calculate a measure of “**suitable biomass**”—essentially, the portion of available forage that meaningfully contributes to the sheep’s energy needs at different reproductive stages. Using this metric, I will develop a Generalized Additive Model (GAM) to map areas of high and low nutritional quality across the landscape.
+To achieve this, I am collecting vegetation data to calculate a measure of “**suitable biomass**”—essentially, the portion of available forage that meaningfully contributes to the sheep’s energy needs at different reproductive stages. This metric is created using measures of digestible energy and digestible protein. I have currently not finalized my values of "suitable biomass" but I could look at the preliminary values of digestible energy and digestible protein. Eventually using this metric, I will develop a Generalized Additive Model (GAM) to map areas of high and low nutritional quality across the landscape.
 
-In the final phase of my project, this GAM will be incorporated into resource selection functions (RSFs)or integrated step selection analyses (iSSFs). These techniques will help determine which resources most influence bighorn sheep movement and allow us to predict future movement patterns—a critical step in ensuring their continued success in this landscape. By bridging nutritional ecology with movement ecology, this research will contribute valuable insights into how bighorn sheep navigate their environment and help inform conservation strategies for this unique, disease-free population.
+These techniques will can help determine which resources most influence bighorn sheep movement and allow us to predict future movement patterns—a critical step in ensuring their continued success in this landscape. By bridging nutritional ecology with movement ecology, this research will contribute valuable insights into how bighorn sheep navigate their environment and help inform conservation strategies for this unique, disease-free population.
+
+### Data Wrangling
 
 ```{r}
 #| warning: FALSE
@@ -25,67 +27,329 @@ library(lpSolve)
 library(openxlsx)
 library(tools)
 library(dplyr)
+library(sf)
+library(tidyverse)
 
 #* Set your path to FRESH Data *#
-#* 
 excelpath="C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/FRESH/processed.data/" 
 
 #* Define the file in the above path to locate *#
-#* 
 habs = list.files(path=excelpath, pattern=".xlsx", all.files=F, full.names=F, recursive=FALSE, ignore.case=T,include.dirs=FALSE) 
 
 #* Define the file path *#
-#* 
 excel.file = paste0(c(excelpath,habs),collapse="")
 
 #* Load it *#
-#* 
 habitat=loadWorkbook(excel.file)
 data = data.frame(openxlsx::readWorkbook(excel.file, sheet="FRESH Data", startRow=1, colNames=TRUE))
 
+
+plant <-read.csv("C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/Cleaning/processed.data/plant.csv")
+
+data <- data %>% 
+  rename(Code = Plant.Code) %>% 
+  left_join(y = plant, 
+            by = "Code",
+            relationship = "many-to-one")
+
+spp.map <- data %>% 
+  select(PVT, TransectID, Code, Phenology, Part, Biomass, Duration, Status)
+
+plot <- read.csv("C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/Cleaning/processed.data/transect.csv")
+
+spp.map <- spp.map %>% 
+  rename(PlotID = TransectID)
+
+spp.map <- spp.map %>% 
+  left_join(y = plot,
+            by = "PlotID",
+            relationship = "many-to-one")
+
+spp.map <- spp.map %>% 
+  rename(PVT = PVT.x,
+         Lat = BeginLat,
+         Long = BeginLong,
+         Easting = BeginUTM_Easting,
+         Northing = BeginUTM_Northing) %>% 
+  select(PVT, PlotID, Code, Phenology, Part, Biomass, Duration, Status, Julian_Day, Lat, Long, Easting, Northing)
+
+
+# Create an sf object with the Lat and Long columns
+spp.map_UTM <- st_as_sf(spp.map, coords = c("Long", "Lat"), crs = 4326)  # EPSG:4326 is WGS84
+
+# Convert to UTM Zone 11N (EPSG:26911)
+spp.map_UTM <- st_transform(spp.map_UTM, crs = 32611)
+
+# Extract UTM coordinates (Easting and Northing)
+spp.map$Easting <- st_coordinates(spp.map_UTM)[, 1]
+spp.map$Northing <- st_coordinates(spp.map_UTM)[, 2]
 ```
 
-First I want to start by seeing if there is any correlation between the digestible energy and digestible protein values of the species that I observed.
+## Quality Trends
+
+With some of my quality data, I wanted to start by comparing the measurements of digestible energy (DE) and digestible protien (DP) between plant species and phenological stages that I observed while I was sampling. Mainly I want to observe if there is any correlation between high DE and high DP. After looking at the results of my scatter plots, it seems like there may be a slight positive trend in newly emergent plants and a slight downward trend in fruiting plants, but for the most part there is no correlation between digestible energy and digestible protein.
 
 ```{r}
+#| warning: FALSE
 library(tidyverse)
+
+data$Phenology <- factor(data$Phenology, levels = c("N", "B", "FL", "FR", "M", "C"))
+
 ggplot(data, aes(x = DP, y = DE)) +
   geom_point(color = "blue", alpha = 0.6) +
   geom_smooth(method = "lm", se = TRUE, color = "red") +  # Linear trend line
-  labs(title = "Relationship Between DE and DP",
+  labs(title = "Relationship Between DE and DP by Phenology",
        x = "Digestible Protein (DP)",
        y = "Digestible Energy (DE)") +
-  theme_minimal()
+  theme_minimal() +
+  
+  # Set phenology as a factor with a specific order
+  facet_wrap(~ Phenology, scales = "free") +
+  scale_x_continuous(expand = c(0.05, 0)) +  # Adjust spacing
+  scale_y_continuous(expand = c(0.05, 0)) +
+  theme(strip.text = element_text(face = "bold"))  # Bold facet labels
+
+
+```
+
+To better visualize the trends in DP and DE between different phenological stages. I isolated the DE and DP and values to compare each state. The DE values are what I expected to see, with the highest being in the new and budding stages and then gradually decreasing, however the DP does not follow this trend.
+
+```{r}
+#| warning: FALSE
+# Ensure Phenology is a factor with the correct order
+data$Phenology <- factor(data$Phenology, levels = c("N", "B", "FL", "FR", "M", "C"))
+
+ggplot(data, aes(x = Phenology, y = DE, fill = Phenology)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  # Boxplot without outlier points
+  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +  # Add jitter for visibility
+  scale_fill_viridis_d(option = "plasma") +  # Use a color palette
+  labs(title = "Distribution of Digestible Energy (DE) by Phenology",
+       x = "Phenology",
+       y = "Digestible Energy (DE)") +
+  theme_minimal() +
+  theme(legend.position = "none")  # Remove legend since color is redundant
 ```
 
 ```{r}
-ggplot(data, aes(x = Plant.Code, y = DE)) +
-  geom_boxplot(fill = "lightblue", color = "black") + 
-  labs(
-    title = "Range of Digestible Energy (DE) by Plant Species",
-    x = "Plant Code",
-    y = "Digestible Energy (DE)"
-  ) +
-  theme_minimal() +  
-  theme(
-    plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
-    axis.title = element_text(size = 12),
-    axis.text.x = element_text(angle = 90, hjust = 1, size = 5),
-  )
+#| warning: FALSE
+ggplot(data, aes(x = Phenology, y = DP, fill = Phenology)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  # Boxplot without outlier points
+  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +  # Add jitter for visibility
+  scale_fill_viridis_d(option = "plasma") +  # Use a color palette
+  labs(title = "Distribution of Digestible Energy (DE) by Phenology",
+       x = "Phenology",
+       y = "Digestible Protien (DP)") +
+  theme_minimal() +
+  theme(legend.position = "none")
 ```
 
+## Biomass Trends
+
+One of the key parts of my project is understanding the spread of invasive species throughout the canyon, specifically cheat grass. When observing the canyon it seems like cheat grass dominates the canyon which could effect the amount of nutrients available later in the summer. To start I wanted to looks at the density of biomass for all native vs invasive species within the transects that I sampled in our study area. From this graph we can see that overall biomass of native and invasive species is relatively similar throughout the canyon. However, there is an overall greater density of native species.
+
 ```{r}
-ggplot(data, aes(x = Plant.Code, y = DP)) +
-  geom_boxplot(fill = "lightblue", color = "black") + 
-  labs(
-    title = "Range of Digestible Energy (DE) by Plant Species",
-    x = "Plant Code",
-    y = "Digestible Energy (DE)"
+#| warning: FALSE
+# Load necessary libraries
+library(tidyverse)
+
+# Example: Load your dataset
+# df <- read_csv("your_dataset.csv")
+
+# Summarize biomass weight by spatial location and species status
+spp.summary <- spp.map %>%
+   filter(!is.na(Biomass) & Biomass > 0)  # Remove NAs
+  
+ggplot(spp.summary, aes(x = Easting, y = Northing, weight = Biomass)) +
+  stat_density_2d(aes(fill = after_stat(density)), geom = "raster", contour = FALSE) +
+  facet_wrap(~ Status) +  # Separate maps for Native/Invasive
+  scale_fill_viridis_c(
+    name = "Biomass Density", 
+    option = "turbo",
+    breaks = c(1e-09, 5e-09),  # Define specific density values
+    labels = c("Low (1e-09)", "High (5e-09)")  # Replace numerical values with "Low" and "High"
+  ) +  
+  labs(title = "Density of Biomass (Native vs Invasive Species)",
+       x = "Easting", 
+       y = "Northing") +
+  theme_minimal() +
+  theme(axis.text = element_blank(),  # Remove tick labels
+    axis.ticks = element_blank())  # Rotate x-axis labels
+
+```
+
+I still do not have complete quality data, so there is only so much I can do with this information, but knowing the amount of biomass for each species in the area will allow us to apply a nutrient value of "suitable biomass" when I finally have those values. I would also like to see the differences in overall biomass for each month. I had a much larger sample size in April and May than I did in June and July, so I standardized my biomass values before plotting them.
+
+```{r}
+#| warning: FALSE
+month.sum <- spp.map %>%
+  filter(!is.na(Biomass) & Biomass > 0) %>%  # Remove NAs
+  mutate(Month = case_when(
+    Julian_Day >= 93 & Julian_Day < 124 ~ "April",
+    Julian_Day >= 124 & Julian_Day < 155 ~ "May",
+    Julian_Day >= 155 & Julian_Day < 185 ~ "June",
+    Julian_Day >= 185 & Julian_Day <= 212 ~ "July",
+    TRUE ~ NA_character_
+  )) %>%
+  filter(!is.na(Month)) %>%
+  mutate(Month = factor(Month, levels = c("April", "May", "June", "July")))
+
+# Normalize biomass within each month (to make sample sizes comparable)
+month.sum <- month.sum %>%
+  group_by(Month) %>%
+  mutate(Total_Biomass = sum(Biomass),  # Calculate total biomass for each month
+         Normalized_Biomass = Biomass / Total_Biomass) %>%  # Normalize biomass
+  ungroup()  # Remove grouping
+
+
+# Create density plot faceted by Month and Status
+ggplot(month.sum, aes(x = Easting, y = Northing, weight = Normalized_Biomass)) +
+  stat_density_2d(aes(fill = after_stat(density)), geom = "raster", contour = FALSE) +
+  facet_grid(Month ~ Status) +  # Grid facet by Month (rows) and Status (columns)
+  scale_fill_viridis_c(
+    name = "Biomass Density", 
+    option = "turbo",
+    breaks = c(2e-09, 11e-09),  # Define specific density values
+    labels = c("Low (2e-09)", "High (11e-09)")  # Replace numerical values with "Low" and "High"
+  ) +  
+  labs(title = "Normalized Density of Biomass (Native vs Invasive Species by Month)",
+       x = "Easting", 
+       y = "Northing") +
+  theme_minimal() +
+  theme(axis.text = element_blank(),  # Remove tick labels
+        axis.ticks = element_blank())
+```
+
+Since cheat grass is the main issue that we have been observing as far as the most invasive species in the canyon I would also like to see how this biomass progresses over each month. Apparently in this subset of my data I didn't have any observations for cheatgrass in the month of June. This makes me think that I should take the rest of my results with a grain of salt until I can complete my biomass predictions. That being said the density of biomass for cheat grass did peak in the southern end of the canyon in June and then started to decrease after that point.
+
+```{r}
+#| warning: FALSE
+# Filter for observations with Species Code "BRTE"
+cheat.sum <- spp.map %>%
+  filter(!is.na(Biomass) & Biomass > 0, Code == "BRTE") %>%  # Remove NAs and filter for "BRTE"
+  mutate(Month = case_when(
+    Julian_Day >= 93 & Julian_Day < 124 ~ "April",
+    Julian_Day >= 124 & Julian_Day < 155 ~ "May",
+    Julian_Day >= 155 & Julian_Day < 185 ~ "June",
+    Julian_Day >= 185 & Julian_Day <= 212 ~ "July",
+    TRUE ~ NA_character_
+  )) %>%
+  filter(!is.na(Month)) %>%
+  mutate(Month = factor(Month, levels = c("April", "May", "June", "July")))  # Set correct order
+
+# Normalize biomass within each month (to make sample sizes comparable)
+cheat.sum <- cheat.sum %>%
+  group_by(Month) %>%
+  mutate(Total_Biomass = sum(Biomass),  # Calculate total biomass for each month
+         Normalized_Biomass = Biomass / Total_Biomass) %>%  # Normalize biomass
+  ungroup()  # Remove grouping
+
+# Create density plot faceted by Month and Status for species "BRTE"
+ggplot(cheat.sum, aes(x = Easting, y = Northing, weight = Normalized_Biomass)) +
+  stat_density_2d(aes(fill = after_stat(density)), geom = "raster", contour = FALSE) +
+  facet_grid(Month ~ Code) +  # Grid facet by Month (rows) and Status (columns)
+  scale_fill_viridis_c(
+    name = "Biomass Density", 
+    option = "turbo",
+    breaks = c(1e-09, 7e-09),  # Define specific density values
+    labels = c("Low (1e-09)", "High (7e-09)")  # Replace numerical values with "Low" and "High"
+  ) +  
+  labs(title = "Normalized Density of Biomass for BRTE by month",
+       x = "Easting", 
+       y = "Northing") +
+  theme_minimal() +
+  theme(axis.text = element_blank(),  # Remove tick labels
+        axis.ticks = element_blank())
+```
+
+## GPS Data
+
+Lastly, I want to see how the sheep movements change each month with the overall biomass of both native and invasive species. I started out by creating a heat map of our overall sheep location use throughout the canyon.
+
+```{r}
+#| warning: FALSE
+gps <- read.csv("C:/Users/Alexis Means/Documents/Project/Demographics/Code/cleaned.data/sheep_clean_24.csv")
+
+gps <- gps %>% 
+  rename(Easting = x_,
+         Northing = y_)
+
+# Step 1: Kernel Density Estimation (KDE) for GPS data
+gps_kde <- ggplot(gps, aes(x = Easting, y = Northing)) +
+  stat_density_2d(aes(fill = after_stat(density)), geom = "raster", contour = FALSE) +
+  scale_fill_viridis_c(option = "inferno",
+          name = "GPS Use Density",
+          breaks = c(2e-09, 10e-09),  # Define specific density values
+          labels = c("Low (2e-09)", "High (10e-09)")  # Replace  values with "Low" and "High"
   ) +
-  theme_minimal() +  
-  theme(
-    plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
-    axis.title = element_text(size = 12),
-    axis.text.x = element_text(angle = 90, hjust = 1, size = 5) 
+  labs(title = "Sheep Area Use")+
+  theme_minimal()+
+  theme(axis.text = element_blank(),  # Remove tick labels
+        axis.ticks = element_blank()) 
+  plot(gps_kde)
+  
+  
+```
+
+If the areas of high biomass density align with values of high nutrient quality in theory this means that the density of our sheep points should also follow the trends of high biomass density in the months of April and May. I wanted to see if I could overlay our sheep locations each month with the biomass density data each month to observe my hunch that sheep would follow this trend in these months. They do not appear to follow this trend, most likely due to other outside factors such as selection for escape terrain that outweigh the need to follow vegetation trends.
+
+```{r}
+#| warning: FALSE
+month.sum <- spp.map %>%
+  filter(!is.na(Biomass) & Biomass > 0) %>%  # Remove NAs
+  mutate(Month = case_when(
+    Julian_Day >= 93 & Julian_Day < 124 ~ "April",
+    Julian_Day >= 124 & Julian_Day < 155 ~ "May",
+    Julian_Day >= 155 & Julian_Day < 185 ~ "June",
+    Julian_Day >= 185 & Julian_Day <= 212 ~ "July",
+    TRUE ~ NA_character_
+  )) %>%
+  filter(!is.na(Month)) %>%
+  mutate(Month = factor(Month, levels = c("April", "May", "June", "July")))
+
+
+# Normalize biomass within each month (to make sample sizes comparable)
+month.sum <- month.sum %>%
+  group_by(Month) %>%
+  mutate(Total_Biomass = sum(Biomass),  # Calculate total biomass for each month
+         Normalized_Biomass = Biomass / Total_Biomass) %>%  # Normalize biomass
+  ungroup()  # Remove grouping
+
+# Extract month from the GPS timestamp
+gps <- gps %>%
+  mutate(Month = case_when(
+    month(t_) == 4 ~ "April",
+    month(t_) == 5 ~ "May",
+    month(t_) == 6 ~ "June",
+    month(t_) == 7 ~ "July",
+    TRUE ~ NA_character_
+  )) %>%
+  filter(!is.na(Month)) %>% 
+  mutate(Month = factor(Month, levels = c("April", "May", "June", "July")))
+
+ggplot() + # Biomass density heatmap using kernel density estimation
+  stat_density_2d(
+    data = month.sum,
+    aes(x = Easting, y = Northing, weight = Normalized_Biomass, fill = after_stat(density)),
+    geom = "raster",
+    contour = FALSE
+  ) +
+  facet_grid(Month ~ Status) +  # Grid facet by Month (rows) and Status (columns)
+  scale_fill_viridis_c(
+    name = "Biomass Density", 
+    option = "turbo",
+    breaks = c(2e-09, 11e-09),  # Define specific density values
+    labels = c("Low (2e-09)", "High (11e-09)")  # Replace numerical values with "Low" and "High"
+  ) +  
+  labs(title = "Normalized Density of Biomass with GPS Locations (Native vs Invasive Species by Month)",
+       x = "Easting", 
+       y = "Northing") +
+  theme_minimal() +
+  theme(axis.text = element_blank(),  # Remove tick labels
+        axis.ticks = element_blank()) +
+  # Overlay GPS points, filtering by Month to match the facet
+  geom_point(
+    data = gps, 
+    aes(x = Easting, y = Northing), 
+    color = "red", alpha = 0.1, size = 0.4
   )
 ```
