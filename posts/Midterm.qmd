@@ -31,18 +31,19 @@ library(dplyr)
 library(sf)
 library(tidyverse)
 
-#* Set your path to FRESH Data *#
-excelpath="C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/FRESH/processed.data/" 
+# Define the path to the directory containing the file
+excelpath <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/FRESH/processed.data/"
 
-#* Define the file in the above path to locate *#
-habs = list.files(path=excelpath, pattern=".xlsx", all.files=F, full.names=F, recursive=FALSE, ignore.case=T,include.dirs=FALSE) 
+# Define the specific file name
+filename <- "FRESH.test.data.xlsx"
 
-#* Define the file path *#
-excel.file = paste0(c(excelpath,habs),collapse="")
+# Construct the full file path
+excel.file <- file.path(excelpath, filename)
 
-#* Load it *#
-habitat=loadWorkbook(excel.file)
-data = data.frame(openxlsx::readWorkbook(excel.file, sheet="FRESH Data", startRow=1, colNames=TRUE))
+# Load the workbook and read the data
+library(openxlsx)
+habitat <- loadWorkbook(excel.file)
+data <- data.frame(readWorkbook(excel.file, sheet = "FRESH Data", startRow = 1, colNames = TRUE))
 
 
 plant <-read.csv("C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/Cleaning/processed.data/plant.csv")
@@ -53,37 +54,7 @@ data <- data %>%
             by = "Code",
             relationship = "many-to-one")
 
-spp.map <- data %>% 
-  select(PVT, TransectID, Code, Phenology, Part, Biomass, Duration, Status)
 
-plot <- read.csv("C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/Cleaning/processed.data/transect.csv")
-
-spp.map <- spp.map %>% 
-  rename(PlotID = TransectID)
-
-spp.map <- spp.map %>% 
-  left_join(y = plot,
-            by = "PlotID",
-            relationship = "many-to-one")
-
-spp.map <- spp.map %>% 
-  rename(PVT = PVT.x,
-         Lat = BeginLat,
-         Long = BeginLong,
-         Easting = BeginUTM_Easting,
-         Northing = BeginUTM_Northing) %>% 
-  select(PVT, PlotID, Code, Phenology, Part, Biomass, Duration, Status, Julian_Day, Lat, Long, Easting, Northing)
-
-
-# Create an sf object with the Lat and Long columns
-spp.map_UTM <- st_as_sf(spp.map, coords = c("Long", "Lat"), crs = 4326)  # EPSG:4326 is WGS84
-
-# Convert to UTM Zone 11N (EPSG:26911)
-spp.map_UTM <- st_transform(spp.map_UTM, crs = 32611)
-
-# Extract UTM coordinates (Easting and Northing)
-spp.map$Easting <- st_coordinates(spp.map_UTM)[, 1]
-spp.map$Northing <- st_coordinates(spp.map_UTM)[, 2]
 ```
 
 ## Quality Trends
@@ -121,14 +92,16 @@ To better visualize the trends in DP and DE between different phenological stage
 data$Phenology <- factor(data$Phenology, levels = c("N", "B", "FL", "FR", "M", "C"))
 
 ggplot(data, aes(x = Phenology, y = DE, fill = Phenology)) +
-  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  # Boxplot without outlier points
-  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +  # Add jitter for visibility
-  scale_fill_viridis_d(option = "plasma") +  # Use a color palette
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  
+  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +   
+  scale_fill_viridis_d(option = "plasma") +  
   labs(title = "Distribution of Digestible Energy (DE) by Phenology",
        x = "Phenology",
-       y = "Digestible Energy (DE)") +
+       y = "DE(kJ g^-1)") +
   theme_minimal() +
-  theme(legend.position = "none")  # Remove legend since color is redundant
+  theme(legend.position = "none")+
+   geom_hline(yintercept = 11.5, linetype = "dashed", color = "red", size = 1)+
+  annotate("text", x = 6.4, y = 11.8, label = "11.5", color = "black", size = 4, fontface = "italic")
 ```
 
 ```{r}
@@ -139,9 +112,11 @@ ggplot(data, aes(x = Phenology, y = DP, fill = Phenology)) +
   scale_fill_viridis_d(option = "plasma") +  # Use a color palette
   labs(title = "Distribution of Digestible Energy (DE) by Phenology",
        x = "Phenology",
-       y = "Digestible Protien (DP)") +
+       y = "DP (g protien/100g forage)") +
   theme_minimal() +
-  theme(legend.position = "none")
+  theme(legend.position = "none")+
+   geom_hline(yintercept = 7.5, linetype = "dashed", color = "red", size = 1)+
+  annotate("text", x = 6.5, y = 7.7, label = "7.5", color = "black", size = 4, fontface = "italic")
 ```
 
 ## Biomass Trends
@@ -149,12 +124,42 @@ ggplot(data, aes(x = Phenology, y = DP, fill = Phenology)) +
 One of the key parts of my project is understanding the spread of invasive species throughout the canyon, specifically cheat grass. When observing the canyon it seems like cheat grass dominates the canyon which could effect the amount of nutrients available later in the summer. To start I wanted to looks at the density of biomass for all native vs invasive species within the transects that I sampled in our study area. From this graph we can see that overall biomass of native and invasive species is relatively similar throughout the canyon. However, there is an overall greater density of native species.
 
 ```{r}
+spp.map <- data %>% 
+  select(TransectID, Code, Phenology, Part, Biomass, Duration, Status)
+
+plot <- read.csv("C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/Cleaning/processed.data/transect.csv")
+
+spp.map <- spp.map %>% 
+  rename(PlotID = TransectID)
+
+spp.map <- spp.map %>% 
+  left_join(y = plot,
+            by = "PlotID",
+            relationship = "many-to-one")
+
+spp.map <- spp.map %>% 
+  rename(Lat = BeginLat,
+         Long = BeginLong,
+         Easting = BeginUTM_Easting,
+         Northing = BeginUTM_Northing) %>% 
+  select(PlotID, Code, Phenology, Part, Biomass, Duration, Status, Julian_Day, Lat, Long, Easting, Northing)
+
+
+# Create an sf object with the Lat and Long columns
+spp.map_UTM <- st_as_sf(spp.map, coords = c("Long", "Lat"), crs = 4326)  # EPSG:4326 is WGS84
+
+# Convert to UTM Zone 11N (EPSG:26911)
+spp.map_UTM <- st_transform(spp.map_UTM, crs = 32611)
+
+# Extract UTM coordinates (Easting and Northing)
+spp.map$Easting <- st_coordinates(spp.map_UTM)[, 1]
+spp.map$Northing <- st_coordinates(spp.map_UTM)[, 2]
+```
+
+```{r}
 #| warning: FALSE
 # Load necessary libraries
 library(tidyverse)
-
-# Example: Load your dataset
-# df <- read_csv("your_dataset.csv")
 
 # Summarize biomass weight by spatial location and species status
 spp.summary <- spp.map %>%
@@ -354,3 +359,111 @@ ggplot() + # Biomass density heatmap using kernel density estimation
     color = "red", alpha = 0.1, size = 0.4
   )
 ```
+
+```{r}
+# Define the path to the directory containing the file
+excelpath <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/FRESH/processed.data/"
+
+# Define the specific file name
+filename <- "2024.test.suitable.biomass.xlsx"
+
+# Construct the full file path
+excel.file <- file.path(excelpath, filename)
+
+# Load the workbook and read the data
+
+habitat <- loadWorkbook(excel.file)
+suitable <- data.frame(readWorkbook(excel.file, sheet = "Plot-Level-Summary", startRow = 1, colNames = TRUE))
+
+
+suitable.map <- suitable %>% 
+  rename(PlotID = TransectID) %>% 
+  left_join(y = plot,
+            by = "PlotID")
+
+suitable.map <- suitable.map %>% 
+  rename(Lat = BeginLat,
+         Long = BeginLong,
+         Easting = BeginUTM_Easting,
+         Northing = BeginUTM_Northing) %>% 
+  select(PlotID, TotalDE, TotalDP, SuitableBiomass, AveDE, AveDP, Julian_Day, Lat, Long, Easting, Northing)
+View(suitable.map)
+
+# Create an sf object with the Lat and Long columns
+suitable.map_UTM <- st_as_sf(suitable.map, coords = c("Long", "Lat"), crs = 4326)  # EPSG:4326 is WGS84
+
+# Convert to UTM Zone 11N (EPSG:26911)
+suitable.map_UTM <- st_transform(suitable.map_UTM, crs = 32611)
+
+# Extract UTM coordinates (Easting and Northing)
+suitable.map$Easting <- st_coordinates(suitable.map_UTM)[, 1]
+suitable.map$Northing <- st_coordinates(suitable.map_UTM)[, 2]
+```
+
+## Suitable Biomass
+
+After completing the FRESH model with synthetic values for crude protein using a subset of my data, I was able to get estimates of usable suitable biomass available at each transect that I sampled. I replicated similar graphs to my biomass density for native vs invasive species and the results are fairly similar.Like the biomass plots, there is a higher density in the south end of our study area when looking at the suitable biomass overall for the study area. 
+
+```{r}
+#| warning: FALSE
+suitable.summary <- suitable.map %>%
+   filter(!is.na(SuitableBiomass) & SuitableBiomass > 0)  # Remove NAs
+  
+ggplot(suitable.summary, aes(x = Easting, y = Northing, weight = SuitableBiomass)) +
+  stat_density_2d(aes(fill = after_stat(density)), geom = "raster", contour = FALSE) +
+  scale_fill_viridis_c(
+    name = "Suitable Biomass Density", 
+    option = "turbo",
+    breaks = c(1e-09, 3e-09),  # Define specific density values
+    labels = c("Low (1e-09)", "High (3e-09)")  # Replace numerical values with "Low" and "High"
+  ) +  
+  labs(title = "Density of Suitable Biomass",
+       x = "Easting", 
+       y = "Northing") +
+  theme_minimal() +
+  theme(axis.text = element_blank(),  # Remove tick labels
+    axis.ticks = element_blank())  # Rotate x-axis labels
+```
+
+```{r}
+#|warning: FALSE
+suitablemonth.sum <- suitable.map %>%
+  filter(!is.na(SuitableBiomass) & SuitableBiomass > 0) %>%  # Remove NAs
+  mutate(Month = case_when(
+    Julian_Day >= 93 & Julian_Day < 124 ~ "April",
+    Julian_Day >= 124 & Julian_Day < 155 ~ "May",
+    Julian_Day >= 155 & Julian_Day < 185 ~ "June",
+    Julian_Day >= 185 & Julian_Day <= 212 ~ "July",
+    TRUE ~ NA_character_
+  )) %>%
+  filter(!is.na(Month)) %>%
+  mutate(Month = factor(Month, levels = c("April", "May", "June", "July")))
+
+# Normalize biomass within each month (to make sample sizes comparable)
+suitablemonth.sum <- suitablemonth.sum %>%
+  group_by(Month) %>%
+  mutate(Total_SuitableBiomass = sum(SuitableBiomass),  # Calculate total biomass for each month
+         Normalized_SuitableBiomass = SuitableBiomass / Total_SuitableBiomass) %>%  # Normalize biomass
+  ungroup()  # Remove grouping
+
+
+# Create density plot faceted by Month and Status
+ggplot(suitablemonth.sum, aes(x = Easting, y = Northing, weight = Normalized_SuitableBiomass)) +
+  stat_density_2d(aes(fill = after_stat(density)), geom = "raster", contour = FALSE) +
+  facet_grid("Month") +  # Grid facet by Month (rows) and Status (columns)
+  scale_fill_viridis_c(
+    name = "Suitable Biomass Density", 
+    option = "turbo",
+    breaks = c(1e-09, 6e-09),  # Define specific density values
+    labels = c("Low (1e-09)", "High (6e-09)")  # Replace numerical values with "Low" and "High"
+  ) +  
+  labs(title = "Normalized Density of Suitable Biomass",
+       x = "Easting", 
+       y = "Northing") +
+  theme_minimal() +
+  theme(axis.text = element_blank(),  # Remove tick labels
+        axis.ticks = element_blank())
+```
+When looking at the density of suitable biomass month by month, May still has the highest density of suitable biomass. While this is most likely the month with the largest amount of species in their nutrient dense phase, it is also the month that we sampled the most. So I feel like the sampling efforts may be slightly skewing my data.
+
+In order to truly see these values accurately represented across my study area, I will need to start creating my predictive GAM. This will allow me to project these values of suitable biomass to other 30x30m pixels with similar covariates and predict how vegetative quality changes throughout the canyon in different times of the year.
