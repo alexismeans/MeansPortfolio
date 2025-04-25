@@ -35,7 +35,7 @@ library(tidyverse)
 excelpath <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/FRESH/processed.data/"
 
 # Define the specific file name
-filename <- "FRESH.test.data.xlsx"
+filename <- "FRESH.Subset.xlsx"
 
 # Construct the full file path
 excel.file <- file.path(excelpath, filename)
@@ -59,7 +59,7 @@ data <- data %>%
 
 ## Quality Trends
 
-With some of my quality data, I wanted to start by comparing the measurements of digestible energy (DE) and digestible protien (DP) between plant species and phenological stages that I observed while I was sampling. Mainly I want to observe if there is any correlation between high DE and high DP. After looking at the results of my scatter plots, it seems like there may be a slight positive trend in newly emergent plants and a slight downward trend in fruiting plants, but for the most part there is no correlation between digestible energy and digestible protein.
+With some of my quality data, I wanted to start by comparing the measurements of digestible energy (DE) and digestible protien (DP) between plant species and phenological stages that I observed while I was sampling. Mainly I want to observe if there is any correlation between high DE and high DP. After looking at the results of my scatter plots, the trend follows the patterns that I would expect. There is an increase in DE and DP through the newly emergent (N) and budding stages (B), followed by an immedaite decrease in the flowering (FL) stage.
 
 ```{r}
 #| warning: FALSE
@@ -84,7 +84,7 @@ ggplot(data, aes(x = DP, y = DE)) +
 
 ```
 
-To better visualize the trends in DP and DE between different phenological stages. I isolated the DE and DP and values to compare each state. The DE values are what I expected to see, with the highest being in the new and budding stages and then gradually decreasing, however the DP does not follow this trend.
+To better visualize the trends in DP and DE between different phenological stages. I isolated the DE and DP and values to compare each state. Both the DE and DP values follow the trend that I expect them to, however, very few of my species meet the necessary DP value of 7.5.
 
 ```{r}
 #| warning: FALSE
@@ -110,13 +110,244 @@ ggplot(data, aes(x = Phenology, y = DP, fill = Phenology)) +
   geom_boxplot(alpha = 0.7, outlier.shape = NA) +  # Boxplot without outlier points
   geom_jitter(width = 0.2, alpha = 0.4, color = "black") +  # Add jitter for visibility
   scale_fill_viridis_d(option = "plasma") +  # Use a color palette
-  labs(title = "Distribution of Digestible Energy (DE) by Phenology",
+  labs(title = "Distribution of Digestible Protien (DP) by Phenology",
        x = "Phenology",
        y = "DP (g protien/100g forage)") +
   theme_minimal() +
   theme(legend.position = "none")+
    geom_hline(yintercept = 7.5, linetype = "dashed", color = "red", size = 1)+
   annotate("text", x = 6.5, y = 7.7, label = "7.5", color = "black", size = 4, fontface = "italic")
+```
+
+```{r}
+data <- data %>%
+  mutate(PVT = str_sub(TransectID, start = 4, end = 6))
+
+ggplot(data, aes(x = PVT, y = DE, fill = Phenology)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  
+  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +   
+  scale_fill_viridis_d(option = "plasma") +  
+  labs(title = "Distribution of Digestible Energy (DE) by Phenology and PVT",
+       x = "Phenology",
+       y = "DE(kJ g^-1)") +
+  theme_minimal() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1)) +  # Rotate x-axis labels
+  geom_hline(yintercept = 11.5, linetype = "dashed", color = "red", size = 1) +
+  annotate("text", x = Inf, y = 11.8, label = "11.5", color = "black", size = 4,
+           hjust = 1.1, vjust = -0.5) +
+  facet_wrap(~ Phenology, scales = "free_x", ncol = 3)  # Adjust ncol as needed
+```
+
+```{r}
+# Filter the data for Phenology "N"
+data_N <- data %>% filter(Phenology == "N")
+
+ggplot(data_N, aes(x = PVT, y = DE, fill = PVT)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  
+  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +   
+  scale_fill_viridis_d(option = "plasma") +  
+  labs(title = "Distribution of Digestible Energy (DE) for Phenology 'N' by PVT",
+       x = "Plant Vegetation Type (PVT)",
+       y = "DE (kJ g^-1)") +
+  theme_minimal() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_hline(yintercept = 11.5, linetype = "dashed", color = "red", size = 1) +
+  annotate("text", x = Inf, y = 11.8, label = "11.5", color = "black", size = 4,
+           hjust = 1.1, vjust = -0.5)
+
+# Filter the data for Phenology "B"
+data_B <- data %>% filter(Phenology == "B")
+
+ggplot(data_B, aes(x = PVT, y = DE, fill = PVT)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  
+  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +   
+  scale_fill_viridis_d(option = "plasma") +  
+  labs(title = "Distribution of Digestible Energy (DE) for Phenology 'B' by PVT",
+       x = "Plant Vegetation Type (PVT)",
+       y = "DE (kJ g^-1)") +
+  theme_minimal() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_hline(yintercept = 11.5, linetype = "dashed", color = "red", size = 1) +
+  annotate("text", x = Inf, y = 11.8, label = "11.5", color = "black", size = 4,
+           hjust = 1.1, vjust = -0.5)
+
+# Filter the data for Phenology "B"
+data_FL <- data %>% filter(Phenology == "FL")
+
+ggplot(data_FL, aes(x = PVT, y = DE, fill = PVT)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  
+  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +   
+  scale_fill_viridis_d(option = "plasma") +  
+  labs(title = "Distribution of Digestible Energy (DE) for Phenology 'FL' by PVT",
+       x = "Plant Vegetation Type (PVT)",
+       y = "DE (kJ g^-1)") +
+  theme_minimal() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_hline(yintercept = 11.5, linetype = "dashed", color = "red", size = 1) +
+  annotate("text", x = Inf, y = 11.8, label = "11.5", color = "black", size = 4,
+           hjust = 1.1, vjust = -0.5)
+
+# Filter the data for Phenology "FR"
+data_FR <- data %>% filter(Phenology == "FR")
+
+ggplot(data_FR, aes(x = PVT, y = DE, fill = PVT)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  
+  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +   
+  scale_fill_viridis_d(option = "plasma") +  
+  labs(title = "Distribution of Digestible Energy (DE) for Phenology 'FR' by PVT",
+       x = "Plant Vegetation Type (PVT)",
+       y = "DE (kJ g^-1)") +
+  theme_minimal() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_hline(yintercept = 11.5, linetype = "dashed", color = "red", size = 1) +
+  annotate("text", x = Inf, y = 11.8, label = "11.5", color = "black", size = 4,
+           hjust = 1.1, vjust = -0.5)
+
+# Filter the data for Phenology "M"
+data_M <- data %>% filter(Phenology == "M")
+
+ggplot(data_M, aes(x = PVT, y = DE, fill = PVT)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  
+  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +   
+  scale_fill_viridis_d(option = "plasma") +  
+  labs(title = "Distribution of Digestible Energy (DE) for Phenology 'M' by PVT",
+       x = "Plant Vegetation Type (PVT)",
+       y = "DE (kJ g^-1)") +
+  theme_minimal() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_hline(yintercept = 11.5, linetype = "dashed", color = "red", size = 1) +
+  annotate("text", x = Inf, y = 11.8, label = "11.5", color = "black", size = 4,
+           hjust = 1.1, vjust = -0.5)
+
+# Filter the data for Phenology "C"
+data_C <- data %>% filter(Phenology == "C")
+
+ggplot(data_C, aes(x = PVT, y = DE, fill = PVT)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  
+  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +   
+  scale_fill_viridis_d(option = "plasma") +  
+  labs(title = "Distribution of Digestible Energy (DE) for Phenology 'C' by PVT",
+       x = "Plant Vegetation Type (PVT)",
+       y = "DE (kJ g^-1)") +
+  theme_minimal() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_hline(yintercept = 11.5, linetype = "dashed", color = "red", size = 1) +
+  annotate("text", x = Inf, y = 11.8, label = "11.5", color = "black", size = 4,
+           hjust = 1.1, vjust = -0.5)
+
+```
+
+```{r}
+
+# Filter the data for Phenology "N"
+data_N <- data %>% filter(Phenology == "N")
+
+ggplot(data_N, aes(x = PVT, y = DP, fill = PVT)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  
+  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +   
+  scale_fill_viridis_d(option = "plasma") +  
+  labs(title = "Distribution of Digestible Protein (DP) for Phenology 'N' by PVT",
+       x = "Plant Vegetation Type (PVT)",
+       y = "DP (kJ g^-1)") +
+  theme_minimal() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_hline(yintercept = 7.5, linetype = "dashed", color = "red", size = 1) +
+  annotate("text", x = Inf, y = 7.8, label = "7.5", color = "black", size = 4,
+           hjust = 1.1, vjust = -0.5)
+
+# Filter the data for Phenology "B"
+data_B <- data %>% filter(Phenology == "B")
+
+ggplot(data_B, aes(x = PVT, y = DP, fill = PVT)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  
+  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +   
+  scale_fill_viridis_d(option = "plasma") +  
+  labs(title = "Distribution of Digestible Protein (DP) for Phenology 'B' by PVT",
+       x = "Plant Vegetation Type (PVT)",
+       y = "DP (kJ g^-1)") +
+  theme_minimal() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_hline(yintercept = 7.5, linetype = "dashed", color = "red", size = 1) +
+  annotate("text", x = Inf, y = 7.8, label = "7.5", color = "black", size = 4,
+           hjust = 1.1, vjust = -0.5)
+
+# Filter the data for Phenology "B"
+data_FL <- data %>% filter(Phenology == "FL")
+
+ggplot(data_FL, aes(x = PVT, y = DP, fill = PVT)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  
+  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +   
+  scale_fill_viridis_d(option = "plasma") +  
+  labs(title = "Distribution of Digestible Protein (DP) for Phenology 'FL' by PVT",
+       x = "Plant Vegetation Type (PVT)",
+       y = "DP (kJ g^-1)") +
+  theme_minimal() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_hline(yintercept = 7.5, linetype = "dashed", color = "red", size = 1) +
+  annotate("text", x = Inf, y = 7.8, label = "7.5", color = "black", size = 4,
+           hjust = 1.1, vjust = -0.5)
+
+# Filter the data for Phenology "FR"
+data_FR <- data %>% filter(Phenology == "FR")
+
+ggplot(data_FR, aes(x = PVT, y = DP, fill = PVT)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  
+  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +   
+  scale_fill_viridis_d(option = "plasma") +  
+  labs(title = "Distribution of Digestible Protein (DP) for Phenology 'FR' by PVT",
+       x = "Plant Vegetation Type (PVT)",
+       y = "DP (kJ g^-1)") +
+  theme_minimal() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_hline(yintercept = 7.5, linetype = "dashed", color = "red", size = 1) +
+  annotate("text", x = Inf, y = 7.8, label = "7.5", color = "black", size = 4,
+           hjust = 1.1, vjust = -0.5)
+
+# Filter the data for Phenology "M"
+data_M <- data %>% filter(Phenology == "M")
+
+ggplot(data_M, aes(x = PVT, y = DP, fill = PVT)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  
+  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +   
+  scale_fill_viridis_d(option = "plasma") +  
+  labs(title = "Distribution of Digestible Protein (DP)) for Phenology 'M' by PVT",
+       x = "Plant Vegetation Type (PVT)",
+       y = "DP (kJ g^-1)") +
+  theme_minimal() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_hline(yintercept = 7.5, linetype = "dashed", color = "red", size = 1) +
+  annotate("text", x = Inf, y = 7.8, label = "7.5", color = "black", size = 4,
+           hjust = 1.1, vjust = -0.5)
+
+# Filter the data for Phenology "C"
+data_C <- data %>% filter(Phenology == "C")
+
+ggplot(data_C, aes(x = PVT, y = DP, fill = PVT)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  
+  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +   
+  scale_fill_viridis_d(option = "plasma") +  
+  labs(title = "Distribution of Digestible Protien (DP) for Phenology 'C' by PVT",
+       x = "Plant Vegetation Type (PVT)",
+       y = "DP (kJ g^-1)") +
+  theme_minimal() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_hline(yintercept = 7.5, linetype = "dashed", color = "red", size = 1) +
+  annotate("text", x = Inf, y = 7.8, label = "7.5", color = "black", size = 4,
+           hjust = 1.1, vjust = -0.5)
+
 ```
 
 ## Biomass Trends
@@ -171,8 +402,8 @@ ggplot(spp.summary, aes(x = Easting, y = Northing, weight = Biomass)) +
   scale_fill_viridis_c(
     name = "Biomass Density", 
     option = "turbo",
-    breaks = c(1e-09, 5e-09),  # Define specific density values
-    labels = c("Low (1e-09)", "High (5e-09)")  # Replace numerical values with "Low" and "High"
+    breaks = c(1e-09, 7e-09),  # Define specific density values
+    labels = c("Low", "High")  # Replace numerical values with "Low" and "High"
   ) +  
   labs(title = "Density of Biomass (Native vs Invasive Species)",
        x = "Easting", 
@@ -183,7 +414,7 @@ ggplot(spp.summary, aes(x = Easting, y = Northing, weight = Biomass)) +
 
 ```
 
-I still do not have complete quality data, so there is only so much I can do with this information, but knowing the amount of biomass for each species in the area will allow us to apply a nutrient value of "suitable biomass" when I finally have those values. I would also like to see the differences in overall biomass for each month. I had a much larger sample size in April and May than I did in June and July, so I standardized my biomass values before plotting them.
+I still do not have complete quality data, so there is only so much I can do with this information, but knowing the amount of biomass for each species in the area will allow us to apply a nutrient value of "suitable biomass". I would also like to see the differences in overall biomass for each month. I had a much larger sample size in April and May than I did in June and July, so I standardized my biomass values before plotting them.
 
 ```{r}
 #| warning: FALSE
@@ -214,8 +445,8 @@ ggplot(month.sum, aes(x = Easting, y = Northing, weight = Normalized_Biomass)) +
   scale_fill_viridis_c(
     name = "Biomass Density", 
     option = "turbo",
-    breaks = c(2e-09, 11e-09),  # Define specific density values
-    labels = c("Low (2e-09)", "High (11e-09)")  # Replace numerical values with "Low" and "High"
+    breaks = c(2e-09, 18e-09),  # Define specific density values
+    labels = c("Low", "High")  # Replace numerical values with "Low" and "High"
   ) +  
   labs(title = "Normalized Density of Biomass (Native vs Invasive Species by Month)",
        x = "Easting", 
@@ -256,8 +487,8 @@ ggplot(cheat.sum, aes(x = Easting, y = Northing, weight = Normalized_Biomass)) +
   scale_fill_viridis_c(
     name = "Biomass Density", 
     option = "turbo",
-    breaks = c(1e-09, 7e-09),  # Define specific density values
-    labels = c("Low (1e-09)", "High (7e-09)")  # Replace numerical values with "Low" and "High"
+    breaks = c(2e-09, 14e-09),  # Define specific density values
+    labels = c("Low ", "High ")  # Replace numerical values with "Low" and "High"
   ) +  
   labs(title = "Normalized Density of Biomass for BRTE by month",
        x = "Easting", 
@@ -285,7 +516,7 @@ gps_kde <- ggplot(gps, aes(x = Easting, y = Northing)) +
   scale_fill_viridis_c(option = "inferno",
           name = "GPS Use Density",
           breaks = c(2e-09, 10e-09),  # Define specific density values
-          labels = c("Low (2e-09)", "High (10e-09)")  # Replace  values with "Low" and "High"
+          labels = c("Low", "High")  # Replace  values with "Low" and "High"
   ) +
   labs(title = "Sheep Area Use")+
   theme_minimal()+
@@ -343,8 +574,8 @@ ggplot() + # Biomass density heatmap using kernel density estimation
   scale_fill_viridis_c(
     name = "Biomass Density", 
     option = "turbo",
-    breaks = c(2e-09, 11e-09),  # Define specific density values
-    labels = c("Low (2e-09)", "High (11e-09)")  # Replace numerical values with "Low" and "High"
+    breaks = c(2e-09, 18e-09),  # Define specific density values
+    labels = c("Low", "High")  # Replace numerical values with "Low" and "High"
   ) +  
   labs(title = "Normalized Density of Biomass with GPS Locations (Native vs Invasive Species by Month)",
        x = "Easting", 
@@ -365,7 +596,7 @@ ggplot() + # Biomass density heatmap using kernel density estimation
 excelpath <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/FRESH/processed.data/"
 
 # Define the specific file name
-filename <- "2024.test.suitable.biomass.xlsx"
+filename <- "2024.subset.results.xlsx"
 
 # Construct the full file path
 excel.file <- file.path(excelpath, filename)
@@ -402,7 +633,7 @@ suitable.map$Northing <- st_coordinates(suitable.map_UTM)[, 2]
 
 ## Suitable Biomass
 
-After completing the FRESH model with synthetic values for crude protein using a subset of my data, I was able to get estimates of usable suitable biomass available at each transect that I sampled. I replicated similar graphs to my biomass density for native vs invasive species and the results are fairly similar.Like the biomass plots, there is a higher density in the south end of our study area when looking at the suitable biomass overall for the study area. 
+After completing the FRESH model with synthetic values for crude protein using a subset of my data, I was able to get estimates of usable suitable biomass available at each transect that I sampled. I replicated similar graphs to my biomass density for native vs invasive species and the results are fairly similar.Like the biomass plots, there is a higher density in the south end of our study area when looking at the suitable biomass overall for the study area.
 
 ```{r}
 #| warning: FALSE
@@ -414,8 +645,8 @@ ggplot(suitable.summary, aes(x = Easting, y = Northing, weight = SuitableBiomass
   scale_fill_viridis_c(
     name = "Suitable Biomass Density", 
     option = "turbo",
-    breaks = c(1e-09, 3e-09),  # Define specific density values
-    labels = c("Low (1e-09)", "High (3e-09)")  # Replace numerical values with "Low" and "High"
+    breaks = c(0.5e-09, 3.5e-09),  # Define specific density values
+    labels = c("Low", "High")  # Replace numerical values with "Low" and "High"
   ) +  
   labs(title = "Density of Suitable Biomass",
        x = "Easting", 
@@ -454,8 +685,8 @@ ggplot(suitablemonth.sum, aes(x = Easting, y = Northing, weight = Normalized_Sui
   scale_fill_viridis_c(
     name = "Suitable Biomass Density", 
     option = "turbo",
-    breaks = c(1e-09, 6e-09),  # Define specific density values
-    labels = c("Low (1e-09)", "High (6e-09)")  # Replace numerical values with "Low" and "High"
+    breaks = c(1e-09, 9e-09),  # Define specific density values
+    labels = c("Low ", "High ")  # Replace numerical values with "Low" and "High"
   ) +  
   labs(title = "Normalized Density of Suitable Biomass",
        x = "Easting", 
@@ -464,6 +695,7 @@ ggplot(suitablemonth.sum, aes(x = Easting, y = Northing, weight = Normalized_Sui
   theme(axis.text = element_blank(),  # Remove tick labels
         axis.ticks = element_blank())
 ```
+
 When looking at the density of suitable biomass month by month, May still has the highest density of suitable biomass. While this is most likely the month with the largest amount of species in their nutrient dense phase, it is also the month that we sampled the most. So I feel like the sampling efforts may be slightly skewing my data.
 
 In order to truly see these values accurately represented across my study area, I will need to start creating my predictive GAM. This will allow me to project these values of suitable biomass to other 30x30m pixels with similar covariates and predict how vegetative quality changes throughout the canyon in different times of the year.
