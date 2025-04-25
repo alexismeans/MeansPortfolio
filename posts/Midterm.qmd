@@ -130,7 +130,6 @@ data <- data %>%
 
 ggplot(data, aes(x = PVT, y = DE, fill = Phenology)) +
   geom_boxplot(alpha = 0.7, outlier.shape = NA) +  
-  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +   
   scale_fill_viridis_d(option = "plasma") +  
   labs(title = "Distribution of Digestible Energy (DE) by Phenology and PVT",
        x = "Phenology",
@@ -139,222 +138,21 @@ ggplot(data, aes(x = PVT, y = DE, fill = Phenology)) +
   theme(legend.position = "none",
         axis.text.x = element_text(angle = 45, hjust = 1)) +  # Rotate x-axis labels
   geom_hline(yintercept = 11.5, linetype = "dashed", color = "red", size = 1) +
-  annotate("text", x = Inf, y = 11.8, label = "11.5", color = "black", size = 4,
-           hjust = 1.1, vjust = -0.5) +
-  facet_wrap(~ Phenology, scales = "free_x", ncol = 3)  # Adjust ncol as needed
+  facet_wrap(~ Phenology, scales = "free_x", ncol = 3)+
+  coord_cartesian(ylim = c(8, 15))
 
-```
-
-```{r}
-#| warning: FALSE
-# Filter the data for Phenology "N"
-data_N <- data %>% filter(Phenology == "N")
-
-ggplot(data_N, aes(x = PVT, y = DE, fill = PVT)) +
+ggplot(data, aes(x = PVT, y = DP, fill = Phenology)) +
   geom_boxplot(alpha = 0.7, outlier.shape = NA) +  
-  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +   
   scale_fill_viridis_d(option = "plasma") +  
-  labs(title = "Distribution of Digestible Energy (DE) for Phenology 'N' by PVT",
-       x = "Plant Vegetation Type (PVT)",
-       y = "DE (kJ g^-1)") +
+  labs(title = "Distribution of Digestible Protein (DP) by Phenology and PVT",
+       x = "Phenology",
+       y = "DP") +
   theme_minimal() +
   theme(legend.position = "none",
-        axis.text.x = element_text(angle = 45, hjust = 1)) +
-  geom_hline(yintercept = 11.5, linetype = "dashed", color = "red", size = 1) +
-  annotate("text", x = Inf, y = 11.8, label = "11.5", color = "black", size = 4,
-           hjust = 1.1, vjust = -0.5)
-
-# Filter the data for Phenology "B"
-data_B <- data %>% filter(Phenology == "B")
-
-ggplot(data_B, aes(x = PVT, y = DE, fill = PVT)) +
-  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  
-  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +   
-  scale_fill_viridis_d(option = "plasma") +  
-  labs(title = "Distribution of Digestible Energy (DE) for Phenology 'B' by PVT",
-       x = "Plant Vegetation Type (PVT)",
-       y = "DE (kJ g^-1)") +
-  theme_minimal() +
-  theme(legend.position = "none",
-        axis.text.x = element_text(angle = 45, hjust = 1)) +
-  geom_hline(yintercept = 11.5, linetype = "dashed", color = "red", size = 1) +
-  annotate("text", x = Inf, y = 11.8, label = "11.5", color = "black", size = 4,
-           hjust = 1.1, vjust = -0.5)
-
-# Filter the data for Phenology "B"
-data_FL <- data %>% filter(Phenology == "FL")
-
-ggplot(data_FL, aes(x = PVT, y = DE, fill = PVT)) +
-  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  
-  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +   
-  scale_fill_viridis_d(option = "plasma") +  
-  labs(title = "Distribution of Digestible Energy (DE) for Phenology 'FL' by PVT",
-       x = "Plant Vegetation Type (PVT)",
-       y = "DE (kJ g^-1)") +
-  theme_minimal() +
-  theme(legend.position = "none",
-        axis.text.x = element_text(angle = 45, hjust = 1)) +
-  geom_hline(yintercept = 11.5, linetype = "dashed", color = "red", size = 1) +
-  annotate("text", x = Inf, y = 11.8, label = "11.5", color = "black", size = 4,
-           hjust = 1.1, vjust = -0.5)
-
-# Filter the data for Phenology "FR"
-data_FR <- data %>% filter(Phenology == "FR")
-
-ggplot(data_FR, aes(x = PVT, y = DE, fill = PVT)) +
-  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  
-  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +   
-  scale_fill_viridis_d(option = "plasma") +  
-  labs(title = "Distribution of Digestible Energy (DE) for Phenology 'FR' by PVT",
-       x = "Plant Vegetation Type (PVT)",
-       y = "DE (kJ g^-1)") +
-  theme_minimal() +
-  theme(legend.position = "none",
-        axis.text.x = element_text(angle = 45, hjust = 1)) +
-  geom_hline(yintercept = 11.5, linetype = "dashed", color = "red", size = 1) +
-  annotate("text", x = Inf, y = 11.8, label = "11.5", color = "black", size = 4,
-           hjust = 1.1, vjust = -0.5)
-
-# Filter the data for Phenology "M"
-data_M <- data %>% filter(Phenology == "M")
-
-ggplot(data_M, aes(x = PVT, y = DE, fill = PVT)) +
-  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  
-  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +   
-  scale_fill_viridis_d(option = "plasma") +  
-  labs(title = "Distribution of Digestible Energy (DE) for Phenology 'M' by PVT",
-       x = "Plant Vegetation Type (PVT)",
-       y = "DE (kJ g^-1)") +
-  theme_minimal() +
-  theme(legend.position = "none",
-        axis.text.x = element_text(angle = 45, hjust = 1)) +
-  geom_hline(yintercept = 11.5, linetype = "dashed", color = "red", size = 1) +
-  annotate("text", x = Inf, y = 11.8, label = "11.5", color = "black", size = 4,
-           hjust = 1.1, vjust = -0.5)
-
-# Filter the data for Phenology "C"
-data_C <- data %>% filter(Phenology == "C")
-
-ggplot(data_C, aes(x = PVT, y = DE, fill = PVT)) +
-  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  
-  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +   
-  scale_fill_viridis_d(option = "plasma") +  
-  labs(title = "Distribution of Digestible Energy (DE) for Phenology 'C' by PVT",
-       x = "Plant Vegetation Type (PVT)",
-       y = "DE (kJ g^-1)") +
-  theme_minimal() +
-  theme(legend.position = "none",
-        axis.text.x = element_text(angle = 45, hjust = 1)) +
-  geom_hline(yintercept = 11.5, linetype = "dashed", color = "red", size = 1) +
-  annotate("text", x = Inf, y = 11.8, label = "11.5", color = "black", size = 4,
-           hjust = 1.1, vjust = -0.5)
-
-```
-
-```{r}
-#| warning: FALSE
-
-# Filter the data for Phenology "N"
-data_N <- data %>% filter(Phenology == "N")
-
-ggplot(data_N, aes(x = PVT, y = DP, fill = PVT)) +
-  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  
-  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +   
-  scale_fill_viridis_d(option = "plasma") +  
-  labs(title = "Distribution of Digestible Protein (DP) for Phenology 'N' by PVT",
-       x = "Plant Vegetation Type (PVT)",
-       y = "DP (kJ g^-1)") +
-  theme_minimal() +
-  theme(legend.position = "none",
-        axis.text.x = element_text(angle = 45, hjust = 1)) +
+        axis.text.x = element_text(angle = 45, hjust = 1)) +  # Rotate x-axis labels
   geom_hline(yintercept = 7.5, linetype = "dashed", color = "red", size = 1) +
-  annotate("text", x = Inf, y = 7.8, label = "7.5", color = "black", size = 4,
-           hjust = 1.1, vjust = -0.5)
-
-# Filter the data for Phenology "B"
-data_B <- data %>% filter(Phenology == "B")
-
-ggplot(data_B, aes(x = PVT, y = DP, fill = PVT)) +
-  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  
-  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +   
-  scale_fill_viridis_d(option = "plasma") +  
-  labs(title = "Distribution of Digestible Protein (DP) for Phenology 'B' by PVT",
-       x = "Plant Vegetation Type (PVT)",
-       y = "DP (kJ g^-1)") +
-  theme_minimal() +
-  theme(legend.position = "none",
-        axis.text.x = element_text(angle = 45, hjust = 1)) +
-  geom_hline(yintercept = 7.5, linetype = "dashed", color = "red", size = 1) +
-  annotate("text", x = Inf, y = 7.8, label = "7.5", color = "black", size = 4,
-           hjust = 1.1, vjust = -0.5)
-
-# Filter the data for Phenology "B"
-data_FL <- data %>% filter(Phenology == "FL")
-
-ggplot(data_FL, aes(x = PVT, y = DP, fill = PVT)) +
-  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  
-  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +   
-  scale_fill_viridis_d(option = "plasma") +  
-  labs(title = "Distribution of Digestible Protein (DP) for Phenology 'FL' by PVT",
-       x = "Plant Vegetation Type (PVT)",
-       y = "DP (kJ g^-1)") +
-  theme_minimal() +
-  theme(legend.position = "none",
-        axis.text.x = element_text(angle = 45, hjust = 1)) +
-  geom_hline(yintercept = 7.5, linetype = "dashed", color = "red", size = 1) +
-  annotate("text", x = Inf, y = 7.8, label = "7.5", color = "black", size = 4,
-           hjust = 1.1, vjust = -0.5)
-
-# Filter the data for Phenology "FR"
-data_FR <- data %>% filter(Phenology == "FR")
-
-ggplot(data_FR, aes(x = PVT, y = DP, fill = PVT)) +
-  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  
-  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +   
-  scale_fill_viridis_d(option = "plasma") +  
-  labs(title = "Distribution of Digestible Protein (DP) for Phenology 'FR' by PVT",
-       x = "Plant Vegetation Type (PVT)",
-       y = "DP (kJ g^-1)") +
-  theme_minimal() +
-  theme(legend.position = "none",
-        axis.text.x = element_text(angle = 45, hjust = 1)) +
-  geom_hline(yintercept = 7.5, linetype = "dashed", color = "red", size = 1) +
-  annotate("text", x = Inf, y = 7.8, label = "7.5", color = "black", size = 4,
-           hjust = 1.1, vjust = -0.5)
-
-# Filter the data for Phenology "M"
-data_M <- data %>% filter(Phenology == "M")
-
-ggplot(data_M, aes(x = PVT, y = DP, fill = PVT)) +
-  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  
-  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +   
-  scale_fill_viridis_d(option = "plasma") +  
-  labs(title = "Distribution of Digestible Protein (DP)) for Phenology 'M' by PVT",
-       x = "Plant Vegetation Type (PVT)",
-       y = "DP (kJ g^-1)") +
-  theme_minimal() +
-  theme(legend.position = "none",
-        axis.text.x = element_text(angle = 45, hjust = 1)) +
-  geom_hline(yintercept = 7.5, linetype = "dashed", color = "red", size = 1) +
-  annotate("text", x = Inf, y = 7.8, label = "7.5", color = "black", size = 4,
-           hjust = 1.1, vjust = -0.5)
-
-# Filter the data for Phenology "C"
-data_C <- data %>% filter(Phenology == "C")
-
-ggplot(data_C, aes(x = PVT, y = DP, fill = PVT)) +
-  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  
-  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +   
-  scale_fill_viridis_d(option = "plasma") +  
-  labs(title = "Distribution of Digestible Protien (DP) for Phenology 'C' by PVT",
-       x = "Plant Vegetation Type (PVT)",
-       y = "DP (kJ g^-1)") +
-  theme_minimal() +
-  theme(legend.position = "none",
-        axis.text.x = element_text(angle = 45, hjust = 1)) +
-  geom_hline(yintercept = 7.5, linetype = "dashed", color = "red", size = 1) +
-  annotate("text", x = Inf, y = 7.8, label = "7.5", color = "black", size = 4,
-           hjust = 1.1, vjust = -0.5)
+  facet_wrap(~ Phenology, scales = "free_x", ncol = 3)+
+  coord_cartesian(ylim = c(0, 12))
 
 ```
 
