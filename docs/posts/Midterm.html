@@ -665,70 +665,73 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-</section>
-<section id="biomass-trends" class="level2">
-<h2 class="anchored" data-anchor-id="biomass-trends">Biomass Trends</h2>
-<p>One of the key parts of my project is understanding the spread of invasive species throughout the canyon, specifically cheat grass. When observing the canyon it seems like cheat grass dominates the canyon which could effect the amount of nutrients available later in the summer. To start I wanted to looks at the density of biomass for all native vs invasive species within the transects that I sampled in our study area. From this graph we can see that overall biomass of native and invasive species is relatively similar throughout the canyon. However, there is an overall greater density of native species.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>spp.map <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span> </span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(TransectID, Code, Phenology, Part, Biomass, Duration, Status)</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>plot <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/Cleaning/processed.data/transect.csv"</span>)</span>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>plot <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/Cleaning/processed.data/transect.csv"</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the path to the directory containing the file</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>excelpath <span class="ot">&lt;-</span> <span class="st">"C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/FRESH/processed.data/"</span></span>
 <span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>spp.map <span class="ot">&lt;-</span> spp.map <span class="sc">%&gt;%</span> </span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">PlotID =</span> TransectID)</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the specific file name</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>filename <span class="ot">&lt;-</span> <span class="st">"2024.subset.results.xlsx"</span></span>
 <span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>spp.map <span class="ot">&lt;-</span> spp.map <span class="sc">%&gt;%</span> </span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(<span class="at">y =</span> plot,</span>
-<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>            <span class="at">by =</span> <span class="st">"PlotID"</span>,</span>
-<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>            <span class="at">relationship =</span> <span class="st">"many-to-one"</span>)</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Construct the full file path</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>excel.file <span class="ot">&lt;-</span> <span class="fu">file.path</span>(excelpath, filename)</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the workbook and read the data</span></span>
 <span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>spp.map <span class="ot">&lt;-</span> spp.map <span class="sc">%&gt;%</span> </span>
-<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">Lat =</span> BeginLat,</span>
-<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>         <span class="at">Long =</span> BeginLong,</span>
-<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>         <span class="at">Easting =</span> BeginUTM_Easting,</span>
-<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>         <span class="at">Northing =</span> BeginUTM_Northing) <span class="sc">%&gt;%</span> </span>
-<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(PlotID, Code, Phenology, Part, Biomass, Duration, Status, Julian_Day, Lat, Long, Easting, Northing)</span>
-<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Create an sf object with the Lat and Long columns</span></span>
-<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>spp.map_UTM <span class="ot">&lt;-</span> <span class="fu">st_as_sf</span>(spp.map, <span class="at">coords =</span> <span class="fu">c</span>(<span class="st">"Long"</span>, <span class="st">"Lat"</span>), <span class="at">crs =</span> <span class="dv">4326</span>)  <span class="co"># EPSG:4326 is WGS84</span></span>
-<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert to UTM Zone 11N (EPSG:26911)</span></span>
-<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>spp.map_UTM <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(spp.map_UTM, <span class="at">crs =</span> <span class="dv">32611</span>)</span>
-<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract UTM coordinates (Easting and Northing)</span></span>
-<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>spp.map<span class="sc">$</span>Easting <span class="ot">&lt;-</span> <span class="fu">st_coordinates</span>(spp.map_UTM)[, <span class="dv">1</span>]</span>
-<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a>spp.map<span class="sc">$</span>Northing <span class="ot">&lt;-</span> <span class="fu">st_coordinates</span>(spp.map_UTM)[, <span class="dv">2</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>habitat <span class="ot">&lt;-</span> <span class="fu">loadWorkbook</span>(excel.file)</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>suitable <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">readWorkbook</span>(excel.file, <span class="at">sheet =</span> <span class="st">"Plot-Level-Summary"</span>, <span class="at">startRow =</span> <span class="dv">1</span>, <span class="at">colNames =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>suitable <span class="ot">&lt;-</span> suitable <span class="sc">%&gt;%</span> </span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">PlotID =</span> TransectID) <span class="sc">%&gt;%</span> </span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(<span class="at">y =</span> plot,</span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>            <span class="at">by =</span> <span class="st">"PlotID"</span>)</span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>suitable <span class="ot">&lt;-</span> suitable <span class="sc">%&gt;%</span> </span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">Lat =</span> BeginLat,</span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>         <span class="at">Long =</span> BeginLong,</span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>         <span class="at">Easting =</span> BeginUTM_Easting,</span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>         <span class="at">Northing =</span> BeginUTM_Northing) <span class="sc">%&gt;%</span> </span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(PlotID, TotalDE, TotalDP, SuitableBiomass, AveDE, AveDP, Julian_Day, Lat, Long, Easting, Northing)</span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a><span class="co"># Create an sf object with the Lat and Long columns</span></span>
+<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a>suitable_UTM <span class="ot">&lt;-</span> <span class="fu">st_as_sf</span>(suitable, <span class="at">coords =</span> <span class="fu">c</span>(<span class="st">"Long"</span>, <span class="st">"Lat"</span>), <span class="at">crs =</span> <span class="dv">4326</span>)  <span class="co"># EPSG:4326 is WGS84</span></span>
+<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert to UTM Zone 11N (EPSG:26911)</span></span>
+<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a>suitable_UTM <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(suitable_UTM, <span class="at">crs =</span> <span class="dv">32611</span>)</span>
+<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract UTM coordinates (Easting and Northing)</span></span>
+<span id="cb18-38"><a href="#cb18-38" aria-hidden="true" tabindex="-1"></a>suitable<span class="sc">$</span>Easting <span class="ot">&lt;-</span> <span class="fu">st_coordinates</span>(suitable_UTM)[, <span class="dv">1</span>]</span>
+<span id="cb18-39"><a href="#cb18-39" aria-hidden="true" tabindex="-1"></a>suitable<span class="sc">$</span>Northing <span class="ot">&lt;-</span> <span class="fu">st_coordinates</span>(suitable_UTM)[, <span class="dv">2</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load necessary libraries</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>suitable <span class="ot">&lt;-</span> suitable <span class="sc">%&gt;%</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">PVT =</span> <span class="fu">str_sub</span>(PlotID, <span class="at">start =</span> <span class="dv">4</span>, <span class="at">end =</span> <span class="dv">6</span>))</span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Summarize biomass weight by spatial location and species status</span></span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>spp.summary <span class="ot">&lt;-</span> spp.map <span class="sc">%&gt;%</span></span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>   <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Biomass) <span class="sc">&amp;</span> Biomass <span class="sc">&gt;</span> <span class="dv">0</span>)  <span class="co"># Remove NAs</span></span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(spp.summary, <span class="fu">aes</span>(<span class="at">x =</span> Easting, <span class="at">y =</span> Northing, <span class="at">weight =</span> Biomass)) <span class="sc">+</span></span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_density_2d</span>(<span class="fu">aes</span>(<span class="at">fill =</span> <span class="fu">after_stat</span>(density)), <span class="at">geom =</span> <span class="st">"raster"</span>, <span class="at">contour =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
-<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> Status) <span class="sc">+</span>  <span class="co"># Separate maps for Native/Invasive</span></span>
-<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_c</span>(</span>
-<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Biomass Density"</span>, </span>
-<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">option =</span> <span class="st">"turbo"</span>,</span>
-<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="fl">1e-09</span>, <span class="fl">7e-09</span>),  <span class="co"># Define specific density values</span></span>
-<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Low"</span>, <span class="st">"High"</span>)  <span class="co"># Replace numerical values with "Low" and "High"</span></span>
-<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span>  </span>
-<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Density of Biomass (Native vs Invasive Species)"</span>,</span>
-<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Easting"</span>, </span>
-<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Northing"</span>) <span class="sc">+</span></span>
-<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_blank</span>(),  <span class="co"># Remove tick labels</span></span>
-<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.ticks =</span> <span class="fu">element_blank</span>())  <span class="co"># Rotate x-axis labels</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 1: Standardize the "Suitable Biomass" values</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>suitable_standardized <span class="ot">&lt;-</span> suitable <span class="sc">%&gt;%</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(PVT) <span class="sc">%&gt;%</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Standardized_Biomass =</span> <span class="fu">scale</span>(SuitableBiomass)) <span class="sc">%&gt;%</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 2: Create the plot</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(suitable_standardized, <span class="fu">aes</span>(<span class="at">x =</span> PVT, <span class="at">y =</span> Standardized_Biomass, <span class="at">fill =</span> PVT)) <span class="sc">+</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">alpha =</span> <span class="fl">0.7</span>, <span class="at">outlier.shape =</span> <span class="cn">NA</span>) <span class="sc">+</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_jitter</span>(<span class="at">width =</span> <span class="fl">0.2</span>, <span class="at">alpha =</span> <span class="fl">0.4</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_d</span>(<span class="at">option =</span> <span class="st">"plasma"</span>) <span class="sc">+</span></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Comparison of Standardized Suitable Biomass Across PVTs"</span>,</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Plant Vegetation Type (PVT)"</span>,</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Standardized Suitable Biomass"</span>) <span class="sc">+</span></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>,</span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
@@ -738,47 +741,27 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>I still do not have complete quality data, so there is only so much I can do with this information, but knowing the amount of biomass for each species in the area will allow us to apply a nutrient value of “suitable biomass”. I would also like to see the differences in overall biomass for each month. I had a much larger sample size in April and May than I did in June and July, so I standardized my biomass values before plotting them.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>month.sum <span class="ot">&lt;-</span> spp.map <span class="sc">%&gt;%</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Biomass) <span class="sc">&amp;</span> Biomass <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span>  <span class="co"># Remove NAs</span></span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Month =</span> <span class="fu">case_when</span>(</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">93</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;</span> <span class="dv">124</span> <span class="sc">~</span> <span class="st">"April"</span>,</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">124</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;</span> <span class="dv">155</span> <span class="sc">~</span> <span class="st">"May"</span>,</span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">155</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;</span> <span class="dv">185</span> <span class="sc">~</span> <span class="st">"June"</span>,</span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">185</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;=</span> <span class="dv">212</span> <span class="sc">~</span> <span class="st">"July"</span>,</span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>  )) <span class="sc">%&gt;%</span></span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Month)) <span class="sc">%&gt;%</span></span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Month =</span> <span class="fu">factor</span>(Month, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"April"</span>, <span class="st">"May"</span>, <span class="st">"June"</span>, <span class="st">"July"</span>)))</span>
-<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Normalize biomass within each month (to make sample sizes comparable)</span></span>
-<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>month.sum <span class="ot">&lt;-</span> month.sum <span class="sc">%&gt;%</span></span>
-<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Month) <span class="sc">%&gt;%</span></span>
-<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Total_Biomass =</span> <span class="fu">sum</span>(Biomass),  <span class="co"># Calculate total biomass for each month</span></span>
-<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>         <span class="at">Normalized_Biomass =</span> Biomass <span class="sc">/</span> Total_Biomass) <span class="sc">%&gt;%</span>  <span class="co"># Normalize biomass</span></span>
-<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()  <span class="co"># Remove grouping</span></span>
-<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Create density plot faceted by Month and Status</span></span>
-<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(month.sum, <span class="fu">aes</span>(<span class="at">x =</span> Easting, <span class="at">y =</span> Northing, <span class="at">weight =</span> Normalized_Biomass)) <span class="sc">+</span></span>
-<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_density_2d</span>(<span class="fu">aes</span>(<span class="at">fill =</span> <span class="fu">after_stat</span>(density)), <span class="at">geom =</span> <span class="st">"raster"</span>, <span class="at">contour =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
-<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(Month <span class="sc">~</span> Status) <span class="sc">+</span>  <span class="co"># Grid facet by Month (rows) and Status (columns)</span></span>
-<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_c</span>(</span>
-<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Biomass Density"</span>, </span>
-<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">option =</span> <span class="st">"turbo"</span>,</span>
-<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="fl">2e-09</span>, <span class="fl">18e-09</span>),  <span class="co"># Define specific density values</span></span>
-<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Low"</span>, <span class="st">"High"</span>)  <span class="co"># Replace numerical values with "Low" and "High"</span></span>
-<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span>  </span>
-<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Normalized Density of Biomass (Native vs Invasive Species by Month)"</span>,</span>
-<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Easting"</span>, </span>
-<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Northing"</span>) <span class="sc">+</span></span>
-<span id="cb20-34"><a href="#cb20-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb20-35"><a href="#cb20-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_blank</span>(),  <span class="co"># Remove tick labels</span></span>
-<span id="cb20-36"><a href="#cb20-36" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.ticks =</span> <span class="fu">element_blank</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(suitable, <span class="fu">aes</span>(<span class="at">x =</span> Julian_Day, <span class="at">y =</span> SuitableBiomass)) <span class="sc">+</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> PVT), <span class="at">alpha =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"loess"</span>, <span class="at">se =</span> <span class="cn">TRUE</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_viridis_d</span>() <span class="sc">+</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Suitable Biomass Over Time"</span>,</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Julian Day"</span>,</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Suitable Biomass"</span>,</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">"PVT"</span>) <span class="sc">+</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"right"</span>,</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">0</span>, <span class="at">hjust =</span> <span class="fl">0.5</span>)) <span class="sc">+</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="fu">min</span>(suitable<span class="sc">$</span>Julian_Day, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), </span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>                                  <span class="fu">max</span>(suitable<span class="sc">$</span>Julian_Day, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), </span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">by =</span> <span class="dv">30</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -787,51 +770,247 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>Since cheat grass is the main issue that we have been observing as far as the most invasive species in the canyon I would also like to see how this biomass progresses over each month. Apparently in this subset of my data I didn’t have any observations for cheatgrass in the month of June. This makes me think that I should take the rest of my results with a grain of salt until I can complete my biomass predictions. That being said the density of biomass for cheat grass did peak in the southern end of the canyon in June and then started to decrease after that point.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter for observations with Species Code "BRTE"</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>cheat.sum <span class="ot">&lt;-</span> spp.map <span class="sc">%&gt;%</span></span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Biomass) <span class="sc">&amp;</span> Biomass <span class="sc">&gt;</span> <span class="dv">0</span>, Code <span class="sc">==</span> <span class="st">"BRTE"</span>) <span class="sc">%&gt;%</span>  <span class="co"># Remove NAs and filter for "BRTE"</span></span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Month =</span> <span class="fu">case_when</span>(</span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">93</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;</span> <span class="dv">124</span> <span class="sc">~</span> <span class="st">"April"</span>,</span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">124</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;</span> <span class="dv">155</span> <span class="sc">~</span> <span class="st">"May"</span>,</span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">155</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;</span> <span class="dv">185</span> <span class="sc">~</span> <span class="st">"June"</span>,</span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">185</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;=</span> <span class="dv">212</span> <span class="sc">~</span> <span class="st">"July"</span>,</span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>  )) <span class="sc">%&gt;%</span></span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Month)) <span class="sc">%&gt;%</span></span>
-<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Month =</span> <span class="fu">factor</span>(Month, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"April"</span>, <span class="st">"May"</span>, <span class="st">"June"</span>, <span class="st">"July"</span>)))  <span class="co"># Set correct order</span></span>
-<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Normalize biomass within each month (to make sample sizes comparable)</span></span>
-<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>cheat.sum <span class="ot">&lt;-</span> cheat.sum <span class="sc">%&gt;%</span></span>
-<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Month) <span class="sc">%&gt;%</span></span>
-<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Total_Biomass =</span> <span class="fu">sum</span>(Biomass),  <span class="co"># Calculate total biomass for each month</span></span>
-<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>         <span class="at">Normalized_Biomass =</span> Biomass <span class="sc">/</span> Total_Biomass) <span class="sc">%&gt;%</span>  <span class="co"># Normalize biomass</span></span>
-<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()  <span class="co"># Remove grouping</span></span>
-<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Create density plot faceted by Month and Status for species "BRTE"</span></span>
-<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(cheat.sum, <span class="fu">aes</span>(<span class="at">x =</span> Easting, <span class="at">y =</span> Northing, <span class="at">weight =</span> Normalized_Biomass)) <span class="sc">+</span></span>
-<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_density_2d</span>(<span class="fu">aes</span>(<span class="at">fill =</span> <span class="fu">after_stat</span>(density)), <span class="at">geom =</span> <span class="st">"raster"</span>, <span class="at">contour =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
-<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(Month <span class="sc">~</span> Code) <span class="sc">+</span>  <span class="co"># Grid facet by Month (rows) and Status (columns)</span></span>
-<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_c</span>(</span>
-<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Biomass Density"</span>, </span>
-<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">option =</span> <span class="st">"turbo"</span>,</span>
-<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="fl">2e-09</span>, <span class="fl">14e-09</span>),  <span class="co"># Define specific density values</span></span>
-<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Low "</span>, <span class="st">"High "</span>)  <span class="co"># Replace numerical values with "Low" and "High"</span></span>
-<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span>  </span>
-<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Normalized Density of Biomass for BRTE by month"</span>,</span>
-<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Easting"</span>, </span>
-<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Northing"</span>) <span class="sc">+</span></span>
-<span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_blank</span>(),  <span class="co"># Remove tick labels</span></span>
-<span id="cb21-36"><a href="#cb21-36" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.ticks =</span> <span class="fu">element_blank</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(suitable, <span class="fu">aes</span>(<span class="at">x =</span> Julian_Day, <span class="at">y =</span> AveDE)) <span class="sc">+</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> PVT), <span class="at">alpha =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"loess"</span>, <span class="at">se =</span> <span class="cn">TRUE</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_viridis_d</span>() <span class="sc">+</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Average DE Over Time"</span>,</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Julian Day"</span>,</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"DE"</span>,</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">"PVT"</span>) <span class="sc">+</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"right"</span>,</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">0</span>, <span class="at">hjust =</span> <span class="fl">0.5</span>)) <span class="sc">+</span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="fu">min</span>(suitable<span class="sc">$</span>Julian_Day, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), </span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>                                  <span class="fu">max</span>(suitable<span class="sc">$</span>Julian_Day, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), </span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">by =</span> <span class="dv">30</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 17 rows containing non-finite outside the scale range
+(`stat_smooth()`).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 17 rows containing missing values or values outside the scale range
+(`geom_point()`).</code></pre>
+</div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
 <p><img src="Midterm_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(suitable, <span class="fu">aes</span>(<span class="at">x =</span> Julian_Day, <span class="at">y =</span> AveDP)) <span class="sc">+</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> PVT), <span class="at">alpha =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"loess"</span>, <span class="at">se =</span> <span class="cn">TRUE</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_viridis_d</span>() <span class="sc">+</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Average DP Over Time"</span>,</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Julian Day"</span>,</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"DP"</span>,</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">"PVT"</span>) <span class="sc">+</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"right"</span>,</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">0</span>, <span class="at">hjust =</span> <span class="fl">0.5</span>)) <span class="sc">+</span></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="fu">min</span>(suitable<span class="sc">$</span>Julian_Day, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), </span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>                                  <span class="fu">max</span>(suitable<span class="sc">$</span>Julian_Day, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), </span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">by =</span> <span class="dv">30</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 17 rows containing non-finite outside the scale range
+(`stat_smooth()`).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 17 rows containing missing values or values outside the scale range
+(`geom_point()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Midterm_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="biomass-trends" class="level2">
+<h2 class="anchored" data-anchor-id="biomass-trends">Biomass Trends</h2>
+<p>One of the key parts of my project is understanding the spread of invasive species throughout the canyon, specifically cheat grass. When observing the canyon it seems like cheat grass dominates the canyon which could effect the amount of nutrients available later in the summer. To start I wanted to looks at the density of biomass for all native vs invasive species within the transects that I sampled in our study area. From this graph we can see that overall biomass of native and invasive species is relatively similar throughout the canyon. However, there is an overall greater density of native species.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>spp.map <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span> </span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(TransectID, Code, Phenology, Part, Biomass, Duration, Status)</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>plot <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/Cleaning/processed.data/transect.csv"</span>)</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>spp.map <span class="ot">&lt;-</span> spp.map <span class="sc">%&gt;%</span> </span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">PlotID =</span> TransectID)</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>spp.map <span class="ot">&lt;-</span> spp.map <span class="sc">%&gt;%</span> </span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(<span class="at">y =</span> plot,</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>            <span class="at">by =</span> <span class="st">"PlotID"</span>,</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>            <span class="at">relationship =</span> <span class="st">"many-to-one"</span>)</span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>spp.map <span class="ot">&lt;-</span> spp.map <span class="sc">%&gt;%</span> </span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">Lat =</span> BeginLat,</span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a>         <span class="at">Long =</span> BeginLong,</span>
+<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a>         <span class="at">Easting =</span> BeginUTM_Easting,</span>
+<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a>         <span class="at">Northing =</span> BeginUTM_Northing) <span class="sc">%&gt;%</span> </span>
+<span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(PlotID, Code, Phenology, Part, Biomass, Duration, Status, Julian_Day, Lat, Long, Easting, Northing)</span>
+<span id="cb30-20"><a href="#cb30-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-21"><a href="#cb30-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-22"><a href="#cb30-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Create an sf object with the Lat and Long columns</span></span>
+<span id="cb30-23"><a href="#cb30-23" aria-hidden="true" tabindex="-1"></a>spp.map_UTM <span class="ot">&lt;-</span> <span class="fu">st_as_sf</span>(spp.map, <span class="at">coords =</span> <span class="fu">c</span>(<span class="st">"Long"</span>, <span class="st">"Lat"</span>), <span class="at">crs =</span> <span class="dv">4326</span>)  <span class="co"># EPSG:4326 is WGS84</span></span>
+<span id="cb30-24"><a href="#cb30-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-25"><a href="#cb30-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert to UTM Zone 11N (EPSG:26911)</span></span>
+<span id="cb30-26"><a href="#cb30-26" aria-hidden="true" tabindex="-1"></a>spp.map_UTM <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(spp.map_UTM, <span class="at">crs =</span> <span class="dv">32611</span>)</span>
+<span id="cb30-27"><a href="#cb30-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-28"><a href="#cb30-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract UTM coordinates (Easting and Northing)</span></span>
+<span id="cb30-29"><a href="#cb30-29" aria-hidden="true" tabindex="-1"></a>spp.map<span class="sc">$</span>Easting <span class="ot">&lt;-</span> <span class="fu">st_coordinates</span>(spp.map_UTM)[, <span class="dv">1</span>]</span>
+<span id="cb30-30"><a href="#cb30-30" aria-hidden="true" tabindex="-1"></a>spp.map<span class="sc">$</span>Northing <span class="ot">&lt;-</span> <span class="fu">st_coordinates</span>(spp.map_UTM)[, <span class="dv">2</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load necessary libraries</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Summarize biomass weight by spatial location and species status</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>spp.summary <span class="ot">&lt;-</span> spp.map <span class="sc">%&gt;%</span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>   <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Biomass) <span class="sc">&amp;</span> Biomass <span class="sc">&gt;</span> <span class="dv">0</span>)  <span class="co"># Remove NAs</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(spp.summary, <span class="fu">aes</span>(<span class="at">x =</span> Easting, <span class="at">y =</span> Northing, <span class="at">weight =</span> Biomass)) <span class="sc">+</span></span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_density_2d</span>(<span class="fu">aes</span>(<span class="at">fill =</span> <span class="fu">after_stat</span>(density)), <span class="at">geom =</span> <span class="st">"raster"</span>, <span class="at">contour =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> Status) <span class="sc">+</span>  <span class="co"># Separate maps for Native/Invasive</span></span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_c</span>(</span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Biomass Density"</span>, </span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">option =</span> <span class="st">"turbo"</span>,</span>
+<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="fl">1e-09</span>, <span class="fl">7e-09</span>),  <span class="co"># Define specific density values</span></span>
+<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Low"</span>, <span class="st">"High"</span>)  <span class="co"># Replace numerical values with "Low" and "High"</span></span>
+<span id="cb31-16"><a href="#cb31-16" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span>  </span>
+<span id="cb31-17"><a href="#cb31-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Density of Biomass (Native vs Invasive Species)"</span>,</span>
+<span id="cb31-18"><a href="#cb31-18" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Easting"</span>, </span>
+<span id="cb31-19"><a href="#cb31-19" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Northing"</span>) <span class="sc">+</span></span>
+<span id="cb31-20"><a href="#cb31-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb31-21"><a href="#cb31-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_blank</span>(),  <span class="co"># Remove tick labels</span></span>
+<span id="cb31-22"><a href="#cb31-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.ticks =</span> <span class="fu">element_blank</span>())  <span class="co"># Rotate x-axis labels</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Midterm_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>I still do not have complete quality data, so there is only so much I can do with this information, but knowing the amount of biomass for each species in the area will allow us to apply a nutrient value of “suitable biomass”. I would also like to see the differences in overall biomass for each month. I had a much larger sample size in April and May than I did in June and July, so I standardized my biomass values before plotting them.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>month.sum <span class="ot">&lt;-</span> spp.map <span class="sc">%&gt;%</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Biomass) <span class="sc">&amp;</span> Biomass <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span>  <span class="co"># Remove NAs</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Month =</span> <span class="fu">case_when</span>(</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">93</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;</span> <span class="dv">124</span> <span class="sc">~</span> <span class="st">"April"</span>,</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">124</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;</span> <span class="dv">155</span> <span class="sc">~</span> <span class="st">"May"</span>,</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">155</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;</span> <span class="dv">185</span> <span class="sc">~</span> <span class="st">"June"</span>,</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">185</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;=</span> <span class="dv">212</span> <span class="sc">~</span> <span class="st">"July"</span>,</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>    <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>  )) <span class="sc">%&gt;%</span></span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Month)) <span class="sc">%&gt;%</span></span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Month =</span> <span class="fu">factor</span>(Month, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"April"</span>, <span class="st">"May"</span>, <span class="st">"June"</span>, <span class="st">"July"</span>)))</span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Normalize biomass within each month (to make sample sizes comparable)</span></span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>month.sum <span class="ot">&lt;-</span> month.sum <span class="sc">%&gt;%</span></span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Month) <span class="sc">%&gt;%</span></span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Total_Biomass =</span> <span class="fu">sum</span>(Biomass),  <span class="co"># Calculate total biomass for each month</span></span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>         <span class="at">Normalized_Biomass =</span> Biomass <span class="sc">/</span> Total_Biomass) <span class="sc">%&gt;%</span>  <span class="co"># Normalize biomass</span></span>
+<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()  <span class="co"># Remove grouping</span></span>
+<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-21"><a href="#cb32-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Create density plot faceted by Month and Status</span></span>
+<span id="cb32-22"><a href="#cb32-22" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(month.sum, <span class="fu">aes</span>(<span class="at">x =</span> Easting, <span class="at">y =</span> Northing, <span class="at">weight =</span> Normalized_Biomass)) <span class="sc">+</span></span>
+<span id="cb32-23"><a href="#cb32-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_density_2d</span>(<span class="fu">aes</span>(<span class="at">fill =</span> <span class="fu">after_stat</span>(density)), <span class="at">geom =</span> <span class="st">"raster"</span>, <span class="at">contour =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb32-24"><a href="#cb32-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(Month <span class="sc">~</span> Status) <span class="sc">+</span>  <span class="co"># Grid facet by Month (rows) and Status (columns)</span></span>
+<span id="cb32-25"><a href="#cb32-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_c</span>(</span>
+<span id="cb32-26"><a href="#cb32-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Biomass Density"</span>, </span>
+<span id="cb32-27"><a href="#cb32-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">option =</span> <span class="st">"turbo"</span>,</span>
+<span id="cb32-28"><a href="#cb32-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="fl">2e-09</span>, <span class="fl">18e-09</span>),  <span class="co"># Define specific density values</span></span>
+<span id="cb32-29"><a href="#cb32-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Low"</span>, <span class="st">"High"</span>)  <span class="co"># Replace numerical values with "Low" and "High"</span></span>
+<span id="cb32-30"><a href="#cb32-30" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span>  </span>
+<span id="cb32-31"><a href="#cb32-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Normalized Density of Biomass (Native vs Invasive Species by Month)"</span>,</span>
+<span id="cb32-32"><a href="#cb32-32" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Easting"</span>, </span>
+<span id="cb32-33"><a href="#cb32-33" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Northing"</span>) <span class="sc">+</span></span>
+<span id="cb32-34"><a href="#cb32-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb32-35"><a href="#cb32-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_blank</span>(),  <span class="co"># Remove tick labels</span></span>
+<span id="cb32-36"><a href="#cb32-36" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.ticks =</span> <span class="fu">element_blank</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Midterm_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Since cheat grass is the main issue that we have been observing as far as the most invasive species in the canyon I would also like to see how this biomass progresses over each month. Apparently in this subset of my data I didn’t have any observations for cheatgrass in the month of June. This makes me think that I should take the rest of my results with a grain of salt until I can complete my biomass predictions. That being said the density of biomass for cheat grass did peak in the southern end of the canyon in June and then started to decrease after that point.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter for observations with Species Code "BRTE"</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>cheat.sum <span class="ot">&lt;-</span> spp.map <span class="sc">%&gt;%</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Biomass) <span class="sc">&amp;</span> Biomass <span class="sc">&gt;</span> <span class="dv">0</span>, Code <span class="sc">==</span> <span class="st">"BRTE"</span>) <span class="sc">%&gt;%</span>  <span class="co"># Remove NAs and filter for "BRTE"</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Month =</span> <span class="fu">case_when</span>(</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">93</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;</span> <span class="dv">124</span> <span class="sc">~</span> <span class="st">"April"</span>,</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">124</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;</span> <span class="dv">155</span> <span class="sc">~</span> <span class="st">"May"</span>,</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">155</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;</span> <span class="dv">185</span> <span class="sc">~</span> <span class="st">"June"</span>,</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">185</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;=</span> <span class="dv">212</span> <span class="sc">~</span> <span class="st">"July"</span>,</span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>    <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>  )) <span class="sc">%&gt;%</span></span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Month)) <span class="sc">%&gt;%</span></span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Month =</span> <span class="fu">factor</span>(Month, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"April"</span>, <span class="st">"May"</span>, <span class="st">"June"</span>, <span class="st">"July"</span>)))  <span class="co"># Set correct order</span></span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Normalize biomass within each month (to make sample sizes comparable)</span></span>
+<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a>cheat.sum <span class="ot">&lt;-</span> cheat.sum <span class="sc">%&gt;%</span></span>
+<span id="cb33-16"><a href="#cb33-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Month) <span class="sc">%&gt;%</span></span>
+<span id="cb33-17"><a href="#cb33-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Total_Biomass =</span> <span class="fu">sum</span>(Biomass),  <span class="co"># Calculate total biomass for each month</span></span>
+<span id="cb33-18"><a href="#cb33-18" aria-hidden="true" tabindex="-1"></a>         <span class="at">Normalized_Biomass =</span> Biomass <span class="sc">/</span> Total_Biomass) <span class="sc">%&gt;%</span>  <span class="co"># Normalize biomass</span></span>
+<span id="cb33-19"><a href="#cb33-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()  <span class="co"># Remove grouping</span></span>
+<span id="cb33-20"><a href="#cb33-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-21"><a href="#cb33-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Create density plot faceted by Month and Status for species "BRTE"</span></span>
+<span id="cb33-22"><a href="#cb33-22" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(cheat.sum, <span class="fu">aes</span>(<span class="at">x =</span> Easting, <span class="at">y =</span> Northing, <span class="at">weight =</span> Normalized_Biomass)) <span class="sc">+</span></span>
+<span id="cb33-23"><a href="#cb33-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_density_2d</span>(<span class="fu">aes</span>(<span class="at">fill =</span> <span class="fu">after_stat</span>(density)), <span class="at">geom =</span> <span class="st">"raster"</span>, <span class="at">contour =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb33-24"><a href="#cb33-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(Month <span class="sc">~</span> Code) <span class="sc">+</span>  <span class="co"># Grid facet by Month (rows) and Status (columns)</span></span>
+<span id="cb33-25"><a href="#cb33-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_c</span>(</span>
+<span id="cb33-26"><a href="#cb33-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Biomass Density"</span>, </span>
+<span id="cb33-27"><a href="#cb33-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">option =</span> <span class="st">"turbo"</span>,</span>
+<span id="cb33-28"><a href="#cb33-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="fl">2e-09</span>, <span class="fl">14e-09</span>),  <span class="co"># Define specific density values</span></span>
+<span id="cb33-29"><a href="#cb33-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Low "</span>, <span class="st">"High "</span>)  <span class="co"># Replace numerical values with "Low" and "High"</span></span>
+<span id="cb33-30"><a href="#cb33-30" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span>  </span>
+<span id="cb33-31"><a href="#cb33-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Normalized Density of Biomass for BRTE by month"</span>,</span>
+<span id="cb33-32"><a href="#cb33-32" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Easting"</span>, </span>
+<span id="cb33-33"><a href="#cb33-33" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Northing"</span>) <span class="sc">+</span></span>
+<span id="cb33-34"><a href="#cb33-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb33-35"><a href="#cb33-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_blank</span>(),  <span class="co"># Remove tick labels</span></span>
+<span id="cb33-36"><a href="#cb33-36" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.ticks =</span> <span class="fu">element_blank</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Midterm_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -843,30 +1022,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>gps <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"C:/Users/Alexis Means/Documents/Project/Demographics/Code/cleaned.data/sheep_clean_24.csv"</span>)</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>gps <span class="ot">&lt;-</span> gps <span class="sc">%&gt;%</span> </span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">Easting =</span> x_,</span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">Northing =</span> y_)</span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 1: Kernel Density Estimation (KDE) for GPS data</span></span>
-<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>gps_kde <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(gps, <span class="fu">aes</span>(<span class="at">x =</span> Easting, <span class="at">y =</span> Northing)) <span class="sc">+</span></span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_density_2d</span>(<span class="fu">aes</span>(<span class="at">fill =</span> <span class="fu">after_stat</span>(density)), <span class="at">geom =</span> <span class="st">"raster"</span>, <span class="at">contour =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
-<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_c</span>(<span class="at">option =</span> <span class="st">"inferno"</span>,</span>
-<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>          <span class="at">name =</span> <span class="st">"GPS Use Density"</span>,</span>
-<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>          <span class="at">breaks =</span> <span class="fu">c</span>(<span class="fl">2e-09</span>, <span class="fl">10e-09</span>),  <span class="co"># Define specific density values</span></span>
-<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>          <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Low"</span>, <span class="st">"High"</span>)  <span class="co"># Replace  values with "Low" and "High"</span></span>
-<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Sheep Area Use"</span>)<span class="sc">+</span></span>
-<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()<span class="sc">+</span></span>
-<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_blank</span>(),  <span class="co"># Remove tick labels</span></span>
-<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.ticks =</span> <span class="fu">element_blank</span>()) </span>
-<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(gps_kde)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>gps <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"C:/Users/Alexis Means/Documents/Project/Demographics/Code/cleaned.data/sheep_clean_24.csv"</span>)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>gps <span class="ot">&lt;-</span> gps <span class="sc">%&gt;%</span> </span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">Easting =</span> x_,</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">Northing =</span> y_)</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 1: Kernel Density Estimation (KDE) for GPS data</span></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>gps_kde <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(gps, <span class="fu">aes</span>(<span class="at">x =</span> Easting, <span class="at">y =</span> Northing)) <span class="sc">+</span></span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_density_2d</span>(<span class="fu">aes</span>(<span class="at">fill =</span> <span class="fu">after_stat</span>(density)), <span class="at">geom =</span> <span class="st">"raster"</span>, <span class="at">contour =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_c</span>(<span class="at">option =</span> <span class="st">"inferno"</span>,</span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>          <span class="at">name =</span> <span class="st">"GPS Use Density"</span>,</span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>          <span class="at">breaks =</span> <span class="fu">c</span>(<span class="fl">2e-09</span>, <span class="fl">10e-09</span>),  <span class="co"># Define specific density values</span></span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>          <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Low"</span>, <span class="st">"High"</span>)  <span class="co"># Replace  values with "Low" and "High"</span></span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Sheep Area Use"</span>)<span class="sc">+</span></span>
+<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()<span class="sc">+</span></span>
+<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_blank</span>(),  <span class="co"># Remove tick labels</span></span>
+<span id="cb34-18"><a href="#cb34-18" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.ticks =</span> <span class="fu">element_blank</span>()) </span>
+<span id="cb34-19"><a href="#cb34-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(gps_kde)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="Midterm_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="Midterm_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -875,69 +1054,69 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>month.sum <span class="ot">&lt;-</span> spp.map <span class="sc">%&gt;%</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Biomass) <span class="sc">&amp;</span> Biomass <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span>  <span class="co"># Remove NAs</span></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Month =</span> <span class="fu">case_when</span>(</span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">93</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;</span> <span class="dv">124</span> <span class="sc">~</span> <span class="st">"April"</span>,</span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">124</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;</span> <span class="dv">155</span> <span class="sc">~</span> <span class="st">"May"</span>,</span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">155</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;</span> <span class="dv">185</span> <span class="sc">~</span> <span class="st">"June"</span>,</span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">185</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;=</span> <span class="dv">212</span> <span class="sc">~</span> <span class="st">"July"</span>,</span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
-<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>  )) <span class="sc">%&gt;%</span></span>
-<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Month)) <span class="sc">%&gt;%</span></span>
-<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Month =</span> <span class="fu">factor</span>(Month, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"April"</span>, <span class="st">"May"</span>, <span class="st">"June"</span>, <span class="st">"July"</span>)))</span>
-<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Normalize biomass within each month (to make sample sizes comparable)</span></span>
-<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>month.sum <span class="ot">&lt;-</span> month.sum <span class="sc">%&gt;%</span></span>
-<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Month) <span class="sc">%&gt;%</span></span>
-<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Total_Biomass =</span> <span class="fu">sum</span>(Biomass),  <span class="co"># Calculate total biomass for each month</span></span>
-<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>         <span class="at">Normalized_Biomass =</span> Biomass <span class="sc">/</span> Total_Biomass) <span class="sc">%&gt;%</span>  <span class="co"># Normalize biomass</span></span>
-<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()  <span class="co"># Remove grouping</span></span>
-<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract month from the GPS timestamp</span></span>
-<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a>gps <span class="ot">&lt;-</span> gps <span class="sc">%&gt;%</span></span>
-<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Month =</span> <span class="fu">case_when</span>(</span>
-<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">month</span>(t_) <span class="sc">==</span> <span class="dv">4</span> <span class="sc">~</span> <span class="st">"April"</span>,</span>
-<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">month</span>(t_) <span class="sc">==</span> <span class="dv">5</span> <span class="sc">~</span> <span class="st">"May"</span>,</span>
-<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">month</span>(t_) <span class="sc">==</span> <span class="dv">6</span> <span class="sc">~</span> <span class="st">"June"</span>,</span>
-<span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">month</span>(t_) <span class="sc">==</span> <span class="dv">7</span> <span class="sc">~</span> <span class="st">"July"</span>,</span>
-<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a>    <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
-<span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a>  )) <span class="sc">%&gt;%</span></span>
-<span id="cb23-30"><a href="#cb23-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Month)) <span class="sc">%&gt;%</span> </span>
-<span id="cb23-31"><a href="#cb23-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Month =</span> <span class="fu">factor</span>(Month, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"April"</span>, <span class="st">"May"</span>, <span class="st">"June"</span>, <span class="st">"July"</span>)))</span>
-<span id="cb23-32"><a href="#cb23-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-33"><a href="#cb23-33" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> <span class="co"># Biomass density heatmap using kernel density estimation</span></span>
-<span id="cb23-34"><a href="#cb23-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_density_2d</span>(</span>
-<span id="cb23-35"><a href="#cb23-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> month.sum,</span>
-<span id="cb23-36"><a href="#cb23-36" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">x =</span> Easting, <span class="at">y =</span> Northing, <span class="at">weight =</span> Normalized_Biomass, <span class="at">fill =</span> <span class="fu">after_stat</span>(density)),</span>
-<span id="cb23-37"><a href="#cb23-37" aria-hidden="true" tabindex="-1"></a>    <span class="at">geom =</span> <span class="st">"raster"</span>,</span>
-<span id="cb23-38"><a href="#cb23-38" aria-hidden="true" tabindex="-1"></a>    <span class="at">contour =</span> <span class="cn">FALSE</span></span>
-<span id="cb23-39"><a href="#cb23-39" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb23-40"><a href="#cb23-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(Month <span class="sc">~</span> Status) <span class="sc">+</span>  <span class="co"># Grid facet by Month (rows) and Status (columns)</span></span>
-<span id="cb23-41"><a href="#cb23-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_c</span>(</span>
-<span id="cb23-42"><a href="#cb23-42" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Biomass Density"</span>, </span>
-<span id="cb23-43"><a href="#cb23-43" aria-hidden="true" tabindex="-1"></a>    <span class="at">option =</span> <span class="st">"turbo"</span>,</span>
-<span id="cb23-44"><a href="#cb23-44" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="fl">2e-09</span>, <span class="fl">18e-09</span>),  <span class="co"># Define specific density values</span></span>
-<span id="cb23-45"><a href="#cb23-45" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Low"</span>, <span class="st">"High"</span>)  <span class="co"># Replace numerical values with "Low" and "High"</span></span>
-<span id="cb23-46"><a href="#cb23-46" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span>  </span>
-<span id="cb23-47"><a href="#cb23-47" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Normalized Density of Biomass with GPS Locations (Native vs Invasive Species by Month)"</span>,</span>
-<span id="cb23-48"><a href="#cb23-48" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Easting"</span>, </span>
-<span id="cb23-49"><a href="#cb23-49" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Northing"</span>) <span class="sc">+</span></span>
-<span id="cb23-50"><a href="#cb23-50" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb23-51"><a href="#cb23-51" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_blank</span>(),  <span class="co"># Remove tick labels</span></span>
-<span id="cb23-52"><a href="#cb23-52" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.ticks =</span> <span class="fu">element_blank</span>()) <span class="sc">+</span></span>
-<span id="cb23-53"><a href="#cb23-53" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Overlay GPS points, filtering by Month to match the facet</span></span>
-<span id="cb23-54"><a href="#cb23-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(</span>
-<span id="cb23-55"><a href="#cb23-55" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> gps, </span>
-<span id="cb23-56"><a href="#cb23-56" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">x =</span> Easting, <span class="at">y =</span> Northing), </span>
-<span id="cb23-57"><a href="#cb23-57" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"red"</span>, <span class="at">alpha =</span> <span class="fl">0.1</span>, <span class="at">size =</span> <span class="fl">0.4</span></span>
-<span id="cb23-58"><a href="#cb23-58" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>month.sum <span class="ot">&lt;-</span> spp.map <span class="sc">%&gt;%</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Biomass) <span class="sc">&amp;</span> Biomass <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span>  <span class="co"># Remove NAs</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Month =</span> <span class="fu">case_when</span>(</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">93</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;</span> <span class="dv">124</span> <span class="sc">~</span> <span class="st">"April"</span>,</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">124</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;</span> <span class="dv">155</span> <span class="sc">~</span> <span class="st">"May"</span>,</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">155</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;</span> <span class="dv">185</span> <span class="sc">~</span> <span class="st">"June"</span>,</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">185</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;=</span> <span class="dv">212</span> <span class="sc">~</span> <span class="st">"July"</span>,</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>    <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>  )) <span class="sc">%&gt;%</span></span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Month)) <span class="sc">%&gt;%</span></span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Month =</span> <span class="fu">factor</span>(Month, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"April"</span>, <span class="st">"May"</span>, <span class="st">"June"</span>, <span class="st">"July"</span>)))</span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Normalize biomass within each month (to make sample sizes comparable)</span></span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a>month.sum <span class="ot">&lt;-</span> month.sum <span class="sc">%&gt;%</span></span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Month) <span class="sc">%&gt;%</span></span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Total_Biomass =</span> <span class="fu">sum</span>(Biomass),  <span class="co"># Calculate total biomass for each month</span></span>
+<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a>         <span class="at">Normalized_Biomass =</span> Biomass <span class="sc">/</span> Total_Biomass) <span class="sc">%&gt;%</span>  <span class="co"># Normalize biomass</span></span>
+<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()  <span class="co"># Remove grouping</span></span>
+<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-21"><a href="#cb35-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract month from the GPS timestamp</span></span>
+<span id="cb35-22"><a href="#cb35-22" aria-hidden="true" tabindex="-1"></a>gps <span class="ot">&lt;-</span> gps <span class="sc">%&gt;%</span></span>
+<span id="cb35-23"><a href="#cb35-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Month =</span> <span class="fu">case_when</span>(</span>
+<span id="cb35-24"><a href="#cb35-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">month</span>(t_) <span class="sc">==</span> <span class="dv">4</span> <span class="sc">~</span> <span class="st">"April"</span>,</span>
+<span id="cb35-25"><a href="#cb35-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">month</span>(t_) <span class="sc">==</span> <span class="dv">5</span> <span class="sc">~</span> <span class="st">"May"</span>,</span>
+<span id="cb35-26"><a href="#cb35-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">month</span>(t_) <span class="sc">==</span> <span class="dv">6</span> <span class="sc">~</span> <span class="st">"June"</span>,</span>
+<span id="cb35-27"><a href="#cb35-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">month</span>(t_) <span class="sc">==</span> <span class="dv">7</span> <span class="sc">~</span> <span class="st">"July"</span>,</span>
+<span id="cb35-28"><a href="#cb35-28" aria-hidden="true" tabindex="-1"></a>    <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
+<span id="cb35-29"><a href="#cb35-29" aria-hidden="true" tabindex="-1"></a>  )) <span class="sc">%&gt;%</span></span>
+<span id="cb35-30"><a href="#cb35-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Month)) <span class="sc">%&gt;%</span> </span>
+<span id="cb35-31"><a href="#cb35-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Month =</span> <span class="fu">factor</span>(Month, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"April"</span>, <span class="st">"May"</span>, <span class="st">"June"</span>, <span class="st">"July"</span>)))</span>
+<span id="cb35-32"><a href="#cb35-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-33"><a href="#cb35-33" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> <span class="co"># Biomass density heatmap using kernel density estimation</span></span>
+<span id="cb35-34"><a href="#cb35-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_density_2d</span>(</span>
+<span id="cb35-35"><a href="#cb35-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> month.sum,</span>
+<span id="cb35-36"><a href="#cb35-36" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">x =</span> Easting, <span class="at">y =</span> Northing, <span class="at">weight =</span> Normalized_Biomass, <span class="at">fill =</span> <span class="fu">after_stat</span>(density)),</span>
+<span id="cb35-37"><a href="#cb35-37" aria-hidden="true" tabindex="-1"></a>    <span class="at">geom =</span> <span class="st">"raster"</span>,</span>
+<span id="cb35-38"><a href="#cb35-38" aria-hidden="true" tabindex="-1"></a>    <span class="at">contour =</span> <span class="cn">FALSE</span></span>
+<span id="cb35-39"><a href="#cb35-39" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb35-40"><a href="#cb35-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(Month <span class="sc">~</span> Status) <span class="sc">+</span>  <span class="co"># Grid facet by Month (rows) and Status (columns)</span></span>
+<span id="cb35-41"><a href="#cb35-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_c</span>(</span>
+<span id="cb35-42"><a href="#cb35-42" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Biomass Density"</span>, </span>
+<span id="cb35-43"><a href="#cb35-43" aria-hidden="true" tabindex="-1"></a>    <span class="at">option =</span> <span class="st">"turbo"</span>,</span>
+<span id="cb35-44"><a href="#cb35-44" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="fl">2e-09</span>, <span class="fl">18e-09</span>),  <span class="co"># Define specific density values</span></span>
+<span id="cb35-45"><a href="#cb35-45" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Low"</span>, <span class="st">"High"</span>)  <span class="co"># Replace numerical values with "Low" and "High"</span></span>
+<span id="cb35-46"><a href="#cb35-46" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span>  </span>
+<span id="cb35-47"><a href="#cb35-47" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Normalized Density of Biomass with GPS Locations (Native vs Invasive Species by Month)"</span>,</span>
+<span id="cb35-48"><a href="#cb35-48" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Easting"</span>, </span>
+<span id="cb35-49"><a href="#cb35-49" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Northing"</span>) <span class="sc">+</span></span>
+<span id="cb35-50"><a href="#cb35-50" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb35-51"><a href="#cb35-51" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_blank</span>(),  <span class="co"># Remove tick labels</span></span>
+<span id="cb35-52"><a href="#cb35-52" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.ticks =</span> <span class="fu">element_blank</span>()) <span class="sc">+</span></span>
+<span id="cb35-53"><a href="#cb35-53" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Overlay GPS points, filtering by Month to match the facet</span></span>
+<span id="cb35-54"><a href="#cb35-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(</span>
+<span id="cb35-55"><a href="#cb35-55" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> gps, </span>
+<span id="cb35-56"><a href="#cb35-56" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">x =</span> Easting, <span class="at">y =</span> Northing), </span>
+<span id="cb35-57"><a href="#cb35-57" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"red"</span>, <span class="at">alpha =</span> <span class="fl">0.1</span>, <span class="at">size =</span> <span class="fl">0.4</span></span>
+<span id="cb35-58"><a href="#cb35-58" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="Midterm_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="Midterm_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -945,43 +1124,43 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the path to the directory containing the file</span></span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>excelpath <span class="ot">&lt;-</span> <span class="st">"C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/FRESH/processed.data/"</span></span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the specific file name</span></span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>filename <span class="ot">&lt;-</span> <span class="st">"2024.subset.results.xlsx"</span></span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Construct the full file path</span></span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>excel.file <span class="ot">&lt;-</span> <span class="fu">file.path</span>(excelpath, filename)</span>
-<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the workbook and read the data</span></span>
-<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>habitat <span class="ot">&lt;-</span> <span class="fu">loadWorkbook</span>(excel.file)</span>
-<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>suitable <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">readWorkbook</span>(excel.file, <span class="at">sheet =</span> <span class="st">"Plot-Level-Summary"</span>, <span class="at">startRow =</span> <span class="dv">1</span>, <span class="at">colNames =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>suitable.map <span class="ot">&lt;-</span> suitable <span class="sc">%&gt;%</span> </span>
-<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">PlotID =</span> TransectID) <span class="sc">%&gt;%</span> </span>
-<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(<span class="at">y =</span> plot,</span>
-<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>            <span class="at">by =</span> <span class="st">"PlotID"</span>)</span>
-<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a>suitable.map <span class="ot">&lt;-</span> suitable.map <span class="sc">%&gt;%</span> </span>
-<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">Lat =</span> BeginLat,</span>
-<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a>         <span class="at">Long =</span> BeginLong,</span>
-<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a>         <span class="at">Easting =</span> BeginUTM_Easting,</span>
-<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a>         <span class="at">Northing =</span> BeginUTM_Northing) <span class="sc">%&gt;%</span> </span>
-<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(PlotID, TotalDE, TotalDP, SuitableBiomass, AveDE, AveDP, Julian_Day, Lat, Long, Easting, Northing)</span>
-<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a><span class="fu">View</span>(suitable.map)</span>
-<span id="cb24-28"><a href="#cb24-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-29"><a href="#cb24-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Create an sf object with the Lat and Long columns</span></span>
-<span id="cb24-30"><a href="#cb24-30" aria-hidden="true" tabindex="-1"></a>suitable.map_UTM <span class="ot">&lt;-</span> <span class="fu">st_as_sf</span>(suitable.map, <span class="at">coords =</span> <span class="fu">c</span>(<span class="st">"Long"</span>, <span class="st">"Lat"</span>), <span class="at">crs =</span> <span class="dv">4326</span>)  <span class="co"># EPSG:4326 is WGS84</span></span>
-<span id="cb24-31"><a href="#cb24-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-32"><a href="#cb24-32" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert to UTM Zone 11N (EPSG:26911)</span></span>
-<span id="cb24-33"><a href="#cb24-33" aria-hidden="true" tabindex="-1"></a>suitable.map_UTM <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(suitable.map_UTM, <span class="at">crs =</span> <span class="dv">32611</span>)</span>
-<span id="cb24-34"><a href="#cb24-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-35"><a href="#cb24-35" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract UTM coordinates (Easting and Northing)</span></span>
-<span id="cb24-36"><a href="#cb24-36" aria-hidden="true" tabindex="-1"></a>suitable.map<span class="sc">$</span>Easting <span class="ot">&lt;-</span> <span class="fu">st_coordinates</span>(suitable.map_UTM)[, <span class="dv">1</span>]</span>
-<span id="cb24-37"><a href="#cb24-37" aria-hidden="true" tabindex="-1"></a>suitable.map<span class="sc">$</span>Northing <span class="ot">&lt;-</span> <span class="fu">st_coordinates</span>(suitable.map_UTM)[, <span class="dv">2</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the path to the directory containing the file</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>excelpath <span class="ot">&lt;-</span> <span class="st">"C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/FRESH/processed.data/"</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the specific file name</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>filename <span class="ot">&lt;-</span> <span class="st">"2024.subset.results.xlsx"</span></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Construct the full file path</span></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>excel.file <span class="ot">&lt;-</span> <span class="fu">file.path</span>(excelpath, filename)</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the workbook and read the data</span></span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>habitat <span class="ot">&lt;-</span> <span class="fu">loadWorkbook</span>(excel.file)</span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>suitable <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">readWorkbook</span>(excel.file, <span class="at">sheet =</span> <span class="st">"Plot-Level-Summary"</span>, <span class="at">startRow =</span> <span class="dv">1</span>, <span class="at">colNames =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a>suitable.map <span class="ot">&lt;-</span> suitable <span class="sc">%&gt;%</span> </span>
+<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">PlotID =</span> TransectID) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(<span class="at">y =</span> plot,</span>
+<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a>            <span class="at">by =</span> <span class="st">"PlotID"</span>)</span>
+<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a>suitable.map <span class="ot">&lt;-</span> suitable.map <span class="sc">%&gt;%</span> </span>
+<span id="cb36-22"><a href="#cb36-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">Lat =</span> BeginLat,</span>
+<span id="cb36-23"><a href="#cb36-23" aria-hidden="true" tabindex="-1"></a>         <span class="at">Long =</span> BeginLong,</span>
+<span id="cb36-24"><a href="#cb36-24" aria-hidden="true" tabindex="-1"></a>         <span class="at">Easting =</span> BeginUTM_Easting,</span>
+<span id="cb36-25"><a href="#cb36-25" aria-hidden="true" tabindex="-1"></a>         <span class="at">Northing =</span> BeginUTM_Northing) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-26"><a href="#cb36-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(PlotID, TotalDE, TotalDP, SuitableBiomass, AveDE, AveDP, Julian_Day, Lat, Long, Easting, Northing)</span>
+<span id="cb36-27"><a href="#cb36-27" aria-hidden="true" tabindex="-1"></a><span class="fu">View</span>(suitable.map)</span>
+<span id="cb36-28"><a href="#cb36-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-29"><a href="#cb36-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Create an sf object with the Lat and Long columns</span></span>
+<span id="cb36-30"><a href="#cb36-30" aria-hidden="true" tabindex="-1"></a>suitable.map_UTM <span class="ot">&lt;-</span> <span class="fu">st_as_sf</span>(suitable.map, <span class="at">coords =</span> <span class="fu">c</span>(<span class="st">"Long"</span>, <span class="st">"Lat"</span>), <span class="at">crs =</span> <span class="dv">4326</span>)  <span class="co"># EPSG:4326 is WGS84</span></span>
+<span id="cb36-31"><a href="#cb36-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-32"><a href="#cb36-32" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert to UTM Zone 11N (EPSG:26911)</span></span>
+<span id="cb36-33"><a href="#cb36-33" aria-hidden="true" tabindex="-1"></a>suitable.map_UTM <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(suitable.map_UTM, <span class="at">crs =</span> <span class="dv">32611</span>)</span>
+<span id="cb36-34"><a href="#cb36-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-35"><a href="#cb36-35" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract UTM coordinates (Easting and Northing)</span></span>
+<span id="cb36-36"><a href="#cb36-36" aria-hidden="true" tabindex="-1"></a>suitable.map<span class="sc">$</span>Easting <span class="ot">&lt;-</span> <span class="fu">st_coordinates</span>(suitable.map_UTM)[, <span class="dv">1</span>]</span>
+<span id="cb36-37"><a href="#cb36-37" aria-hidden="true" tabindex="-1"></a>suitable.map<span class="sc">$</span>Northing <span class="ot">&lt;-</span> <span class="fu">st_coordinates</span>(suitable.map_UTM)[, <span class="dv">2</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -991,28 +1170,28 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>suitable.summary <span class="ot">&lt;-</span> suitable.map <span class="sc">%&gt;%</span></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>   <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(SuitableBiomass) <span class="sc">&amp;</span> SuitableBiomass <span class="sc">&gt;</span> <span class="dv">0</span>)  <span class="co"># Remove NAs</span></span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(suitable.summary, <span class="fu">aes</span>(<span class="at">x =</span> Easting, <span class="at">y =</span> Northing, <span class="at">weight =</span> SuitableBiomass)) <span class="sc">+</span></span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_density_2d</span>(<span class="fu">aes</span>(<span class="at">fill =</span> <span class="fu">after_stat</span>(density)), <span class="at">geom =</span> <span class="st">"raster"</span>, <span class="at">contour =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_c</span>(</span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Suitable Biomass Density"</span>, </span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">option =</span> <span class="st">"turbo"</span>,</span>
-<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="fl">0.5e-09</span>, <span class="fl">3.5e-09</span>),  <span class="co"># Define specific density values</span></span>
-<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Low"</span>, <span class="st">"High"</span>)  <span class="co"># Replace numerical values with "Low" and "High"</span></span>
-<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span>  </span>
-<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Density of Suitable Biomass"</span>,</span>
-<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Easting"</span>, </span>
-<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Northing"</span>) <span class="sc">+</span></span>
-<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_blank</span>(),  <span class="co"># Remove tick labels</span></span>
-<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.ticks =</span> <span class="fu">element_blank</span>())  <span class="co"># Rotate x-axis labels</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>suitable.summary <span class="ot">&lt;-</span> suitable.map <span class="sc">%&gt;%</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>   <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(SuitableBiomass) <span class="sc">&amp;</span> SuitableBiomass <span class="sc">&gt;</span> <span class="dv">0</span>)  <span class="co"># Remove NAs</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(suitable.summary, <span class="fu">aes</span>(<span class="at">x =</span> Easting, <span class="at">y =</span> Northing, <span class="at">weight =</span> SuitableBiomass)) <span class="sc">+</span></span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_density_2d</span>(<span class="fu">aes</span>(<span class="at">fill =</span> <span class="fu">after_stat</span>(density)), <span class="at">geom =</span> <span class="st">"raster"</span>, <span class="at">contour =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_c</span>(</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Suitable Biomass Density"</span>, </span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">option =</span> <span class="st">"turbo"</span>,</span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="fl">0.5e-09</span>, <span class="fl">3.5e-09</span>),  <span class="co"># Define specific density values</span></span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Low"</span>, <span class="st">"High"</span>)  <span class="co"># Replace numerical values with "Low" and "High"</span></span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span>  </span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Density of Suitable Biomass"</span>,</span>
+<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Easting"</span>, </span>
+<span id="cb37-14"><a href="#cb37-14" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Northing"</span>) <span class="sc">+</span></span>
+<span id="cb37-15"><a href="#cb37-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb37-16"><a href="#cb37-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_blank</span>(),  <span class="co"># Remove tick labels</span></span>
+<span id="cb37-17"><a href="#cb37-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.ticks =</span> <span class="fu">element_blank</span>())  <span class="co"># Rotate x-axis labels</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="Midterm_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="Midterm_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -1020,43 +1199,43 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co">#|warning: FALSE</span></span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>suitablemonth.sum <span class="ot">&lt;-</span> suitable.map <span class="sc">%&gt;%</span></span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(SuitableBiomass) <span class="sc">&amp;</span> SuitableBiomass <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span>  <span class="co"># Remove NAs</span></span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Month =</span> <span class="fu">case_when</span>(</span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">93</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;</span> <span class="dv">124</span> <span class="sc">~</span> <span class="st">"April"</span>,</span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">124</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;</span> <span class="dv">155</span> <span class="sc">~</span> <span class="st">"May"</span>,</span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">155</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;</span> <span class="dv">185</span> <span class="sc">~</span> <span class="st">"June"</span>,</span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">185</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;=</span> <span class="dv">212</span> <span class="sc">~</span> <span class="st">"July"</span>,</span>
-<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>    <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
-<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>  )) <span class="sc">%&gt;%</span></span>
-<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Month)) <span class="sc">%&gt;%</span></span>
-<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Month =</span> <span class="fu">factor</span>(Month, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"April"</span>, <span class="st">"May"</span>, <span class="st">"June"</span>, <span class="st">"July"</span>)))</span>
-<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Normalize biomass within each month (to make sample sizes comparable)</span></span>
-<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>suitablemonth.sum <span class="ot">&lt;-</span> suitablemonth.sum <span class="sc">%&gt;%</span></span>
-<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Month) <span class="sc">%&gt;%</span></span>
-<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Total_SuitableBiomass =</span> <span class="fu">sum</span>(SuitableBiomass),  <span class="co"># Calculate total biomass for each month</span></span>
-<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>         <span class="at">Normalized_SuitableBiomass =</span> SuitableBiomass <span class="sc">/</span> Total_SuitableBiomass) <span class="sc">%&gt;%</span>  <span class="co"># Normalize biomass</span></span>
-<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()  <span class="co"># Remove grouping</span></span>
-<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Create density plot faceted by Month and Status</span></span>
-<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(suitablemonth.sum, <span class="fu">aes</span>(<span class="at">x =</span> Easting, <span class="at">y =</span> Northing, <span class="at">weight =</span> Normalized_SuitableBiomass)) <span class="sc">+</span></span>
-<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_density_2d</span>(<span class="fu">aes</span>(<span class="at">fill =</span> <span class="fu">after_stat</span>(density)), <span class="at">geom =</span> <span class="st">"raster"</span>, <span class="at">contour =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
-<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(<span class="st">"Month"</span>) <span class="sc">+</span>  <span class="co"># Grid facet by Month (rows) and Status (columns)</span></span>
-<span id="cb26-26"><a href="#cb26-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_c</span>(</span>
-<span id="cb26-27"><a href="#cb26-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Suitable Biomass Density"</span>, </span>
-<span id="cb26-28"><a href="#cb26-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">option =</span> <span class="st">"turbo"</span>,</span>
-<span id="cb26-29"><a href="#cb26-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="fl">1e-09</span>, <span class="fl">9e-09</span>),  <span class="co"># Define specific density values</span></span>
-<span id="cb26-30"><a href="#cb26-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Low "</span>, <span class="st">"High "</span>)  <span class="co"># Replace numerical values with "Low" and "High"</span></span>
-<span id="cb26-31"><a href="#cb26-31" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span>  </span>
-<span id="cb26-32"><a href="#cb26-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Normalized Density of Suitable Biomass"</span>,</span>
-<span id="cb26-33"><a href="#cb26-33" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Easting"</span>, </span>
-<span id="cb26-34"><a href="#cb26-34" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Northing"</span>) <span class="sc">+</span></span>
-<span id="cb26-35"><a href="#cb26-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb26-36"><a href="#cb26-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_blank</span>(),  <span class="co"># Remove tick labels</span></span>
-<span id="cb26-37"><a href="#cb26-37" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.ticks =</span> <span class="fu">element_blank</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co">#|warning: FALSE</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>suitablemonth.sum <span class="ot">&lt;-</span> suitable.map <span class="sc">%&gt;%</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(SuitableBiomass) <span class="sc">&amp;</span> SuitableBiomass <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span>  <span class="co"># Remove NAs</span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Month =</span> <span class="fu">case_when</span>(</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">93</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;</span> <span class="dv">124</span> <span class="sc">~</span> <span class="st">"April"</span>,</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">124</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;</span> <span class="dv">155</span> <span class="sc">~</span> <span class="st">"May"</span>,</span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">155</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;</span> <span class="dv">185</span> <span class="sc">~</span> <span class="st">"June"</span>,</span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">185</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;=</span> <span class="dv">212</span> <span class="sc">~</span> <span class="st">"July"</span>,</span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>    <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>  )) <span class="sc">%&gt;%</span></span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Month)) <span class="sc">%&gt;%</span></span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Month =</span> <span class="fu">factor</span>(Month, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"April"</span>, <span class="st">"May"</span>, <span class="st">"June"</span>, <span class="st">"July"</span>)))</span>
+<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Normalize biomass within each month (to make sample sizes comparable)</span></span>
+<span id="cb38-15"><a href="#cb38-15" aria-hidden="true" tabindex="-1"></a>suitablemonth.sum <span class="ot">&lt;-</span> suitablemonth.sum <span class="sc">%&gt;%</span></span>
+<span id="cb38-16"><a href="#cb38-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Month) <span class="sc">%&gt;%</span></span>
+<span id="cb38-17"><a href="#cb38-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Total_SuitableBiomass =</span> <span class="fu">sum</span>(SuitableBiomass),  <span class="co"># Calculate total biomass for each month</span></span>
+<span id="cb38-18"><a href="#cb38-18" aria-hidden="true" tabindex="-1"></a>         <span class="at">Normalized_SuitableBiomass =</span> SuitableBiomass <span class="sc">/</span> Total_SuitableBiomass) <span class="sc">%&gt;%</span>  <span class="co"># Normalize biomass</span></span>
+<span id="cb38-19"><a href="#cb38-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()  <span class="co"># Remove grouping</span></span>
+<span id="cb38-20"><a href="#cb38-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-21"><a href="#cb38-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-22"><a href="#cb38-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Create density plot faceted by Month and Status</span></span>
+<span id="cb38-23"><a href="#cb38-23" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(suitablemonth.sum, <span class="fu">aes</span>(<span class="at">x =</span> Easting, <span class="at">y =</span> Northing, <span class="at">weight =</span> Normalized_SuitableBiomass)) <span class="sc">+</span></span>
+<span id="cb38-24"><a href="#cb38-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_density_2d</span>(<span class="fu">aes</span>(<span class="at">fill =</span> <span class="fu">after_stat</span>(density)), <span class="at">geom =</span> <span class="st">"raster"</span>, <span class="at">contour =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb38-25"><a href="#cb38-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(<span class="st">"Month"</span>) <span class="sc">+</span>  <span class="co"># Grid facet by Month (rows) and Status (columns)</span></span>
+<span id="cb38-26"><a href="#cb38-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_c</span>(</span>
+<span id="cb38-27"><a href="#cb38-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Suitable Biomass Density"</span>, </span>
+<span id="cb38-28"><a href="#cb38-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">option =</span> <span class="st">"turbo"</span>,</span>
+<span id="cb38-29"><a href="#cb38-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="fl">1e-09</span>, <span class="fl">9e-09</span>),  <span class="co"># Define specific density values</span></span>
+<span id="cb38-30"><a href="#cb38-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Low "</span>, <span class="st">"High "</span>)  <span class="co"># Replace numerical values with "Low" and "High"</span></span>
+<span id="cb38-31"><a href="#cb38-31" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span>  </span>
+<span id="cb38-32"><a href="#cb38-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Normalized Density of Suitable Biomass"</span>,</span>
+<span id="cb38-33"><a href="#cb38-33" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Easting"</span>, </span>
+<span id="cb38-34"><a href="#cb38-34" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Northing"</span>) <span class="sc">+</span></span>
+<span id="cb38-35"><a href="#cb38-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb38-36"><a href="#cb38-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_blank</span>(),  <span class="co"># Remove tick labels</span></span>
+<span id="cb38-37"><a href="#cb38-37" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.ticks =</span> <span class="fu">element_blank</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: The following aesthetics were dropped during statistical transformation:
@@ -1087,7 +1266,7 @@ weight.
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="Midterm_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="Midterm_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>

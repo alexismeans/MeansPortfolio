@@ -350,6 +350,128 @@ ggplot(data_C, aes(x = PVT, y = DP, fill = PVT)) +
 
 ```
 
+```{r}
+plot <- read.csv("C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/Cleaning/processed.data/transect.csv")
+
+# Define the path to the directory containing the file
+excelpath <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/FRESH/processed.data/"
+
+# Define the specific file name
+filename <- "2024.subset.results.xlsx"
+
+# Construct the full file path
+excel.file <- file.path(excelpath, filename)
+
+# Load the workbook and read the data
+
+habitat <- loadWorkbook(excel.file)
+suitable <- data.frame(readWorkbook(excel.file, sheet = "Plot-Level-Summary", startRow = 1, colNames = TRUE))
+
+
+suitable <- suitable %>% 
+  rename(PlotID = TransectID) %>% 
+  left_join(y = plot,
+            by = "PlotID")
+
+suitable <- suitable %>% 
+  rename(Lat = BeginLat,
+         Long = BeginLong,
+         Easting = BeginUTM_Easting,
+         Northing = BeginUTM_Northing) %>% 
+  select(PlotID, TotalDE, TotalDP, SuitableBiomass, AveDE, AveDP, Julian_Day, Lat, Long, Easting, Northing)
+
+
+# Create an sf object with the Lat and Long columns
+suitable_UTM <- st_as_sf(suitable, coords = c("Long", "Lat"), crs = 4326)  # EPSG:4326 is WGS84
+
+# Convert to UTM Zone 11N (EPSG:26911)
+suitable_UTM <- st_transform(suitable_UTM, crs = 32611)
+
+# Extract UTM coordinates (Easting and Northing)
+suitable$Easting <- st_coordinates(suitable_UTM)[, 1]
+suitable$Northing <- st_coordinates(suitable_UTM)[, 2]
+
+```
+
+```{r}
+suitable <- suitable %>%
+  mutate(PVT = str_sub(PlotID, start = 4, end = 6))
+
+# Step 1: Standardize the "Suitable Biomass" values
+suitable_standardized <- suitable %>%
+  group_by(PVT) %>%
+  mutate(Standardized_Biomass = scale(SuitableBiomass)) %>%
+  ungroup()
+
+# Step 2: Create the plot
+ggplot(suitable_standardized, aes(x = PVT, y = Standardized_Biomass, fill = PVT)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +
+  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +
+  scale_fill_viridis_d(option = "plasma") +
+  labs(title = "Comparison of Standardized Suitable Biomass Across PVTs",
+       x = "Plant Vegetation Type (PVT)",
+       y = "Standardized Suitable Biomass") +
+  theme_minimal() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1)) 
+```
+
+```{r}
+ggplot(suitable, aes(x = Julian_Day, y = SuitableBiomass)) +
+  geom_point(aes(color = PVT), alpha = 0.6) +
+  geom_smooth(method = "loess", se = TRUE, color = "black") +
+  scale_color_viridis_d() +
+  labs(title = "Suitable Biomass Over Time",
+       x = "Julian Day",
+       y = "Suitable Biomass",
+       color = "PVT") +
+  theme_minimal() +
+  theme(legend.position = "right",
+        axis.text.x = element_text(angle = 0, hjust = 0.5)) +
+  scale_x_continuous(breaks = seq(min(suitable$Julian_Day, na.rm = TRUE), 
+                                  max(suitable$Julian_Day, na.rm = TRUE), 
+                                  by = 30))
+
+```
+
+```{r}
+ggplot(suitable, aes(x = Julian_Day, y = AveDE)) +
+  geom_point(aes(color = PVT), alpha = 0.6) +
+  geom_smooth(method = "loess", se = TRUE, color = "black") +
+  scale_color_viridis_d() +
+  labs(title = "Average DE Over Time",
+       x = "Julian Day",
+       y = "DE",
+       color = "PVT") +
+  theme_minimal() +
+  theme(legend.position = "right",
+        axis.text.x = element_text(angle = 0, hjust = 0.5)) +
+  scale_x_continuous(breaks = seq(min(suitable$Julian_Day, na.rm = TRUE), 
+                                  max(suitable$Julian_Day, na.rm = TRUE), 
+                                  by = 30))
+
+
+```
+
+```{r}
+ggplot(suitable, aes(x = Julian_Day, y = AveDP)) +
+  geom_point(aes(color = PVT), alpha = 0.6) +
+  geom_smooth(method = "loess", se = TRUE, color = "black") +
+  scale_color_viridis_d() +
+  labs(title = "Average DP Over Time",
+       x = "Julian Day",
+       y = "DP",
+       color = "PVT") +
+  theme_minimal() +
+  theme(legend.position = "right",
+        axis.text.x = element_text(angle = 0, hjust = 0.5)) +
+  scale_x_continuous(breaks = seq(min(suitable$Julian_Day, na.rm = TRUE), 
+                                  max(suitable$Julian_Day, na.rm = TRUE), 
+                                  by = 30))
+
+
+```
+
 ## Biomass Trends
 
 One of the key parts of my project is understanding the spread of invasive species throughout the canyon, specifically cheat grass. When observing the canyon it seems like cheat grass dominates the canyon which could effect the amount of nutrients available later in the summer. To start I wanted to looks at the density of biomass for all native vs invasive species within the transects that I sampled in our study area. From this graph we can see that overall biomass of native and invasive species is relatively similar throughout the canyon. However, there is an overall greater density of native species.
