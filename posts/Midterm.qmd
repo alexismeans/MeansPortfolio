@@ -57,7 +57,9 @@ data <- data %>%
 
 ```
 
-## Quality Trends
+## Exploring Quality Trends
+
+### Comparing DE and DP values for phenological stage
 
 With some of my quality data, I wanted to start by comparing the measurements of digestible energy (DE) and digestible protien (DP) between plant species and phenological stages that I observed while I was sampling. Mainly I want to observe if there is any correlation between high DE and high DP. After looking at the results of my scatter plots, the trend follows the patterns that I would expect. There is an increase in DE and DP through the newly emergent (N) and budding stages (B), followed by an immedaite decrease in the flowering (FL) stage.
 
@@ -119,7 +121,10 @@ ggplot(data, aes(x = Phenology, y = DP, fill = Phenology)) +
   annotate("text", x = 6.5, y = 7.7, label = "7.5", color = "black", size = 4, fontface = "italic")
 ```
 
+### DE and DP values compared by PVT
+
 ```{r}
+#| warning: FALSE
 data <- data %>%
   mutate(PVT = str_sub(TransectID, start = 4, end = 6))
 
@@ -137,9 +142,11 @@ ggplot(data, aes(x = PVT, y = DE, fill = Phenology)) +
   annotate("text", x = Inf, y = 11.8, label = "11.5", color = "black", size = 4,
            hjust = 1.1, vjust = -0.5) +
   facet_wrap(~ Phenology, scales = "free_x", ncol = 3)  # Adjust ncol as needed
+
 ```
 
 ```{r}
+#| warning: FALSE
 # Filter the data for Phenology "N"
 data_N <- data %>% filter(Phenology == "N")
 
@@ -245,6 +252,7 @@ ggplot(data_C, aes(x = PVT, y = DE, fill = PVT)) +
 ```
 
 ```{r}
+#| warning: FALSE
 
 # Filter the data for Phenology "N"
 data_N <- data %>% filter(Phenology == "N")
@@ -416,7 +424,10 @@ ggplot(suitable_standardized, aes(x = PVT, y = Standardized_Biomass, fill = PVT)
         axis.text.x = element_text(angle = 45, hjust = 1)) 
 ```
 
+### Quality Trends overtime 
+
 ```{r}
+#| warning: FALSE
 ggplot(suitable, aes(x = Julian_Day, y = SuitableBiomass)) +
   geom_point(aes(color = PVT), alpha = 0.6) +
   geom_smooth(method = "loess", se = TRUE, color = "black") +
@@ -435,6 +446,7 @@ ggplot(suitable, aes(x = Julian_Day, y = SuitableBiomass)) +
 ```
 
 ```{r}
+#| warning: FALSE
 ggplot(suitable, aes(x = Julian_Day, y = AveDE)) +
   geom_point(aes(color = PVT), alpha = 0.6) +
   geom_smooth(method = "loess", se = TRUE, color = "black") +
@@ -454,6 +466,7 @@ ggplot(suitable, aes(x = Julian_Day, y = AveDE)) +
 ```
 
 ```{r}
+#| warning: FALSE
 ggplot(suitable, aes(x = Julian_Day, y = AveDP)) +
   geom_point(aes(color = PVT), alpha = 0.6) +
   geom_smooth(method = "loess", se = TRUE, color = "black") +
