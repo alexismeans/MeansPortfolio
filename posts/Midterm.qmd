@@ -15,7 +15,7 @@ Located within the Columbia Plateau, the John Day Canyon is a steep, rugged land
 
 My research focuses on understanding the nutritional requirements of these bighorn sheep and how those needs shift throughout their reproductive cycle due to changing metabolic demands. The ultimate goal is to develop a predictive model that links their nutritional requirements to movement patterns. By doing so, we can identify potential threats, such as areas where bighorn sheep may come into contact with domestic livestock, and pinpoint critical habitats essential for their survival.
 
-To achieve this, I am collecting vegetation data to calculate a measure of “**suitable biomass**”—essentially, the portion of available forage that meaningfully contributes to the sheep’s energy needs at different reproductive stages. This metric is created using measures of digestible energy and digestible protein. I have currently not finalized my values of "suitable biomass" but I could look at the preliminary values of digestible energy and digestible protein. Eventually using this metric, I will develop a Generalized Additive Model (GAM) to map areas of high and low nutritional quality across the landscape.
+To achieve this, I am collecting vegetation data to calculate a measure of “**suitable biomass**”—essentially, the portion of available forage that meaningfully contributes to the sheep’s energy needs at different reproductive stages. This metric is created using measures of digestible energy and digestible protein. I have currently not finalized my values of "suitable biomass", but I do have preliminary values of digestible energy and digestible protein. Eventually using this metric, I will develop a Generalized Additive Model (GAM) to map areas of high and low nutritional quality across the landscape.
 
 These techniques will can help determine which resources most influence bighorn sheep movement and allow us to predict future movement patterns—a critical step in ensuring their continued success in this landscape. By bridging nutritional ecology with movement ecology, this research will contribute valuable insights into how bighorn sheep navigate their environment and help inform conservation strategies for this unique, disease-free population.
 
@@ -61,7 +61,7 @@ data <- data %>%
 
 ### Comparing DE and DP values for phenological stage
 
-With some of my quality data, I wanted to start by comparing the measurements of digestible energy (DE) and digestible protien (DP) between plant species and phenological stages that I observed while I was sampling. Mainly I want to observe if there is any correlation between high DE and high DP. After looking at the results of my scatter plots, the trend follows the patterns that I would expect. There is an increase in DE and DP through the newly emergent (N) and budding stages (B), followed by an immedaite decrease in the flowering (FL) stage.
+Using a subset of my quality data, I began by comparing measurements of digestible energy (DE) and digestible protein (DP) across plant species and phenological stages. My main goal was to explore whether there is a correlation between high DE and high DP. The scatter plot results showed a pattern consistent with my expectations: the highest values for both DE and DP occur during the newly emergent (N) and budding (B) stages. These values drop sharply by the flowering (FL) stage and remain relatively stable thereafter.
 
 ```{r}
 #| warning: FALSE
@@ -71,22 +71,19 @@ data$Phenology <- factor(data$Phenology, levels = c("N", "B", "FL", "FR", "M", "
 
 ggplot(data, aes(x = DP, y = DE)) +
   geom_point(color = "blue", alpha = 0.6) +
-  geom_smooth(method = "lm", se = TRUE, color = "red") +  # Linear trend line
+  geom_smooth(method = "lm", se = TRUE, color = "red") + 
   labs(title = "Relationship Between DE and DP by Phenology",
        x = "Digestible Protein (DP)",
        y = "Digestible Energy (DE)") +
   theme_minimal() +
-  
-  # Set phenology as a factor with a specific order
   facet_wrap(~ Phenology, scales = "free") +
-  scale_x_continuous(expand = c(0.05, 0)) +  # Adjust spacing
+  scale_x_continuous(expand = c(0.05, 0)) +  
   scale_y_continuous(expand = c(0.05, 0)) +
-  theme(strip.text = element_text(face = "bold"))  # Bold facet labels
-
+  theme(strip.text = element_text(face = "bold"))  
 
 ```
 
-To better visualize the trends in DP and DE between different phenological stages. I isolated the DE and DP and values to compare each state. Both the DE and DP values follow the trend that I expect them to, however, very few of my species meet the necessary DP value of 7.5.
+To better visualize the trends in DP and DE across phenological stages, I isolated the DE and DP values for direct comparison. Both metrics follow the expected pattern, showing a general decline over time. While many species meet the DE requirement of 11.5 kJ per gram of forage, very few meet the necessary DP threshold of 7.5 g per 100 g of forage beyond the newly emergent stage. These thresholds represent the minimum forage quality needed to meet the energetic and protein demands of a lactating female sheep.
 
 ```{r}
 #| warning: FALSE
@@ -95,7 +92,6 @@ data$Phenology <- factor(data$Phenology, levels = c("N", "B", "FL", "FR", "M", "
 
 ggplot(data, aes(x = Phenology, y = DE, fill = Phenology)) +
   geom_boxplot(alpha = 0.7, outlier.shape = NA) +  
-  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +   
   scale_fill_viridis_d(option = "plasma") +  
   labs(title = "Distribution of Digestible Energy (DE) by Phenology",
        x = "Phenology",
@@ -109,50 +105,75 @@ ggplot(data, aes(x = Phenology, y = DE, fill = Phenology)) +
 ```{r}
 #| warning: FALSE
 ggplot(data, aes(x = Phenology, y = DP, fill = Phenology)) +
-  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  # Boxplot without outlier points
-  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +  # Add jitter for visibility
-  scale_fill_viridis_d(option = "plasma") +  # Use a color palette
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  
+  scale_fill_viridis_d(option = "plasma") +  
   labs(title = "Distribution of Digestible Protien (DP) by Phenology",
        x = "Phenology",
        y = "DP (g protien/100g forage)") +
   theme_minimal() +
   theme(legend.position = "none")+
    geom_hline(yintercept = 7.5, linetype = "dashed", color = "red", size = 1)+
-  annotate("text", x = 6.5, y = 7.7, label = "7.5", color = "black", size = 4, fontface = "italic")
+  annotate("text", x = 6.5, y = 8, label = "7.5", color = "black", size = 4, fontface = "italic")+
+  coord_cartesian(ylim = c(-2, 12))
 ```
 
-### DE and DP values compared by PVT
+### Quality Metrics Compared across Vegetation Type
+
+I was curious whether this trend varied across different vegetation types, particularly in riparian areas, which retain the most moisture. However, I did not observe any clear pattern indicating that a specific vegetation type consistently supported significantly higher quality metrics than others.
 
 ```{r}
 #| warning: FALSE
-data <- data %>%
-  mutate(PVT = str_sub(TransectID, start = 4, end = 6))
 
-ggplot(data, aes(x = PVT, y = DE, fill = Phenology)) +
+data <- data %>%
+  mutate(PVT = str_sub(TransectID, start = 4, end = 6)) %>% 
+  group_by(PVT) %>%
+  mutate(Stand_DE = scale(DE)) %>%
+  mutate(Stand_DP = scale(DP)) %>%
+  ungroup()
+
+data <- data %>%
+  mutate(PVT = case_when(
+    PVT == "672" ~ "Grassland",
+    PVT == "682" ~ "Riparian",
+    PVT == "674" ~ "Intermediate",
+    PVT == "668" ~ "Scabland",
+    PVT == "669" ~ "Shrubland",
+    TRUE ~ as.character(PVT)  # This keeps any other values unchanged
+  ))
+
+ggplot(data, aes(x = PVT, y = DE, fill = PVT)) +
   geom_boxplot(alpha = 0.7, outlier.shape = NA) +  
   scale_fill_viridis_d(option = "plasma") +  
   labs(title = "Distribution of Digestible Energy (DE) by Phenology and PVT",
-       x = "Phenology",
-       y = "DE(kJ g^-1)") +
+       x = NULL,  # Remove x-axis label
+       y = "DE (kJ g^-1)",
+       fill = "PVT") +  # Label for the legend
   theme_minimal() +
-  theme(legend.position = "none",
-        axis.text.x = element_text(angle = 45, hjust = 1)) +  # Rotate x-axis labels
+  theme(
+    legend.position = "right",  # Show legend on the right
+    axis.text.x = element_blank(),  # Remove x-axis text
+    axis.ticks.x = element_blank()  # Remove x-axis ticks
+  ) +
   geom_hline(yintercept = 11.5, linetype = "dashed", color = "red", size = 1) +
-  facet_wrap(~ Phenology, scales = "free_x", ncol = 3)+
+  facet_wrap(~ Phenology, scales = "free_x", ncol = 3) +
   coord_cartesian(ylim = c(8, 15))
 
-ggplot(data, aes(x = PVT, y = DP, fill = Phenology)) +
+ggplot(data, aes(x = PVT, y = DP, fill = PVT)) +
   geom_boxplot(alpha = 0.7, outlier.shape = NA) +  
   scale_fill_viridis_d(option = "plasma") +  
   labs(title = "Distribution of Digestible Protein (DP) by Phenology and PVT",
-       x = "Phenology",
-       y = "DP") +
+      x = NULL,  # Remove x-axis label
+       y = "DP (g protein/100 g forage)",
+       fill = "PVT") +  # Label for the legend
   theme_minimal() +
-  theme(legend.position = "none",
-        axis.text.x = element_text(angle = 45, hjust = 1)) +  # Rotate x-axis labels
+  theme(legend.position = "right",  # Show legend on the right
+    axis.text.x = element_blank(),  # Remove x-axis text
+    axis.ticks.x = element_blank(),
+    strip.text = element_text(face = "bold")# Remove x-axis ticks
+  ) +
   geom_hline(yintercept = 7.5, linetype = "dashed", color = "red", size = 1) +
   facet_wrap(~ Phenology, scales = "free_x", ncol = 3)+
-  coord_cartesian(ylim = c(0, 12))
+  coord_cartesian(ylim = c(-2, 12))
 
 ```
 
@@ -197,35 +218,70 @@ suitable_UTM <- st_transform(suitable_UTM, crs = 32611)
 suitable$Easting <- st_coordinates(suitable_UTM)[, 1]
 suitable$Northing <- st_coordinates(suitable_UTM)[, 2]
 
+suitable <- suitable %>%  
+mutate(Month = case_when(
+    Julian_Day >= 93 & Julian_Day < 124 ~ "April",
+    Julian_Day >= 124 & Julian_Day < 155 ~ "May",
+    Julian_Day >= 155 & Julian_Day < 185 ~ "June",
+    Julian_Day >= 185 & Julian_Day <= 212 ~ "July",
+    TRUE ~ NA_character_
+  )) %>%
+  filter(!is.na(Month)) %>%
+  mutate(Month = factor(Month, levels = c("April", "May", "June", "July")))
+
+suitable <- suitable %>% 
+  mutate(PVT = str_sub(PlotID, start = 4, end = 6)) %>% 
+  mutate(PVT = case_when(
+    PVT == "672" ~ "Grassland",
+    PVT == "682" ~ "Riparian",
+    PVT == "674" ~ "Intermediate",
+    PVT == "668" ~ "Scabland",
+    PVT == "669" ~ "Shrubland",
+    TRUE ~ as.character(PVT)  # This keeps any other values unchanged
+  ))
+
+
 ```
+
+### Suitable Biomass by Vegetation Type
+
+Using measurements of DE and DP, along with the biomass of forage collected at my transects, I applied the FRESH Model (Hanley et al. 2012) to evaluate how many of the sampled areas met the nutritional requirements of a lactating female sheep, based on the combined contribution of all observed species. This analysis produced my estimate of "suitable biomass."
+
+While my initial hypothesis was that riparian areas would stand out for their nutrient quality, this was not supported by the DE and DP values alone. However, due to the higher plant density in these moisture-rich areas, riparian zones did yield a much greater total biomass, resulting in higher suitable biomass values overall compared to other vegetation types.
+
+One vegetation type that stands out is scabland. Found mostly on exposed ridges, these areas are typically rocky, wind-swept, and sun-exposed—conditions not usually associated with high productivity. However, these ridges are often the most accessible points in the landscape and are frequently used by landowners for grazing cattle on BLM land. They also lie closer to potential sources of agricultural runoff and experience more frequent disturbance. I suspect that these human influences may be altering the natural composition and productivity of the scabland community. Therefore, I plan to include distance to private land as a variable in my GAM, as I believe it may be a key factor shaping this vegetation type.
 
 ```{r}
-suitable <- suitable %>%
-  mutate(PVT = str_sub(PlotID, start = 4, end = 6))
 
-# Step 1: Standardize the "Suitable Biomass" values
-suitable_standardized <- suitable %>%
-  group_by(PVT) %>%
-  mutate(Standardized_Biomass = scale(SuitableBiomass)) %>%
-  ungroup()
-
-# Step 2: Create the plot
-ggplot(suitable_standardized, aes(x = PVT, y = Standardized_Biomass, fill = PVT)) +
+ggplot(suitable, aes(x = PVT, y = SuitableBiomass, fill = PVT)) +
   geom_boxplot(alpha = 0.7, outlier.shape = NA) +
-  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +
   scale_fill_viridis_d(option = "plasma") +
-  labs(title = "Comparison of Standardized Suitable Biomass Across PVTs",
+  labs(title = "Comparison of Suitable Biomass Across PVTs",
        x = "Plant Vegetation Type (PVT)",
-       y = "Standardized Suitable Biomass") +
+       y = "Suitable Biomass") +
   theme_minimal() +
   theme(legend.position = "none",
-        axis.text.x = element_text(angle = 45, hjust = 1)) 
+        axis.text.x = element_text(angle = 45, hjust = 1))+
+  coord_cartesian(ylim = c(-2, 170))
+  
 ```
 
-### Quality Trends overtime 
+### Quality Trends overtime
+
+Next, I looked at how these forage quality metrics changed over time. It’s important to note that if a transect did not meet the nutritional requirements for a lactating female sheep, it was assigned a suitable biomass value of zero. Because of this, it may appear that my sampling ended in early July, even though I continued collecting data through August. This is likely because many transects no longer met the nutritional thresholds by mid-summer, resulting in more zeros for suitable biomass.
+
+The trends in suitable biomass and digestible energy align with my expectations—they both decline over time. Digestible protein, however, remains relatively stable throughout the season.
+
+It’s also validating to see that my assumption about the timing of the “green-up”—the period when forage is at its most nutritious—was accurate. The first graph shows a steady decline in suitable biomass until mid-May, after which values remain fairly constant with only a slight decrease through the rest of the summer.
 
 ```{r}
 #| warning: FALSE
+
+# Define the Julian days and corresponding month labels
+date_breaks <- c(92, 122, 155, 185)
+date_labels <- c("April", "May", "June", "July")
+
+
 ggplot(suitable, aes(x = Julian_Day, y = SuitableBiomass)) +
   geom_point(aes(color = PVT), alpha = 0.6) +
   geom_smooth(method = "loess", se = TRUE, color = "black") +
@@ -237,9 +293,10 @@ ggplot(suitable, aes(x = Julian_Day, y = SuitableBiomass)) +
   theme_minimal() +
   theme(legend.position = "right",
         axis.text.x = element_text(angle = 0, hjust = 0.5)) +
-  scale_x_continuous(breaks = seq(min(suitable$Julian_Day, na.rm = TRUE), 
-                                  max(suitable$Julian_Day, na.rm = TRUE), 
-                                  by = 30))
+  scale_x_continuous(breaks = date_breaks,
+    labels = date_labels,
+    limits = c(min(date_breaks), max(date_breaks))
+  )
 
 ```
 
@@ -256,9 +313,10 @@ ggplot(suitable, aes(x = Julian_Day, y = AveDE)) +
   theme_minimal() +
   theme(legend.position = "right",
         axis.text.x = element_text(angle = 0, hjust = 0.5)) +
-  scale_x_continuous(breaks = seq(min(suitable$Julian_Day, na.rm = TRUE), 
-                                  max(suitable$Julian_Day, na.rm = TRUE), 
-                                  by = 30))
+  scale_x_continuous(breaks = date_breaks,
+    labels = date_labels,
+    limits = c(min(date_breaks), max(date_breaks))
+  )
 
 
 ```
@@ -276,10 +334,11 @@ ggplot(suitable, aes(x = Julian_Day, y = AveDP)) +
   theme_minimal() +
   theme(legend.position = "right",
         axis.text.x = element_text(angle = 0, hjust = 0.5)) +
-  scale_x_continuous(breaks = seq(min(suitable$Julian_Day, na.rm = TRUE), 
-                                  max(suitable$Julian_Day, na.rm = TRUE), 
-                                  by = 30))
-
+  scale_x_continuous(
+    breaks = date_breaks,
+    labels = date_labels,
+    limits = c(min(date_breaks), max(date_breaks))
+  )
 
 ```
 
