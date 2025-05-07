@@ -8,9 +8,9 @@
 
 <meta name="author" content="Alexis Means">
 <meta name="dcterms.date" content="2025-03-26">
-<meta name="description" content="I will be using quality and biomass data to help visualize how forage quality changes throughout my study area over time.">
+<meta name="description" content="I will be using quality and biomass data from my sampled vegetation data in the John Day, Oregon to help visualize how forage quality changes throughout my study area over time.">
 
-<title>Midterm – Means Portfolio</title>
+<title>BCB 520 - Final Project – Means Portfolio</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -150,11 +150,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Midterm</h1>
-            <p class="subtitle lead">Biomass Visualization</p>
+      <h1 class="title">BCB 520 - Final Project</h1>
+            <p class="subtitle lead">Exploring biomass and quality values in the John Day, Oregon</p>
                   <div>
         <div class="description">
-          I will be using quality and biomass data to help visualize how forage quality changes throughout my study area over time.
+          I will be using quality and biomass data from my sampled vegetation data in the John Day, Oregon to help visualize how forage quality changes throughout my study area over time.
         </div>
       </div>
                 </div>
@@ -198,8 +198,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="understanding-bighorn-sheep-nutrition-and-movement-in-the-john-day-canyon"><strong>Understanding Bighorn Sheep Nutrition and Movement in the John Day Canyon</strong></h2>
 <p>Located within the Columbia Plateau, the John Day Canyon is a steep, rugged landscape where sagebrush and grasses dominate the hillsides. This dynamic environment supports a unique population of bighorn sheep — one that, remarkably, has avoided the disease outbreaks that often devastate other herds.</p>
 <p>My research focuses on understanding the nutritional requirements of these bighorn sheep and how those needs shift throughout their reproductive cycle due to changing metabolic demands. The ultimate goal is to develop a predictive model that links their nutritional requirements to movement patterns. By doing so, we can identify potential threats, such as areas where bighorn sheep may come into contact with domestic livestock, and pinpoint critical habitats essential for their survival.</p>
-<p>To achieve this, I am collecting vegetation data to calculate a measure of “<strong>suitable biomass</strong>”—essentially, the portion of available forage that meaningfully contributes to the sheep’s energy needs at different reproductive stages. This metric is created using measures of digestible energy and digestible protein. I have currently not finalized my values of “suitable biomass”, but I do have preliminary values of digestible energy and digestible protein. Eventually using this metric, I will develop a Generalized Additive Model (GAM) to map areas of high and low nutritional quality across the landscape.</p>
-<p>These techniques will can help determine which resources most influence bighorn sheep movement and allow us to predict future movement patterns—a critical step in ensuring their continued success in this landscape. By bridging nutritional ecology with movement ecology, this research will contribute valuable insights into how bighorn sheep navigate their environment and help inform conservation strategies for this unique, disease-free population.</p>
+<p>To achieve this, I am collecting vegetation data to calculate a measure of “<strong>suitable biomass</strong>”—essentially, the portion of available forage that meaningfully contributes to the sheep’s energy needs at different reproductive stages. This metric is created using measures of digestible energy and digestible protein. I have currently not finalized my values of “suitable biomass”, but I do have preliminary values of digestible energy and digestible protein from a subset of my data. Eventually using this metric, I will develop a Generalized Additive Model (GAM) to map areas of high and low nutritional quality across the landscape.</p>
+<p>These techniques will help determine which resources most influence bighorn sheep movement and allow us to predict future movement patterns—a critical step in ensuring their continued success in this landscape. By bridging nutritional ecology with movement ecology, this research will contribute valuable insights into how bighorn sheep navigate their environment and help inform conservation strategies for this unique, disease-free population.</p>
 <section id="data-wrangling" class="level3">
 <h3 class="anchored" data-anchor-id="data-wrangling">Data Wrangling</h3>
 <div class="cell">
@@ -270,7 +270,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>To better visualize the trends in DP and DE across phenological stages, I isolated the DE and DP values for direct comparison. Both metrics follow the expected pattern, showing a general decline over time. While many species meet the DE requirement of 11.5 kJ per gram of forage, very few meet the necessary DP threshold of 7.5 g per 100 g of forage beyond the newly emergent stage. These thresholds represent the minimum forage quality needed to meet the energetic and protein demands of a lactating female sheep.</p>
+<p>To better visualize the trends in DP and DE across phenological stages, I isolated the DE and DP values for direct comparison. Both metrics follow the expected pattern, showing a general decline over progressing phenological stage. While many species meet the DE requirement of 11.5 kJ per gram of forage, very few meet the necessary DP threshold of 7.5 g per 100 g of forage beyond the newly emergent stage. These thresholds represent the minimum forage quality needed to meet the energetic and protein demands of a lactating female sheep.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -463,9 +463,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="suitable-biomass-by-vegetation-type" class="level3">
 <h3 class="anchored" data-anchor-id="suitable-biomass-by-vegetation-type">Suitable Biomass by Vegetation Type</h3>
-<p>Using measurements of DE and DP, along with the biomass of forage collected at my transects, I applied the FRESH Model (Hanley et al.&nbsp;2012) to evaluate how many of the sampled areas met the nutritional requirements of a lactating female sheep, based on the combined contribution of all observed species. This analysis produced my estimate of “suitable biomass.”</p>
+<p>Using measurements of DE and DP, along with the biomass of forage collected at my transects, I applied the FRESH Model (<a href="https://research.fs.usda.gov/treesearch/40300">Hanley et al.&nbsp;2012</a>) to evaluate how many of the sampled areas met the nutritional requirements of a lactating female sheep, based on the combined contribution of all observed species. This analysis produced my estimate of “suitable biomass.”</p>
 <p>While my initial hypothesis was that riparian areas would stand out for their nutrient quality, this was not supported by the DE and DP values alone. However, due to the higher plant density in these moisture-rich areas, riparian zones did yield a much greater total biomass, resulting in higher suitable biomass values overall compared to other vegetation types.</p>
-<p>One vegetation type that stands out is scabland. Found mostly on exposed ridges, these areas are typically rocky, wind-swept, and sun-exposed—conditions not usually associated with high productivity. However, these ridges are often the most accessible points in the landscape and are frequently used by landowners for grazing cattle on BLM land. They also lie closer to potential sources of agricultural runoff and experience more frequent disturbance. I suspect that these human influences may be altering the natural composition and productivity of the scabland community. Therefore, I plan to include distance to private land as a variable in my GAM, as I believe it may be a key factor shaping this vegetation type.</p>
+<p>One vegetation community that caught my attention was the scabland community. Found mostly on exposed ridges, these areas are typically rocky, wind-swept, and sun-exposed—conditions not usually associated with high productivity. However, these ridges are often the most accessible points in the landscape and are frequently used by landowners for grazing cattle on BLM land. They also lie closer to potential sources of agricultural runoff and experience more frequent disturbance. I suspect that these human influences may be altering the natural composition and productivity of the scabland community. Therefore, I plan to include distance to private land as a variable in my GAM, as I believe it may be a key factor shaping this vegetation type.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -493,7 +493,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="quality-trends-overtime">Quality Trends overtime</h3>
 <p>Next, I looked at how these forage quality metrics changed over time. It’s important to note that if a transect did not meet the nutritional requirements for a lactating female sheep, it was assigned a suitable biomass value of zero. Because of this, it may appear that my sampling ended in early July, even though I continued collecting data through August. This is likely because many transects no longer met the nutritional thresholds by mid-summer, resulting in more zeros for suitable biomass.</p>
 <p>The trends in suitable biomass and digestible energy align with my expectations—they both decline over time. Digestible protein, however, remains relatively stable throughout the season.</p>
-<p>It’s also validating to see that my assumption about the timing of the “green-up”—the period when forage is at its most nutritious—was accurate. The first graph shows a steady decline in suitable biomass until mid-May, after which values remain fairly constant with only a slight decrease through the rest of the summer.</p>
+<p>It’s also reassuring to see that my assumption about the timing of the “green-up”—the period when forage is at its most nutritious—was accurate. The first graph shows a steady decline in suitable biomass until mid-May, after which values remain fairly constant with only a slight decrease through the rest of the summer.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -585,7 +585,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="biomass-trends" class="level2">
 <h2 class="anchored" data-anchor-id="biomass-trends">Biomass Trends</h2>
-<p>One of the key parts of my project is understanding the spread of invasive species throughout the canyon, specifically cheat grass. When observing the canyon it seems like cheat grass dominates the canyon which could effect the amount of nutrients available later in the summer. To start I wanted to looks at the density of biomass for all native vs invasive species within the transects that I sampled in our study area. From this graph we can see that overall biomass of native and invasive species is relatively similar throughout the canyon. However, there is an overall greater density of native species.</p>
+<p>One of the key parts of my project is understanding the spread of invasive species throughout the canyon, specifically cheat grass. When observing the canyon it seems like cheat grass dominates the landscape which could effect the amount of nutrients available later in the summer after much of it has progressed through its flowering stage. To start I wanted to looks at the density of biomass for all native versus invasive species within the transects that I sampled in our study area. From this graph we can see that overall biomass of native and invasive species is relatively similar throughout the canyon. However, there is an overall greater density of native species.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -655,7 +655,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>I still do not have complete quality data, so there is only so much I can do with this information, but knowing the amount of biomass for each species in the area will allow us to apply a nutrient value of “suitable biomass”. I would also like to see the differences in overall biomass for each month. I had a much larger sample size in April and May than I did in June and July, so I standardized my biomass values before plotting them.</p>
+<p>I am still currently using only a subset of my quality data, so these results may be slightly skewed from the results of my complete data set.</p>
+<p>I would also like to see the differences in overall biomass for each month. I had a much larger sample size in April and May than I did in June and July, so I standardized my biomass values before plotting them.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -704,7 +705,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>Since cheat grass is the main issue that we have been observing as far as the most invasive species in the canyon I would also like to see how this biomass progresses over each month. Apparently in this subset of my data I didn’t have any observations for cheatgrass in the month of June. This makes me think that I should take the rest of my results with a grain of salt until I can complete my biomass predictions. That being said the density of biomass for cheat grass did peak in the southern end of the canyon in June and then started to decrease after that point.</p>
+<p>Since cheatgrass is the main invasive species we’ve been tracking in the canyon, I’m especially interested in how its biomass changes from month to month. In this part of my dataset, I didn’t record any cheatgrass observations in June, so I’ll need to be cautious about interpreting the rest of the results until I can finish my biomass predictions. That said, the data I do have suggest that cheatgrass biomass peaked in the southern end of the canyon around June and began to decline after that.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -753,6 +754,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
+<p>The metric of “suitable biomass” is a single value applied to my transect, so I have not figured out how to apply that value to specific species. I could however look at the overall DE and DP for native versus invasive species. (another graph to add to the to-do list)</p>
 </section>
 <section id="gps-data" class="level2">
 <h2 class="anchored" data-anchor-id="gps-data">GPS Data</h2>
@@ -788,7 +790,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>If the areas of high biomass density align with values of high nutrient quality in theory this means that the density of our sheep points should also follow the trends of high biomass density in the months of April and May. I wanted to see if I could overlay our sheep locations each month with the biomass density data each month to observe my hunch that sheep would follow this trend in these months. They do not appear to follow this trend, most likely due to other outside factors such as selection for escape terrain that outweigh the need to follow vegetation trends.</p>
+<p>If the areas of high biomass density align with values of high nutrient quality in theory this means that the density of our sheep points should also follow the trends of high biomass density in the months of April and May. I wanted to see if I could overlay our sheep locations each month with the biomass density data each month to observe my hunch that sheep would follow this trend in these months. They do not appear to follow this trend, most likely due to other outside factors such as selection for escape terrain that outweigh the need to follow vegetation trends. It is also likely that areas of high biomass does not always mean areas of high nutritional quality.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -904,7 +906,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="suitable-biomass" class="level2">
 <h2 class="anchored" data-anchor-id="suitable-biomass">Suitable Biomass</h2>
-<p>After completing the FRESH model with synthetic values for crude protein using a subset of my data, I was able to get estimates of usable suitable biomass available at each transect that I sampled. I replicated similar graphs to my biomass density for native vs invasive species and the results are fairly similar.Like the biomass plots, there is a higher density in the south end of our study area when looking at the suitable biomass overall for the study area.</p>
+<p>After completing the FRESH model using a subset of my data, I was able to get estimates of suitable biomass available at each transect that I sampled. I replicated similar graphs to my biomass density for native vs invasive species and the results are fairly similar. Like the biomass plots, there is a higher density in the south end of our study area when looking at the suitable biomass overall for the study area.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -937,43 +939,44 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co">#|warning: FALSE</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>suitablemonth.sum <span class="ot">&lt;-</span> suitable.map <span class="sc">%&gt;%</span></span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(SuitableBiomass) <span class="sc">&amp;</span> SuitableBiomass <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span>  <span class="co"># Remove NAs</span></span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Month =</span> <span class="fu">case_when</span>(</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">93</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;</span> <span class="dv">124</span> <span class="sc">~</span> <span class="st">"April"</span>,</span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">124</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;</span> <span class="dv">155</span> <span class="sc">~</span> <span class="st">"May"</span>,</span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">155</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;</span> <span class="dv">185</span> <span class="sc">~</span> <span class="st">"June"</span>,</span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    Julian_Day <span class="sc">&gt;=</span> <span class="dv">185</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;=</span> <span class="dv">212</span> <span class="sc">~</span> <span class="st">"July"</span>,</span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>  )) <span class="sc">%&gt;%</span></span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Month)) <span class="sc">%&gt;%</span></span>
-<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Month =</span> <span class="fu">factor</span>(Month, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"April"</span>, <span class="st">"May"</span>, <span class="st">"June"</span>, <span class="st">"July"</span>)))</span>
-<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Normalize biomass within each month (to make sample sizes comparable)</span></span>
-<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>suitablemonth.sum <span class="ot">&lt;-</span> suitablemonth.sum <span class="sc">%&gt;%</span></span>
-<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Month) <span class="sc">%&gt;%</span></span>
-<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Total_SuitableBiomass =</span> <span class="fu">sum</span>(SuitableBiomass),  <span class="co"># Calculate total biomass for each month</span></span>
-<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>         <span class="at">Normalized_SuitableBiomass =</span> SuitableBiomass <span class="sc">/</span> Total_SuitableBiomass) <span class="sc">%&gt;%</span>  <span class="co"># Normalize biomass</span></span>
-<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()  <span class="co"># Remove grouping</span></span>
-<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a></span>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co">#|warning: false</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="co">#| message: false</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>suitablemonth.sum <span class="ot">&lt;-</span> suitable.map <span class="sc">%&gt;%</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(SuitableBiomass) <span class="sc">&amp;</span> SuitableBiomass <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">Month =</span> <span class="fu">case_when</span>(</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>      Julian_Day <span class="sc">&gt;=</span> <span class="dv">93</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;</span> <span class="dv">124</span> <span class="sc">~</span> <span class="st">"April"</span>,</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>      Julian_Day <span class="sc">&gt;=</span> <span class="dv">124</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;</span> <span class="dv">155</span> <span class="sc">~</span> <span class="st">"May"</span>,</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>      Julian_Day <span class="sc">&gt;=</span> <span class="dv">155</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;</span> <span class="dv">185</span> <span class="sc">~</span> <span class="st">"June"</span>,</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>      Julian_Day <span class="sc">&gt;=</span> <span class="dv">185</span> <span class="sc">&amp;</span> Julian_Day <span class="sc">&lt;=</span> <span class="dv">212</span> <span class="sc">~</span> <span class="st">"July"</span>,</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>    )) <span class="sc">%&gt;%</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Month)) <span class="sc">%&gt;%</span></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Month =</span> <span class="fu">factor</span>(Month, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"April"</span>, <span class="st">"May"</span>, <span class="st">"June"</span>, <span class="st">"July"</span>)))</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Normalize biomass within each month (to make sample sizes comparable)</span></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>suitablemonth.sum <span class="ot">&lt;-</span> suitablemonth.sum <span class="sc">%&gt;%</span></span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Month) <span class="sc">%&gt;%</span></span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Total_SuitableBiomass =</span> <span class="fu">sum</span>(SuitableBiomass),  <span class="co"># Calculate total biomass for each month</span></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>         <span class="at">Normalized_SuitableBiomass =</span> SuitableBiomass <span class="sc">/</span> Total_SuitableBiomass) <span class="sc">%&gt;%</span>  <span class="co"># Normalize biomass</span></span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()  <span class="co"># Remove grouping</span></span>
 <span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Create density plot faceted by Month and Status</span></span>
-<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(suitablemonth.sum, <span class="fu">aes</span>(<span class="at">x =</span> Easting, <span class="at">y =</span> Northing, <span class="at">weight =</span> Normalized_SuitableBiomass)) <span class="sc">+</span></span>
-<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_density_2d</span>(<span class="fu">aes</span>(<span class="at">fill =</span> <span class="fu">after_stat</span>(density)), <span class="at">geom =</span> <span class="st">"raster"</span>, <span class="at">contour =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
-<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(<span class="st">"Month"</span>) <span class="sc">+</span>  <span class="co"># Grid facet by Month (rows) and Status (columns)</span></span>
-<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_c</span>(</span>
-<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Suitable Biomass Density"</span>, </span>
-<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">option =</span> <span class="st">"turbo"</span>,</span>
-<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="fl">1e-09</span>, <span class="fl">9e-09</span>),  <span class="co"># Define specific density values</span></span>
-<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Low "</span>, <span class="st">"High "</span>)  <span class="co"># Replace numerical values with "Low" and "High"</span></span>
-<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span>  </span>
-<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Normalized Density of Suitable Biomass"</span>,</span>
-<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Easting"</span>, </span>
-<span id="cb20-34"><a href="#cb20-34" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Northing"</span>) <span class="sc">+</span></span>
-<span id="cb20-35"><a href="#cb20-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb20-36"><a href="#cb20-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_blank</span>(),  <span class="co"># Remove tick labels</span></span>
-<span id="cb20-37"><a href="#cb20-37" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.ticks =</span> <span class="fu">element_blank</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Create density plot faceted by Month and Status</span></span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(suitablemonth.sum, <span class="fu">aes</span>(<span class="at">x =</span> Easting, <span class="at">y =</span> Northing, <span class="at">weight =</span> Normalized_SuitableBiomass)) <span class="sc">+</span></span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_density_2d</span>(<span class="fu">aes</span>(<span class="at">fill =</span> <span class="fu">after_stat</span>(density)), <span class="at">geom =</span> <span class="st">"raster"</span>, <span class="at">contour =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(<span class="st">"Month"</span>) <span class="sc">+</span>  <span class="co"># Grid facet by Month (rows) and Status (columns)</span></span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_c</span>(</span>
+<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Suitable Biomass Density"</span>, </span>
+<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">option =</span> <span class="st">"turbo"</span>,</span>
+<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="fl">1e-09</span>, <span class="fl">9e-09</span>),  <span class="co"># Define specific density values</span></span>
+<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Low "</span>, <span class="st">"High "</span>)  <span class="co"># Replace numerical values with "Low" and "High"</span></span>
+<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span>  </span>
+<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Normalized Density of Suitable Biomass"</span>,</span>
+<span id="cb20-34"><a href="#cb20-34" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Easting"</span>, </span>
+<span id="cb20-35"><a href="#cb20-35" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Northing"</span>) <span class="sc">+</span></span>
+<span id="cb20-36"><a href="#cb20-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb20-37"><a href="#cb20-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_blank</span>(),  <span class="co"># Remove tick labels</span></span>
+<span id="cb20-38"><a href="#cb20-38" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.ticks =</span> <span class="fu">element_blank</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: The following aesthetics were dropped during statistical transformation:
