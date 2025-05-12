@@ -57,6 +57,18 @@ data <- data %>%
 
 ```
 
+### Data Dictionary
+
+For further description as to what each of my variables are within my data set. Please see my data dictionary here.
+
+```{r}
+#| echo: TRUE  
+#| message: FALSE
+
+table<- read.csv("C:/Users/Alexis Means/Documents/School/BCB520/2A/attributes.csv") 
+knitr::kable(table)
+```
+
 ## Exploring Quality Trends
 
 ### Comparing DE and DP values for phenological stage
