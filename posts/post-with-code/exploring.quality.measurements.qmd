@@ -55,6 +55,8 @@ data <- data %>%
 
 First I wanted to filter the dataset to contain only the top 20 species/ phenological stage pairs with the highest levels of DE and DP. I started by grouping my observatons by their species, phenological stage and part of the plant. If there was multiple measurements for those observations, I calculated the mean for that unique plant combination.
 
+### Digestible Energy
+
 ```{r}
 #| warning: FALSE
 library(tidyverse)
@@ -120,10 +122,11 @@ p1 <- ggplot(top_20_combos, aes(
 ggplotly(p1, tooltip = "text")
 
 
-
-
-
 ```
+
+This graph shows that Sisymbrium altissimum (SIAL2) when in its newly emergent stage (N) has the highest observed levels of digestible energy at 14.54 (units?) followed by Amsinckia menziesii (AMME) in its newly emergent stage (N) at 14.47 (units) and Equisetum hyemale (EQHY) in its newly emergent stage (N) at 14.31 (units). Most of the species that were observed with the highest DE were in the newly emergent (N) or budding (B) stages which is as to be expected. There was only two flowering species that fell within the top 20 with the highest DE which were (ERCO12) at 13.47 and (LONU2) at 13.26, one fruiting species (TRDU) at 13.26 and two mature species (CREPIS) at 13.56 and (TACA8) at 13.2. I was surprised to see any mature species make it within the top 20 highest digestible energy values. There were only 3 invasive species that within this list as well, they were new Equisetum hyemale (EQHY), and both new and budding Bromus Tectorum (BRTE).
+
+However, the species that we observed with the highest digestible energy are not the ones that we observed most frequently or the species with the highest biomass.
 
 ```{r}
 #| warning: FALSE
@@ -166,4 +169,102 @@ p2 <- ggplot(combo_counts, aes(
   theme_minimal(base_size = 12)
 
 ggplotly(p2, tooltip = "text")
+```
+
+This graph shows that of the top 20 species-phenology combinations, Bromus Tectorum (BRTE) in its newly emergent stage is the species that we observed the most which is a common invasive species which overruns much of the canyon.
+
+### Digestible Protein
+
+```{r}
+#| warning: FALSE
+
+# Step 1: Calculate mean DE and organize data
+top_20_DP <- data_clean %>%
+  group_by(Code, Phenology, Part) %>%
+  summarise(mean_DP = mean(DP, na.rm = TRUE), .groups = "drop") %>%
+  arrange(desc(mean_DP)) %>%
+  slice_head(n = 20) %>% 
+  mutate(combo_label = paste(Code, Phenology, Part, sep = "_"))%>%
+  mutate(combo_label = reorder(combo_label, -mean_DP))
+
+top_20_DP <- top_20_DP %>%
+  left_join(
+    data %>%
+      select(Code, Phenology, Part, Status) %>%
+      distinct(), 
+    by = c("Code", "Phenology", "Part")
+  ) %>%
+  mutate(combo_label = paste(Code, Phenology, Part, sep = "_"),
+         combo_label = reorder(combo_label, -mean_DP))
+
+
+##creating interavtive scatterplot
+p3 <- ggplot(top_20_DP, aes(
+  x = combo_label,
+  y = mean_DP,
+  color = Status,
+  text = paste0(
+    "Code: ", Code,
+    "<br>Phenology: ", Phenology,
+    "<br>Part: ", Part,
+    "<br>Status: ", Status,
+    "<br>Mean DE: ", round(mean_DP, 2)
+  )
+)) +
+  geom_point(size = 4) +
+  labs(
+    title = "Top 20 Species Combinations by Mean DP",
+    x = "Code | Phenology | Part",
+    y = "Mean DP",
+    color = "Status"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplotly(p3, tooltip = "text")
+
+
+```
+
+```{r}
+#| warning: FALSE
+# Step 2: Filter the dataset to only include those top 20 combinations
+filtered_DP <- data_clean %>%
+  semi_join(top_20_DP, by = c("Code", "Phenology", "Part"))
+
+# Count number of observations per Code–Phenology–Part combo
+DP_counts <- filtered_DP %>%
+  count(Code, Phenology, Part, name = "obs_count") %>%
+  left_join(
+    data %>%
+      select(Code, Phenology, Part, Status) %>%
+      distinct(),
+    by = c("Code", "Phenology", "Part")
+  ) %>%
+  mutate(combo_label = paste(Code, Phenology, Part, sep = "_"),
+         combo_label = reorder(combo_label, obs_count))
+
+p4 <- ggplot(DP_counts, aes(
+  x = combo_label,
+  y = obs_count,
+  fill = Status,
+  text = paste0(
+    "Code: ", Code,
+    "<br>Phenology: ", Phenology,
+    "<br>Part: ", Part,
+    "<br>Status: ", Status,
+    "<br>Observations: ", obs_count
+  )
+)) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Observation Frequency of Top 20 Species Combos",
+    x = "Code | Phenology | Part",
+    y = "Number of Observations",
+    fill = "Status"
+  ) +
+  theme_minimal(base_size = 12)
+
+ggplotly(p4, tooltip = "text")
 ```
