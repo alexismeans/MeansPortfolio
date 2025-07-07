@@ -1,0 +1,169 @@
+---
+title: "Quality Measurement Exploration"
+author: "Alexis Means"
+subtitle: "Creating visualizations to compare levels of DE and DP"
+date: 2025-07-07
+description: I want to create multiple visualizations that allow me to compare the levels of DE and DP for individual species. Specifically I want to see which species have the highest and the lowest levels and if they are actually species that can be consumed by the sheep (not Lupinus or Artemisia spp).I would also like to compare how invasive/ non native species compare to native species. Specifically focusing on grasses. 
+code-fold: TRUE
+---
+
+# Introduction
+
+In my final project for BCB 520, I started to dive into the levels of DE and DP supplied by different phenological stages as well as different vegetation communities. Now I would like to make similar observations, but at a species level.
+
+## Data Wrangling
+
+This chunk of code loads in my quality measurements for my species with observed biomass measurements.
+
+```{r}
+#| warning: FALSE
+
+library(lpSolve)
+library(openxlsx)
+library(tools)
+library(dplyr)
+library(sf)
+library(tidyverse)
+
+# Define the path to the directory containing the file
+excelpath <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/FRESH/processed.data/"
+
+# Define the specific file name
+filename <- "FRESH.Subset.xlsx"
+
+# Construct the full file path
+excel.file <- file.path(excelpath, filename)
+
+# Load the workbook and read the data
+library(openxlsx)
+habitat <- loadWorkbook(excel.file)
+data <- data.frame(readWorkbook(excel.file, sheet = "FRESH Data", startRow = 1, colNames = TRUE))
+
+
+plant <-read.csv("C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/Cleaning/processed.data/plant.csv")
+
+data <- data %>% 
+  rename(Code = Plant.Code) %>% 
+  left_join(y = plant, 
+            by = "Code",
+            relationship = "many-to-one")
+
+
+```
+
+## Highest DE and DP
+
+First I wanted to filter the dataset to contain only the top 20 species/ phenological stage pairs with the highest levels of DE and DP. I started by grouping my observatons by their species, phenological stage and part of the plant. If there was multiple measurements for those observations, I calculated the mean for that unique plant combination.
+
+```{r}
+#| warning: FALSE
+library(tidyverse)
+
+#make sure that the phenological stages are seen as categorical variables and in the correct order
+data$Phenology <- factor(data$Phenology, levels = c("N", "B", "FL", "FR", "M", "C"))
+
+library(dplyr)
+library(stringr)
+library(plotly)
+
+# Clean up any leading/trailing whitespace and convert to character
+data_clean <- data %>%
+  mutate(
+    Code = str_trim(as.character(Code)),
+    Phenology = str_trim(as.character(Phenology)),
+    Part = str_trim(as.character(Part))
+  )
+
+# Step 1: Calculate mean DE and organize data
+top_20_combos <- data_clean %>%
+  group_by(Code, Phenology, Part) %>%
+  summarise(mean_DE = mean(DE, na.rm = TRUE), .groups = "drop") %>%
+  arrange(desc(mean_DE)) %>%
+  slice_head(n = 20) %>% 
+  mutate(combo_label = paste(Code, Phenology, Part, sep = "_"))%>%
+  mutate(combo_label = reorder(combo_label, -mean_DE))
+
+top_20_combos <- top_20_combos %>%
+  left_join(
+    data %>%
+      select(Code, Phenology, Part, Status) %>%
+      distinct(), 
+    by = c("Code", "Phenology", "Part")
+  ) %>%
+  mutate(combo_label = paste(Code, Phenology, Part, sep = "_"),
+         combo_label = reorder(combo_label, -mean_DE))
+
+
+##creating interavtive scatterplot
+p1 <- ggplot(top_20_combos, aes(
+  x = combo_label,
+  y = mean_DE,
+  color = Status,
+  text = paste0(
+    "Code: ", Code,
+    "<br>Phenology: ", Phenology,
+    "<br>Part: ", Part,
+    "<br>Status: ", Status,
+    "<br>Mean DE: ", round(mean_DE, 2)
+  )
+)) +
+  geom_point(size = 4) +
+  labs(
+    title = "Top 20 Species Combinations by Mean DE",
+    x = "Code | Phenology | Part",
+    y = "Mean DE",
+    color = "Status"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplotly(p1, tooltip = "text")
+
+
+
+
+
+```
+
+```{r}
+#| warning: FALSE
+# Step 2: Filter the dataset to only include those top 20 combinations
+filtered_DE <- data_clean %>%
+  semi_join(top_20_combos, by = c("Code", "Phenology", "Part"))
+
+# Count number of observations per Code–Phenology–Part combo
+combo_counts <- filtered_DE %>%
+  count(Code, Phenology, Part, name = "obs_count") %>%
+  left_join(
+    data %>%
+      select(Code, Phenology, Part, Status) %>%
+      distinct(),
+    by = c("Code", "Phenology", "Part")
+  ) %>%
+  mutate(combo_label = paste(Code, Phenology, Part, sep = "_"),
+         combo_label = reorder(combo_label, obs_count))
+
+p2 <- ggplot(combo_counts, aes(
+  x = combo_label,
+  y = obs_count,
+  fill = Status,
+  text = paste0(
+    "Code: ", Code,
+    "<br>Phenology: ", Phenology,
+    "<br>Part: ", Part,
+    "<br>Status: ", Status,
+    "<br>Observations: ", obs_count
+  )
+)) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Observation Frequency of Top 20 Species Combos",
+    x = "Code | Phenology | Part",
+    y = "Number of Observations",
+    fill = "Status"
+  ) +
+  theme_minimal(base_size = 12)
+
+ggplotly(p2, tooltip = "text")
+```
