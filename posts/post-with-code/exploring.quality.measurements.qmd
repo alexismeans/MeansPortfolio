@@ -173,6 +173,19 @@ ggplotly(p2, tooltip = "text")
 
 This graph shows that of the top 20 species-phenology combinations, Bromus Tectorum (BRTE) in its newly emergent stage is the species that we observed the most which is a common invasive species which overruns much of the canyon.
 
+```{r}
+biomass_DE <- data %>% 
+  group_by(Code, Phenology, Part) %>% 
+  left_join(
+    data %>%
+      select(Code, Phenology, Part, Status, Biomass) %>%
+      distinct(), 
+    by = c("Code", "Phenology", "Part")
+  ) %>%
+  mutate(combo_label = paste(Code, Phenology, Part, sep = "_"))
+
+```
+
 ### Digestible Protein
 
 ```{r}
@@ -267,4 +280,176 @@ p4 <- ggplot(DP_counts, aes(
   theme_minimal(base_size = 12)
 
 ggplotly(p4, tooltip = "text")
+```
+
+## Grass Species
+
+### Digestible Energy
+
+```{r}
+grass.DE <- data %>%
+  filter(Family == "POACEAE") %>% 
+  group_by(Code, Phenology, Part) %>%
+  summarise(mean_DE = mean(DE, na.rm = TRUE), .groups = "drop") %>%
+  arrange(desc(mean_DE)) %>%
+  slice_head(n = 20) %>% 
+  left_join(
+    data %>%
+      select(Code, Phenology, Part, Status) %>%
+      distinct(), 
+    by = c("Code", "Phenology", "Part")
+  ) %>%
+  mutate(combo_label = paste(Code, Phenology, Part, sep = "_"),
+         combo_label = reorder(combo_label, -mean_DE))
+
+##creating interavtive scatterplot
+p5 <- ggplot(grass.DE, aes(
+  x = combo_label,
+  y = mean_DE,
+  color = Status,
+  text = paste0(
+    "Code: ", Code,
+    "<br>Phenology: ", Phenology,
+    "<br>Part: ", Part,
+    "<br>Status: ", Status,
+    "<br>Mean DE: ", round(mean_DE, 2)
+  )
+)) +
+  geom_point(size = 4) +
+  labs(
+    title = "Top 20 Grass Species by Mean DE",
+    x = "Code | Phenology | Part",
+    y = "Mean DE",
+    color = "Status"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplotly(p5, tooltip = "text")
+```
+
+```{r}
+filtered_grass.DE <- data %>%
+  semi_join(grass.DE, by = c("Code", "Phenology", "Part"))
+
+# Count number of observations per Code–Phenology–Part combo
+grass.DE_counts <- filtered_grass.DE %>%
+  count(Code, Phenology, Part, name = "obs_count") %>%
+  left_join(
+    data %>%
+      select(Code, Phenology, Part, Status) %>%
+      distinct(),
+    by = c("Code", "Phenology", "Part")
+  ) %>%
+  mutate(combo_label = paste(Code, Phenology, Part, sep = "_"),
+         combo_label = reorder(combo_label, obs_count))
+
+p6 <- ggplot(grass.DE_counts, aes(
+  x = combo_label,
+  y = obs_count,
+  fill = Status,
+  text = paste0(
+    "Code: ", Code,
+    "<br>Phenology: ", Phenology,
+    "<br>Part: ", Part,
+    "<br>Status: ", Status,
+    "<br>Observations: ", obs_count
+  )
+)) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Observation Frequency of Top 20 Grass Species by DE",
+    x = "Code | Phenology | Part",
+    y = "Number of Observations",
+    fill = "Status"
+  ) +
+  theme_minimal(base_size = 12)
+
+ggplotly(p6, tooltip = "text")
+```
+
+### Digestible Protein 
+
+```{r}
+grass.DP <- data %>%
+  filter(Family == "POACEAE") %>% 
+  group_by(Code, Phenology, Part) %>%
+  summarise(mean_DP = mean(DP, na.rm = TRUE), .groups = "drop") %>%
+  arrange(desc(mean_DP)) %>%
+  slice_head(n = 20) %>% 
+  left_join(
+    data %>%
+      select(Code, Phenology, Part, Status) %>%
+      distinct(), 
+    by = c("Code", "Phenology", "Part")
+  ) %>%
+  mutate(combo_label = paste(Code, Phenology, Part, sep = "_"),
+         combo_label = reorder(combo_label, -mean_DP))
+
+##creating interavtive scatterplot
+p7 <- ggplot(grass.DP, aes(
+  x = combo_label,
+  y = mean_DP,
+  color = Status,
+  text = paste0(
+    "Code: ", Code,
+    "<br>Phenology: ", Phenology,
+    "<br>Part: ", Part,
+    "<br>Status: ", Status,
+    "<br>Mean DP: ", round(mean_DP, 2)
+  )
+)) +
+  geom_point(size = 4) +
+  labs(
+    title = "Top 20 Grass Species by Mean DP",
+    x = "Code | Phenology | Part",
+    y = "Mean DP",
+    color = "Status"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplotly(p7, tooltip = "text")
+```
+
+```{r}
+filtered_grass.DP <- data %>%
+  semi_join(grass.DP, by = c("Code", "Phenology", "Part"))
+
+# Count number of observations per Code–Phenology–Part combo
+grass.DP_counts <- filtered_grass.DP %>%
+  count(Code, Phenology, Part, name = "obs_count") %>%
+  left_join(
+    data %>%
+      select(Code, Phenology, Part, Status) %>%
+      distinct(),
+    by = c("Code", "Phenology", "Part")
+  ) %>%
+  mutate(combo_label = paste(Code, Phenology, Part, sep = "_"),
+         combo_label = reorder(combo_label, obs_count))
+
+p8 <- ggplot(grass.DP_counts, aes(
+  x = combo_label,
+  y = obs_count,
+  fill = Status,
+  text = paste0(
+    "Code: ", Code,
+    "<br>Phenology: ", Phenology,
+    "<br>Part: ", Part,
+    "<br>Status: ", Status,
+    "<br>Observations: ", obs_count
+  )
+)) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Observation Frequency of Top 20 Grass Species by DP",
+    x = "Code | Phenology | Part",
+    y = "Number of Observations",
+    fill = "Status"
+  ) +
+  theme_minimal(base_size = 12)
+
+ggplotly(p8, tooltip = "text")
 ```
