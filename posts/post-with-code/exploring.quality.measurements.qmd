@@ -124,10 +124,6 @@ ggplotly(p1, tooltip = "text")
 
 ```
 
-This graph shows that Sisymbrium altissimum (SIAL2) when in its newly emergent stage (N) has the highest observed levels of digestible energy at 14.54 (units?) followed by Amsinckia menziesii (AMME) in its newly emergent stage (N) at 14.47 (units) and Equisetum hyemale (EQHY) in its newly emergent stage (N) at 14.31 (units). Most of the species that were observed with the highest DE were in the newly emergent (N) or budding (B) stages which is as to be expected. There was only two flowering species that fell within the top 20 with the highest DE which were (ERCO12) at 13.47 and (LONU2) at 13.26, one fruiting species (TRDU) at 13.26 and two mature species (CREPIS) at 13.56 and (TACA8) at 13.2. I was surprised to see any mature species make it within the top 20 highest digestible energy values. There were only 3 invasive species that within this list as well, they were new Equisetum hyemale (EQHY), and both new and budding Bromus Tectorum (BRTE).
-
-However, the species that we observed with the highest digestible energy are not the ones that we observed most frequently or the species with the highest biomass.
-
 ```{r}
 #| warning: FALSE
 # Step 2: Filter the dataset to only include those top 20 combinations
@@ -171,7 +167,9 @@ p2 <- ggplot(combo_counts, aes(
 ggplotly(p2, tooltip = "text")
 ```
 
-This graph shows that of the top 20 species-phenology combinations, Bromus Tectorum (BRTE) in its newly emergent stage is the species that we observed the most which is a common invasive species which overruns much of the canyon.
+The first graph shows that Sisymbrium altissimum (SIAL2) when in its newly emergent stage (N) has the highest observed levels of digestible energy at 14.54 (units?) followed by Amsinckia menziesii (AMME) in its newly emergent stage (N) at 14.47 (units) and Equisetum hyemale (EQHY) in its newly emergent stage (N) at 14.31 (units). Most of the species that were observed with the highest DE were in the newly emergent (N) or budding (B) stages which is as to be expected. There was only two flowering species that fell within the top 20 with the highest DE which were (ERCO12) at 13.47 and (LONU2) at 13.26, one fruiting species (TRDU) at 13.26 and two mature species (CREPIS) at 13.56 and (TACA8) at 13.2. I was surprised to see any mature species make it within the top 20 highest digestible energy values. There were only 3 invasive species that within this list as well, they were new Equisetum hyemale (EQHY), and both new and budding Bromus Tectorum (BRTE).
+
+However, the species that we observed with the highest digestible energy are not the ones that we observed most frequently or the species with the highest biomass. The second graph shows that of the top 20 species-phenology combinations, Bromus Tectorum (BRTE) in its newly emergent stage is the species that we observed the most which is a common invasive species which overruns much of the canyon.
 
 ```{r}
 biomass_DE <- data %>% 
