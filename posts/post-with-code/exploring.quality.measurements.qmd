@@ -55,7 +55,7 @@ data <- data %>%
 
 First I wanted to filter the dataset to contain only the top 20 species/ phenological stage pairs with the highest levels of DE and DP. I started by grouping my observatons by their species, phenological stage and part of the plant. If there was multiple measurements for those observations, I calculated the mean for that unique plant combination.
 
-### Digestible Energy
+### DE vs DP
 
 ```{r}
 #| warning: FALSE
@@ -76,53 +76,47 @@ data_clean <- data %>%
     Part = str_trim(as.character(Part))
   )
 
-# Step 1: Calculate mean DE and organize data
+# Step 1: Calculate means and filter top 20 combos
 top_20_combos <- data_clean %>%
-  group_by(Code, Phenology, Part) %>%
-  summarise(mean_DE = mean(DE, na.rm = TRUE), .groups = "drop") %>%
-  arrange(desc(mean_DE)) %>%
-  slice_head(n = 20) %>% 
-  mutate(combo_label = paste(Code, Phenology, Part, sep = "_"))%>%
-  mutate(combo_label = reorder(combo_label, -mean_DE))
-
-top_20_combos <- top_20_combos %>%
-  left_join(
-    data %>%
-      select(Code, Phenology, Part, Status) %>%
-      distinct(), 
-    by = c("Code", "Phenology", "Part")
+  group_by(Code, Phenology, Part, Status) %>%
+  summarise(
+    mean_DE = mean(DE, na.rm = TRUE),
+    mean_DP = mean(DP, na.rm = TRUE),
+    .groups = "drop"
   ) %>%
-  mutate(combo_label = paste(Code, Phenology, Part, sep = "_"),
-         combo_label = reorder(combo_label, -mean_DE))
+  arrange(desc(mean_DE), desc(mean_DP)) %>%  # Arrange by both
+  slice_head(n = 20) %>%                     # Keep only top 20
+  mutate(combo_label = paste(Code, Phenology, Part, sep = "_"))
 
-
-##creating interavtive scatterplot
+# Step 2: Create interactive scatterplot
 p1 <- ggplot(top_20_combos, aes(
-  x = combo_label,
-  y = mean_DE,
+  x = mean_DE,
+  y = mean_DP,
   color = Status,
   text = paste0(
     "Code: ", Code,
     "<br>Phenology: ", Phenology,
     "<br>Part: ", Part,
     "<br>Status: ", Status,
-    "<br>Mean DE: ", round(mean_DE, 2)
+    "<br>Mean DE: ", round(mean_DE, 2),
+    "<br>Mean DP: ", round(mean_DP, 2)
   )
 )) +
   geom_point(size = 4) +
   labs(
-    title = "Top 20 Species Combinations by Mean DE",
-    x = "Code | Phenology | Part",
-    y = "Mean DE",
+    title = "Top 20 Species Combinations by Mean DE and DP",
+    x = "Mean DE",
+    y = "Mean DP",
     color = "Status"
   ) +
   theme_minimal(base_size = 12) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  xlim(13, 15) +   # You can adjust this as needed
+  ylim(6, NA)
 
 ggplotly(p1, tooltip = "text")
-
-
 ```
+
+### Frequency of Observation
 
 ```{r}
 #| warning: FALSE
@@ -184,34 +178,25 @@ biomass_DE <- data %>%
 
 ```
 
-### Digestible Protein
+## Grass Species
 
 ```{r}
-#| warning: FALSE
-
-# Step 1: Calculate mean DE and organize data
-top_20_DP <- data_clean %>%
-  group_by(Code, Phenology, Part) %>%
-  summarise(mean_DP = mean(DP, na.rm = TRUE), .groups = "drop") %>%
-  arrange(desc(mean_DP)) %>%
-  slice_head(n = 20) %>% 
-  mutate(combo_label = paste(Code, Phenology, Part, sep = "_"))%>%
-  mutate(combo_label = reorder(combo_label, -mean_DP))
-
-top_20_DP <- top_20_DP %>%
-  left_join(
-    data %>%
-      select(Code, Phenology, Part, Status) %>%
-      distinct(), 
-    by = c("Code", "Phenology", "Part")
+grass <- data %>%
+  filter(Family == "POACEAE") %>% 
+  group_by(Code, Phenology, Part, Status) %>%
+   summarise(
+    mean_DE = mean(DE, na.rm = TRUE),
+    mean_DP = mean(DP, na.rm = TRUE),
+    .groups = "drop"
   ) %>%
-  mutate(combo_label = paste(Code, Phenology, Part, sep = "_"),
-         combo_label = reorder(combo_label, -mean_DP))
+  arrange(desc(mean_DE), desc(mean_DP)) %>%  # Arrange by both
+  slice_head(n = 20) %>% 
+  mutate(combo_label = paste(Code, Phenology, Part, sep = "_"))
 
 
 ##creating interavtive scatterplot
-p3 <- ggplot(top_20_DP, aes(
-  x = combo_label,
+p5 <- ggplot(grass, aes(
+  x = mean_DE,
   y = mean_DP,
   color = Status,
   text = paste0(
@@ -219,116 +204,29 @@ p3 <- ggplot(top_20_DP, aes(
     "<br>Phenology: ", Phenology,
     "<br>Part: ", Part,
     "<br>Status: ", Status,
-    "<br>Mean DE: ", round(mean_DP, 2)
+    "<br>Mean DE: ", round(mean_DE, 2),
+    "<br>Mean DP: ", round(mean_DP, 2)
   )
 )) +
   geom_point(size = 4) +
+  geom_vline(xintercept = 13.5, linetype = "dashed", color = "red") +
+  geom_hline(yintercept = 7.5, linetype = "dashed", color = "red") +
   labs(
-    title = "Top 20 Species Combinations by Mean DP",
-    x = "Code | Phenology | Part",
+    title = "Top 20 Grass Species by Mean DE and DP",
+    x = "Mean DE",
     y = "Mean DP",
     color = "Status"
   ) +
   theme_minimal(base_size = 12) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-ggplotly(p3, tooltip = "text")
-
-
-```
-
-```{r}
-#| warning: FALSE
-# Step 2: Filter the dataset to only include those top 20 combinations
-filtered_DP <- data_clean %>%
-  semi_join(top_20_DP, by = c("Code", "Phenology", "Part"))
-
-# Count number of observations per Code–Phenology–Part combo
-DP_counts <- filtered_DP %>%
-  count(Code, Phenology, Part, name = "obs_count") %>%
-  left_join(
-    data %>%
-      select(Code, Phenology, Part, Status) %>%
-      distinct(),
-    by = c("Code", "Phenology", "Part")
-  ) %>%
-  mutate(combo_label = paste(Code, Phenology, Part, sep = "_"),
-         combo_label = reorder(combo_label, obs_count))
-
-p4 <- ggplot(DP_counts, aes(
-  x = combo_label,
-  y = obs_count,
-  fill = Status,
-  text = paste0(
-    "Code: ", Code,
-    "<br>Phenology: ", Phenology,
-    "<br>Part: ", Part,
-    "<br>Status: ", Status,
-    "<br>Observations: ", obs_count
-  )
-)) +
-  geom_col() +
-  coord_flip() +
-  labs(
-    title = "Observation Frequency of Top 20 Species Combos",
-    x = "Code | Phenology | Part",
-    y = "Number of Observations",
-    fill = "Status"
-  ) +
-  theme_minimal(base_size = 12)
-
-ggplotly(p4, tooltip = "text")
-```
-
-## Grass Species
-
-### Digestible Energy
-
-```{r}
-grass.DE <- data %>%
-  filter(Family == "POACEAE") %>% 
-  group_by(Code, Phenology, Part) %>%
-  summarise(mean_DE = mean(DE, na.rm = TRUE), .groups = "drop") %>%
-  arrange(desc(mean_DE)) %>%
-  slice_head(n = 20) %>% 
-  left_join(
-    data %>%
-      select(Code, Phenology, Part, Status) %>%
-      distinct(), 
-    by = c("Code", "Phenology", "Part")
-  ) %>%
-  mutate(combo_label = paste(Code, Phenology, Part, sep = "_"),
-         combo_label = reorder(combo_label, -mean_DE))
-
-##creating interavtive scatterplot
-p5 <- ggplot(grass.DE, aes(
-  x = combo_label,
-  y = mean_DE,
-  color = Status,
-  text = paste0(
-    "Code: ", Code,
-    "<br>Phenology: ", Phenology,
-    "<br>Part: ", Part,
-    "<br>Status: ", Status,
-    "<br>Mean DE: ", round(mean_DE, 2)
-  )
-)) +
-  geom_point(size = 4) +
-  labs(
-    title = "Top 20 Grass Species by Mean DE",
-    x = "Code | Phenology | Part",
-    y = "Mean DE",
-    color = "Status"
-  ) +
-  theme_minimal(base_size = 12) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  xlim(12, 14) +
+  ylim(0, NA)
 
 ggplotly(p5, tooltip = "text")
 ```
 
 ```{r}
 filtered_grass.DE <- data %>%
-  semi_join(grass.DE, by = c("Code", "Phenology", "Part"))
+  semi_join(grass, by = c("Code", "Phenology", "Part"))
 
 # Count number of observations per Code–Phenology–Part combo
 grass.DE_counts <- filtered_grass.DE %>%
@@ -365,89 +263,4 @@ p6 <- ggplot(grass.DE_counts, aes(
   theme_minimal(base_size = 12)
 
 ggplotly(p6, tooltip = "text")
-```
-
-### Digestible Protein 
-
-```{r}
-grass.DP <- data %>%
-  filter(Family == "POACEAE") %>% 
-  group_by(Code, Phenology, Part) %>%
-  summarise(mean_DP = mean(DP, na.rm = TRUE), .groups = "drop") %>%
-  arrange(desc(mean_DP)) %>%
-  slice_head(n = 20) %>% 
-  left_join(
-    data %>%
-      select(Code, Phenology, Part, Status) %>%
-      distinct(), 
-    by = c("Code", "Phenology", "Part")
-  ) %>%
-  mutate(combo_label = paste(Code, Phenology, Part, sep = "_"),
-         combo_label = reorder(combo_label, -mean_DP))
-
-##creating interavtive scatterplot
-p7 <- ggplot(grass.DP, aes(
-  x = combo_label,
-  y = mean_DP,
-  color = Status,
-  text = paste0(
-    "Code: ", Code,
-    "<br>Phenology: ", Phenology,
-    "<br>Part: ", Part,
-    "<br>Status: ", Status,
-    "<br>Mean DP: ", round(mean_DP, 2)
-  )
-)) +
-  geom_point(size = 4) +
-  labs(
-    title = "Top 20 Grass Species by Mean DP",
-    x = "Code | Phenology | Part",
-    y = "Mean DP",
-    color = "Status"
-  ) +
-  theme_minimal(base_size = 12) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-ggplotly(p7, tooltip = "text")
-```
-
-```{r}
-filtered_grass.DP <- data %>%
-  semi_join(grass.DP, by = c("Code", "Phenology", "Part"))
-
-# Count number of observations per Code–Phenology–Part combo
-grass.DP_counts <- filtered_grass.DP %>%
-  count(Code, Phenology, Part, name = "obs_count") %>%
-  left_join(
-    data %>%
-      select(Code, Phenology, Part, Status) %>%
-      distinct(),
-    by = c("Code", "Phenology", "Part")
-  ) %>%
-  mutate(combo_label = paste(Code, Phenology, Part, sep = "_"),
-         combo_label = reorder(combo_label, obs_count))
-
-p8 <- ggplot(grass.DP_counts, aes(
-  x = combo_label,
-  y = obs_count,
-  fill = Status,
-  text = paste0(
-    "Code: ", Code,
-    "<br>Phenology: ", Phenology,
-    "<br>Part: ", Part,
-    "<br>Status: ", Status,
-    "<br>Observations: ", obs_count
-  )
-)) +
-  geom_col() +
-  coord_flip() +
-  labs(
-    title = "Observation Frequency of Top 20 Grass Species by DP",
-    x = "Code | Phenology | Part",
-    y = "Number of Observations",
-    fill = "Status"
-  ) +
-  theme_minimal(base_size = 12)
-
-ggplotly(p8, tooltip = "text")
 ```
