@@ -272,28 +272,37 @@ ggplotly(p6, tooltip = "text")
 ### Grass Species Phenological Stages
 
 ```{r}
-grass_n <- data %>%
-  filter(
-    Family == "POACEAE",
-    str_detect(Phenology, "N")   # This matches any Phenology that contains "N"
-  ) %>%
-  group_by(Code, Phenology, Part, Status) %>%
+# Create a unified dataset with ordered phenological stages
+grass_combined <- data %>%
+  filter(Family == "POACEAE") %>%
+  mutate(Stage = case_when(
+    str_detect(Phenology, "N")  ~ "Newly Emergent",
+    str_detect(Phenology, "B")  ~ "Budding",
+    str_detect(Phenology, "FL") ~ "Flowering",
+    str_detect(Phenology, "M")  ~ "Mature",
+    str_detect(Phenology, "C")  ~ "Cured",
+    TRUE ~ NA_character_
+  )) %>%
+  filter(!is.na(Stage)) %>%
+  mutate(Stage = factor(Stage, levels = c("Newly Emergent", "Budding", "Flowering", "Mature", "Cured"))) %>%
+  group_by(Stage, Code, Phenology, Part, Status) %>%
   summarise(
     mean_DE = mean(DE, na.rm = TRUE),
     mean_DP = mean(DP, na.rm = TRUE),
     .groups = "drop"
   ) %>%
-  arrange(desc(mean_DE), desc(mean_DP)) %>%
+  arrange(Stage, desc(mean_DE), desc(mean_DP)) %>%
+  group_by(Stage) %>%
   slice_head(n = 20) %>%
   mutate(combo_label = paste(Code, Phenology, Part, sep = "_"))
 
-# Step 2: Plot
-p7 <- ggplot(grass_n, aes(
+p_combined <- ggplot(grass_combined, aes(
   x = mean_DE,
   y = mean_DP,
   color = Status,
   text = paste0(
-    "Code: ", Code,
+    "Stage: ", Stage,
+    "<br>Code: ", Code,
     "<br>Phenology: ", Phenology,
     "<br>Part: ", Part,
     "<br>Status: ", Status,
@@ -301,202 +310,25 @@ p7 <- ggplot(grass_n, aes(
     "<br>Mean DP: ", round(mean_DP, 2)
   )
 )) +
-  geom_point(size = 4) +
+  geom_point(size = 3) +
   geom_vline(xintercept = 13.5, linetype = "dashed", color = "red") +
   geom_hline(yintercept = 7.5, linetype = "dashed", color = "red") +
   labs(
-    title = "Comparing Grass Species in Newly Emergent Stage",
+    title = "Comparing Grass Species by Phenological Stage",
     x = "Mean DE",
     y = "Mean DP",
     color = "Status"
   ) +
-  theme_minimal(base_size = 12) +
-  xlim(12, 14) +
-  ylim(0, NA)
+  facet_wrap(~ Stage, scales = "free") +
+  scale_x_continuous(
+  breaks = function(x) floor(min(x)):ceiling(max(x)),
+  labels = scales::number_format(accuracy = 1)
+) +
+scale_y_continuous(
+  breaks = function(x) floor(min(x)):ceiling(max(x)),
+  labels = scales::number_format(accuracy = 1)
+) +
+  theme_minimal(base_size = 12)
 
-ggplotly(p7, tooltip = "text")
-```
-
-```{r}
-grass_b <- data %>%
-  filter(
-    Family == "POACEAE",
-    str_detect(Phenology, "B")   # This matches any Phenology that contains "N"
-  ) %>%
-  group_by(Code, Phenology, Part, Status) %>%
-  summarise(
-    mean_DE = mean(DE, na.rm = TRUE),
-    mean_DP = mean(DP, na.rm = TRUE),
-    .groups = "drop"
-  ) %>%
-  arrange(desc(mean_DE), desc(mean_DP)) %>%
-  slice_head(n = 20) %>%
-  mutate(combo_label = paste(Code, Phenology, Part, sep = "_"))
-
-# Step 2: Plot
-p8 <- ggplot(grass_b, aes(
-  x = mean_DE,
-  y = mean_DP,
-  color = Status,
-  text = paste0(
-    "Code: ", Code,
-    "<br>Phenology: ", Phenology,
-    "<br>Part: ", Part,
-    "<br>Status: ", Status,
-    "<br>Mean DE: ", round(mean_DE, 2),
-    "<br>Mean DP: ", round(mean_DP, 2)
-  )
-)) +
-  geom_point(size = 4) +
-  geom_vline(xintercept = 13.5, linetype = "dashed", color = "red") +
-  geom_hline(yintercept = 7.5, linetype = "dashed", color = "red") +
-  labs(
-    title = "Comparing Grass Species in Budding Stage",
-    x = "Mean DE",
-    y = "Mean DP",
-    color = "Status"
-  ) +
-  theme_minimal(base_size = 12) +
-  xlim(12, 14) +
-  ylim(0, NA)
-
-ggplotly(p8, tooltip = "text")
-```
-
-```{r}
-grass_fl <- data %>%
-  filter(
-    Family == "POACEAE",
-    str_detect(Phenology, "FL")   # This matches any Phenology that contains "N"
-  ) %>%
-  group_by(Code, Phenology, Part, Status) %>%
-  summarise(
-    mean_DE = mean(DE, na.rm = TRUE),
-    mean_DP = mean(DP, na.rm = TRUE),
-    .groups = "drop"
-  ) %>%
-  arrange(desc(mean_DE), desc(mean_DP)) %>%
-  slice_head(n = 20) %>%
-  mutate(combo_label = paste(Code, Phenology, Part, sep = "_"))
-
-# Step 2: Plot
-p9 <- ggplot(grass_fl, aes(
-  x = mean_DE,
-  y = mean_DP,
-  color = Status,
-  text = paste0(
-    "Code: ", Code,
-    "<br>Phenology: ", Phenology,
-    "<br>Part: ", Part,
-    "<br>Status: ", Status,
-    "<br>Mean DE: ", round(mean_DE, 2),
-    "<br>Mean DP: ", round(mean_DP, 2)
-  )
-)) +
-  geom_point(size = 4) +
-  geom_vline(xintercept = 13.5, linetype = "dashed", color = "red") +
-  geom_hline(yintercept = 7.5, linetype = "dashed", color = "red") +
-  labs(
-    title = "Comparing Grass Species in Flowering Stage",
-    x = "Mean DE",
-    y = "Mean DP",
-    color = "Status"
-  ) +
-  theme_minimal(base_size = 12) +
-  xlim(12, 14) +
-  ylim(0, NA)
-
-ggplotly(p9, tooltip = "text")
-```
-
-```{r}
-grass_m <- data %>%
-  filter(
-    Family == "POACEAE",
-    str_detect(Phenology, "M")   # This matches any Phenology that contains "N"
-  ) %>%
-  group_by(Code, Phenology, Part, Status) %>%
-  summarise(
-    mean_DE = mean(DE, na.rm = TRUE),
-    mean_DP = mean(DP, na.rm = TRUE),
-    .groups = "drop"
-  ) %>%
-  arrange(desc(mean_DE), desc(mean_DP)) %>%
-  slice_head(n = 20) %>%
-  mutate(combo_label = paste(Code, Phenology, Part, sep = "_"))
-
-# Step 2: Plot
-p10 <- ggplot(grass_m, aes(
-  x = mean_DE,
-  y = mean_DP,
-  color = Status,
-  text = paste0(
-    "Code: ", Code,
-    "<br>Phenology: ", Phenology,
-    "<br>Part: ", Part,
-    "<br>Status: ", Status,
-    "<br>Mean DE: ", round(mean_DE, 2),
-    "<br>Mean DP: ", round(mean_DP, 2)
-  )
-)) +
-  geom_point(size = 4) +
-  geom_vline(xintercept = 13.5, linetype = "dashed", color = "red") +
-  geom_hline(yintercept = 7.5, linetype = "dashed", color = "red") +
-  labs(
-    title = "Comparing Grass Species in Mature Stage",
-    x = "Mean DE",
-    y = "Mean DP",
-    color = "Status"
-  ) +
-  theme_minimal(base_size = 12) +
-  xlim(7.5, 14) +
-  ylim(0, NA)
-
-ggplotly(p10, tooltip = "text")
-```
-
-```{r}
-grass_c <- data %>%
-  filter(
-    Family == "POACEAE",
-    str_detect(Phenology, "C")   # This matches any Phenology that contains "N"
-  ) %>%
-  group_by(Code, Phenology, Part, Status) %>%
-  summarise(
-    mean_DE = mean(DE, na.rm = TRUE),
-    mean_DP = mean(DP, na.rm = TRUE),
-    .groups = "drop"
-  ) %>%
-  arrange(desc(mean_DE), desc(mean_DP)) %>%
-  slice_head(n = 20) %>%
-  mutate(combo_label = paste(Code, Phenology, Part, sep = "_"))
-
-# Step 2: Plot
-p11 <- ggplot(grass_c, aes(
-  x = mean_DE,
-  y = mean_DP,
-  color = Status,
-  text = paste0(
-    "Code: ", Code,
-    "<br>Phenology: ", Phenology,
-    "<br>Part: ", Part,
-    "<br>Status: ", Status,
-    "<br>Mean DE: ", round(mean_DE, 2),
-    "<br>Mean DP: ", round(mean_DP, 2)
-  )
-)) +
-  geom_point(size = 4) +
-  geom_vline(xintercept = 13.5, linetype = "dashed", color = "red") +
-  geom_hline(yintercept = 7.5, linetype = "dashed", color = "red") +
-  labs(
-    title = "Comparing Grass Species in Cured Stage",
-    x = "Mean DE",
-    y = "Mean DP",
-    color = "Status"
-  ) +
-  theme_minimal(base_size = 12) +
-  xlim(10, NA) +
-  ylim(0, NA)
-
-ggplotly(p11, tooltip = "text")
+ggplotly(p_combined, tooltip = "text")
 ```
