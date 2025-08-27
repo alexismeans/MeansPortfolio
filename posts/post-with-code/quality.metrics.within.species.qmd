@@ -1,0 +1,300 @@
+---
+title: "Comparing Quality between PVTs"
+date: 8/21/2025
+code-fold: true
+---
+
+```{r}
+#| warning: FALSE
+library(tidyverse)
+
+quality <- read.csv("C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/FRESH/processed.data/4.24.25_cleaned_quality.csv")
+
+totalquality <- read.csv("C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/FRESH/raw.data/totalquality.csv")
+
+plant <- read.csv("C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/Cleaning/processed.data/plant.csv")
+
+plant <- plant %>% 
+  select(-Spp, -CommonName, -Duration) %>% 
+  rename(Spp = Code) %>% 
+  select(Spp, Family, Genus, FG_New, Status)
+
+totalquality <- totalquality %>% 
+  rename(UniqueID = ID) %>% 
+  select(Date, Transect, UniqueID)
+
+d <- quality %>% 
+  left_join(y = totalquality,
+          by = "UniqueID") %>% 
+  select(Date, Transect, Sample_ID, PVT, Spp, Pheno, Part, Description, DP, DE) %>%
+  distinct(Sample_ID, .keep_all = TRUE) %>% 
+  left_join(y = plant, 
+            by = "Spp") %>% 
+  mutate(Date = mdy(Date)) %>% 
+  mutate(Season = if_else(Date < ymd("2024-06-01"), "SP", "SU")) %>% 
+  select(-Date) %>% 
+  mutate(Description = paste0(Description, "_", Season)) 
+
+d <- d %>%
+filter(DE != "#VALUE!", DP != "#VALUE!")
+
+d <- d %>% 
+  mutate(
+    DE = as.numeric(DE),
+    DP = as.numeric(DP),
+    PVT = as.factor(PVT),
+    Season = as.factor(Season),
+    Spp = as.factor(Spp),
+    Pheno = as.factor(Pheno),
+    Part = as.factor(Part)
+  ) 
+
+d <- d %>%
+  mutate(
+    Pheno = factor(Pheno, levels = c("N", "B", "FL", "FR", "M", "C"))
+  )
+```
+
+```{r}
+summary_df <- d %>%
+  group_by(PVT, Spp, Pheno, Part, Season) %>%
+  summarise(
+    DE_mean = mean(DE, na.rm = TRUE),
+    DP_mean = mean(DP, na.rm = TRUE),
+    n = n(),
+    .groups = "drop"
+  )
+
+View(summary_df)
+```
+
+```{r}
+season_comp <- summary_df %>%
+  pivot_wider(
+    names_from = Season,
+    values_from = c(DE_mean, DP_mean)
+  ) %>%
+  mutate(
+    DE_diff = DE_mean_SU - DE_mean_SP,
+    DP_diff = DP_mean_SU - DP_mean_SP
+  )
+
+View(season_comp)
+
+#write.csv(season_comp, "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/quality/processed.data/season_comparison.csv")
+```
+
+```{r}
+pvt_comp <- summary_df %>%
+  pivot_wider(
+    names_from = PVT,
+    values_from = c(DE_mean, DP_mean)
+  )
+
+View(pvt_comp)
+
+#write.csv(pvt_comp, "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/quality/processed.data/pvt_comparison.csv")
+```
+
+```{r}
+
+brte_fl <- d %>%
+  filter(Spp == "BRTE", Pheno == "FL") %>%
+  mutate(
+    Season = factor(Season, levels = c("SP", "SU")),
+    PVT = as.factor(PVT)
+  )
+
+# Pivot DE and DP into long format
+brte_long <- brte_fl %>%
+  pivot_longer(
+    cols = c(DE, DP),
+    names_to = "Metric",
+    values_to = "Value"
+  )
+
+# Plot with facets
+ggplot(brte_long, aes(x = PVT, y = Value, color = Season)) +
+  geom_jitter(width = 0.2, height = 0, size = 2, alpha = 0.7) +
+  facet_wrap(~ Metric, scales = "free_y") +    # separate panels for DE and DP
+  labs(title = "BRTE DE and DP by PVT and Season (FL)",
+       y = "Value", x = "PVT") +
+  theme_minimal()
+```
+
+```{r}
+brte_m <- d %>%
+  filter(Spp == "BRTE", Pheno == "M") %>%
+  mutate(
+    Season = factor(Season, levels = c("SP", "SU")),
+    PVT = as.factor(PVT)
+  )
+
+# Pivot DE and DP into long format
+brte_m <- brte_m %>%
+  pivot_longer(
+    cols = c(DE, DP),
+    names_to = "Metric",
+    values_to = "Value"
+  )
+
+# Plot with facets
+ggplot(brte_m, aes(x = PVT, y = Value, color = Season)) +
+  geom_jitter(width = 0.2, height = 0, size = 2, alpha = 0.7) +
+  facet_wrap(~ Metric, scales = "free_y") +    # separate panels for DE and DP
+  labs(title = "BRTE DE and DP by PVT and Season (M)",
+       y = "Value", x = "PVT") +
+  theme_minimal()
+
+```
+
+```{r}
+brte_c <- d %>%
+  filter(Spp == "BRTE", Pheno == "C") %>%
+  mutate(
+    Season = factor(Season, levels = c("SP", "SU")),
+    PVT = as.factor(PVT)
+  )
+
+# Pivot DE and DP into long format
+brte_c <- brte_c %>%
+  pivot_longer(
+    cols = c(DE, DP),
+    names_to = "Metric",
+    values_to = "Value"
+  )
+
+# Plot with facets
+ggplot(brte_c, aes(x = PVT, y = Value, color = Season)) +
+  geom_jitter(width = 0.2, height = 0, size = 2, alpha = 0.7) +
+  facet_wrap(~ Metric, scales = "free_y") +    # separate panels for DE and DP
+  labs(title = "BRTE DE and DP by PVT and Season (C)",
+       y = "Value", x = "PVT") +
+  theme_minimal()
+
+```
+
+```{r}
+pssp6_n <- d %>%
+  filter(Spp == "PSSP6", Pheno == "N") %>%
+  mutate(
+    Season = factor(Season, levels = c("SP", "SU")),
+    PVT = as.factor(PVT)
+  )
+
+# Pivot DE and DP into long format
+pssp6_n <- pssp6_n %>%
+  pivot_longer(
+    cols = c(DE, DP),
+    names_to = "Metric",
+    values_to = "Value"
+  )
+
+# Plot with facets
+ggplot(pssp6_n, aes(x = PVT, y = Value, color = Season)) +
+  geom_jitter(width = 0.2, height = 0, size = 2, alpha = 0.7) +
+  facet_wrap(~ Metric, scales = "free_y") +    # separate panels for DE and DP
+  labs(title = "PSSP6 DE and DP by PVT and Season (N)",
+       y = "Value", x = "PVT") +
+  theme_minimal()
+```
+
+```{r}
+pssp6_fl <- d %>%
+  filter(Spp == "PSSP6", Pheno == "FL") %>%
+  mutate(
+    Season = factor(Season, levels = c("SP", "SU")),
+    PVT = as.factor(PVT)
+  )
+
+# Pivot DE and DP into long format
+pssp6_fl <- pssp6_fl %>%
+  pivot_longer(
+    cols = c(DE, DP),
+    names_to = "Metric",
+    values_to = "Value"
+  )
+
+# Plot with facets
+ggplot(pssp6_fl, aes(x = PVT, y = Value, color = Season)) +
+  geom_jitter(width = 0.2, height = 0, size = 2, alpha = 0.7) +
+  facet_wrap(~ Metric, scales = "free_y") +    # separate panels for DE and DP
+  labs(title = "PSSP6 DE and DP by PVT and Season (FL)",
+       y = "Value", x = "PVT") +
+  theme_minimal()
+```
+
+```{r}
+pssp6_m <- d %>%
+  filter(Spp == "PSSP6", Pheno == "M") %>%
+  mutate(
+    Season = factor(Season, levels = c("SP", "SU")),
+    PVT = as.factor(PVT)
+  )
+
+# Pivot DE and DP into long format
+pssp6_m <- pssp6_m %>%
+  pivot_longer(
+    cols = c(DE, DP),
+    names_to = "Metric",
+    values_to = "Value"
+  )
+
+# Plot with facets
+ggplot(pssp6_m, aes(x = PVT, y = Value, color = Season)) +
+  geom_jitter(width = 0.2, height = 0, size = 2, alpha = 0.7) +
+  facet_wrap(~ Metric, scales = "free_y") +    # separate panels for DE and DP
+  labs(title = "PSSP6 DE and DP by PVT and Season (M)",
+       y = "Value", x = "PVT") +
+  theme_minimal()
+```
+
+```{r}
+amme_b <- d %>%
+  filter(Spp == "AMME", Pheno == "B") %>%
+  mutate(
+    Season = factor(Season, levels = c("SP", "SU")),
+    PVT = as.factor(PVT)
+  )
+
+# Pivot DE and DP into long format
+amme_b <- amme_b %>%
+  pivot_longer(
+    cols = c(DE, DP),
+    names_to = "Metric",
+    values_to = "Value"
+  )
+
+# Plot with facets
+ggplot(amme_b, aes(x = PVT, y = Value, color = Season)) +
+  geom_jitter(width = 0.2, height = 0, size = 2, alpha = 0.7) +
+  facet_wrap(~ Metric, scales = "free_y") +    # separate panels for DE and DP
+  labs(title = "AMME DE and DP by PVT and Season (B)",
+       y = "Value", x = "PVT") +
+  theme_minimal()
+```
+
+```{r}
+acth7_fl<- d %>%
+  filter(Spp == "ACTH7", Pheno == "FL") %>%
+  mutate(
+    Season = factor(Season, levels = c("SP", "SU")),
+    PVT = as.factor(PVT)
+  )
+
+# Pivot DE and DP into long format
+acth7_fl <- acth7_fl %>%
+  pivot_longer(
+    cols = c(DE, DP),
+    names_to = "Metric",
+    values_to = "Value"
+  )
+
+# Plot with facets
+ggplot(acth7_fl, aes(x = PVT, y = Value, color = Season)) +
+  geom_jitter(width = 0.2, height = 0, size = 2, alpha = 0.7) +
+  facet_wrap(~ Metric, scales = "free_y") +    # separate panels for DE and DP
+  labs(title = "ACTH7 DE and DP by PVT and Season (FL)",
+       y = "Value", x = "PVT") +
+  theme_minimal()
+```

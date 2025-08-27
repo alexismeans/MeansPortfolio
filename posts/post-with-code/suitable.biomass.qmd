@@ -66,10 +66,6 @@ ggplot(percentdata, aes(x = PVT, y = percent_biomass, fill = PVT)) +
   theme_minimal() + theme(legend.position = "none")
 ```
 
-**DE Visualizations**
-
-**DP Visualizations**
-
 ```{r}
 # Create the boxplot
 ggplot(data, aes(x = PVT, y = SuitableBiomass, fill = PVT)) + 
