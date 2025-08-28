@@ -19,7 +19,6 @@ This chunk of code loads in my quality measurements for my species with observed
 #| warning: FALSE
 
 library(lpSolve)
-library(openxlsx)
 library(tools)
 library(dplyr)
 library(sf)
