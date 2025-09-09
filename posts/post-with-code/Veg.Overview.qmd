@@ -1,0 +1,639 @@
+---
+title: "Project Recap"
+code-fold: TRUE
+Date: 9/4/2025
+---
+
+# Project Recap
+
+## Sample Timing
+
+```{r}
+#| warning: FALSE
+#| message: false
+library(readr)
+library(readxl)
+library(tidyverse)
+library(sf)
+
+db <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/VegDatabases/Working.composition.data.xlsx"
+
+transect <- read_excel(db, "Transect")
+
+transect <- transect %>% 
+  select(-Personnel, -PVTDescrip, -`Temp (F)`, -Moved, -Notes, -MidLat, -MidLong, -EndLat, -EndLong) %>% 
+  mutate(Date = ymd(Date)) %>% 
+  rename(lat = BeginLat,
+         long = BeginLong)
+  
+  
+sf <- st_as_sf(transect, coords = c("long", "lat"), crs = 4326, remove = FALSE)
+utm <- st_transform(sf, crs = 32610)
+
+transect$easting <- st_coordinates(utm)[,1]
+transect$northing<- st_coordinates(utm)[,2]
+
+transect <- transect %>% 
+  mutate(PVT = recode(PVT,
+                      '672' = "Grassland",
+                      '682' = "Riparian",
+                      '668' = "Scabland",
+                      '669' = "Shrubland",
+                      '674' = "Intermediate",
+                      '660' = "Sparse"))
+
+```
+
+### Total Transects Sampled
+
+Between 2024 and 2025, we sampled 109 transects across six different vegetation communities in the canyon. Most of these were in Grassland (58 transects), with fewer in Intermediate (13), Riparian (12), Scabland (11), Shrubland (11), and Sparse (4). The number of transects in each community reflected how much of the study area that community covered, based on Landfire data. Since Grassland makes up more than 85% of the site, it naturally had the most sampling, while the other communities only covered about 1–5% each. As you all know, there are plenty of rocky(sparse) areas that sheep often use, but because they were tough to get to and didn't usually have much plant diversity, we ended up sampling fewer transects within these communities. Still, I think the sampling we did was enough to capture what’s going on in that community.
+
+```{r}
+#| warning: FALSE
+#| message: false
+library(ggplot2)
+
+ggplot(transect, aes (x = PVT))+
+  geom_bar(fill = "darkblue")+
+  labs(title = "Number of Transects Sampled",
+       x = "PVT Type",
+       y = "Count") +
+  theme_grey()
+```
+
+### Timing of Sampling
+
+In our first year, we focused heavily on the grassland community and sampled transects more strictly in proportion to the area each vegetation community covered. Grassland was sampled two to three times a week, with fewer visits to the other communities, which didn’t give us much coverage outside grassland. In the second year, we shifted more effort toward the other vegetation communities to better capture their phenology timing.
+
+The first graph shows the timing of transects were sampled in both 2024 and 2025, and the second gives a better picture of how the sampling timing overlapped for each vegetation community in both years. Overall, I think we did a good job filling gaps in the smaller (but equally important) vegetation communities, giving us a clearer picture of how phenology timing varies across them.
+
+```{r}
+#| warning: FALSE
+#| message: false
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+
+transect <- transect %>% 
+  mutate (Year = year(Date))
+
+ggplot(transect, aes(x = Date, y = PVT)) +
+         geom_point(color = "blue")+
+         scale_x_date(date_labels = "%b")+
+         labs(title = "Sampling Dates",
+              x = "Month",
+              y = "PVT Category") +
+         facet_wrap(~ Year, scales = "free_x") +
+         theme_bw()
+```
+
+```{r}
+#| warning: FALSE
+#| message: false
+transect <- transect %>% 
+ mutate(DOY = yday(Date),
+        Year = factor(year(Date)))
+
+ggplot(transect, aes(x = DOY, y = PVT, color = Year)) +
+         geom_point()+
+         scale_x_continuous(breaks = c( 75, 105, 136, 166, 197, 228),
+                      labels = c("March", "Apr", "May", "June", "July", "Aug"))+
+         labs(title = "Sampling Dates",
+              x = "Month",
+              y = "PVT Category",
+              color = "Year") +
+         theme_bw()
+```
+
+### Sample Locations
+
+I also wanted to share a visual of where our transects were distributed. In the first year, since we didn’t yet have collar data on summer movements, we focused on a boundary within two miles of the river, prioritizing points closer to the river over those further away on top of the canyon.
+
+In the second year, we refined the boundary using GPS data from the previous summer. The shape stayed similar but narrowed further into the canyon. The extra floats were a big help for reaching those tougher spots at the bottom of the canyon (thanks again to everyone who helped with those!). Overall, I’m really happy with how the distribution turned out. The only areas with lighter sampling were on the West side where access was limited, but the floats went a long way toward filling in those gaps.
+
+```{r}
+#| warning: FALSE
+#| message: false
+library(ggmap)
+
+#plot without map in background
+ggplot(transect, aes(x = easting, y = northing, color = PVT))+
+  geom_point(size = 2, alpha = 0.8)+
+  scale_color_manual (values = c(
+    "Grassland" = "green",
+    "Riparian" = "blue",
+    "Sparse" = "brown",
+    "Intermediate" = "yellow",
+    "Scabland" = "purple",
+    "Shrubland" = "red"
+  ))+
+  labs(title = "Sample locations within the John Day",
+       x = "Easting",
+       y = "Northing",
+       color = "Vegetation Type")+
+  theme_minimal()+
+  theme(legend.position = "right")
+```
+
+## Timing of "Green-up" 
+
+### Overall timing 
+
+Next, I wanted to look at the overall timing of green-up in the canyon. The first graph combines results from both summers. As expected, the peak of “New” growth is around March–April, while the biggest transition to “Cured” plants occurs around May–June. It’s neat to see this line up with what Emily found regarding the birth pulse, with the most new (and highly nutritious) forage coinciding with peak lambing.
+
+I also compared the timing between years. Overall, the trends look fairly similar. Anecdotally, I thought green-up in 2025 might have moved faster due to lower rainfall, but that doesn’t seem to be reflected in the month-to-month observations.
+
+*(P.S. The graphs for this section are interactive! If you are interested, you can hover over each box to see the actual percentages of each group and compare them across months.)*
+
+```{r}
+#| warning: FALSE
+#| message: false
+
+library(plotly)
+comp <- read_excel(db, "Composition")
+
+comp <- comp %>%
+  mutate(Date = ymd(Date)) %>% 
+   mutate(DOY = yday(Date),
+        Month = month(Date, label = TRUE),
+        Year = factor(year(Date))) %>% 
+    filter(!Spp %in% c("LITTER", "LICHEN", "ROCKS", "WATER", "EARTH", "DEADFALL", "NA")) %>% 
+  mutate(PVT = substr(PlotID, 4, 6)) %>% 
+  mutate(Pheno = na_if(Pheno, "NA")) %>% 
+  filter(!is.na(Pheno))
+
+
+comp <- comp %>% 
+  mutate(
+    Pheno = case_when(
+      Pheno == "N" ~ "New",
+      Pheno == "B" ~ "Budding",
+      Pheno == "FL" ~ "Flowering",
+      Pheno == "FR" ~ "Fruiting",
+      Pheno == "M" ~ "Mature",
+      Pheno == "C" ~ "Cured",
+      TRUE ~ Pheno
+    ),
+    PVT = case_when(
+      PVT == "672" ~ "Grassland",
+      PVT == "682" ~ "Riparian",
+      PVT == "660" ~ "Sparse",
+      PVT == "668" ~ "Scabland",
+      PVT == "669" ~ "Shrubland",
+      PVT == "674" ~ "Intermediate",
+      
+    )
+  ) 
+
+comp$Pheno <- factor(comp$Pheno, 
+                       levels = c("New", "Budding", "Flowering", "Fruiting", "Mature", "Cured"),
+                       ordered = TRUE)
+
+comp_plot <- comp %>%
+  count(Month, Pheno) %>%
+  group_by(Month) %>%
+  mutate(prop = n / sum(n)) %>%
+  ungroup()
+
+
+p1 <-  ggplot(comp_plot, aes(x = Month, y = prop, fill = Pheno,
+                           text = paste("Phenology:", Pheno,
+                                        "<br>Month:", Month,
+                                        "<br>Proportion:", scales::percent(prop)))) +
+  geom_col() +
+  scale_y_continuous(labels = scales::percent) +
+  labs(y = "Proportion", x = "Month", fill = "Phenology stage") +
+  theme_minimal()
+
+# Convert to interactive Plotly plot
+ggplotly(p1, tooltip = "text")
+```
+
+```{r}
+# Prepare the data
+df_plot <- comp %>%
+  count(Year, Month, Pheno) %>%
+  group_by(Year, Month) %>%
+  mutate(prop = n / sum(n))
+
+# Base ggplot
+p <- ggplot(df_plot, aes(x = Month, y = prop, fill = Pheno,
+                         text = paste("Phenology:", Pheno,
+                                      "<br>Month:", Month,
+                                      "<br>Year:", Year,
+                                      "<br>Proportion:", scales::percent(prop)))) +
+  geom_col() +
+  scale_y_continuous(labels = scales::percent) +
+  labs(y = "Proportion", x = "Month", fill = "Phenology stage") +
+  facet_wrap(~Year, ncol = 1) +
+  theme_minimal()
+
+# Convert to interactive plotly plot
+ggplotly(p, tooltip = "text")
+```
+
+### Timing by Vegetation Community
+
+I was also curious to see how green-up timing varied across the different vegetation communities, especially in the riparian areas. The timing in Grassland, Intermediate, and Shrubland communities was fairly similar, while Scabland and Sparse areas progressed the fastest. As expected, the Riparian areas showed a slower progression through green-up compared to the other communities, likely providing more nutritious forage into late June or early July—just as lactation is hopefully slowing for many of the ewes.
+
+```{r}
+pvt_comp <- comp %>%
+  count(PVT, Month, Pheno) %>%
+  group_by(PVT, Month) %>%
+  mutate(prop = n / sum(n)) %>%
+  ungroup()
+
+
+p2 <- ggplot(pvt_comp, aes(x = Month, y = prop, fill = Pheno,
+                          text = paste("Vegetation community:", PVT,
+                                       "<br>Phenology:", Pheno,
+                                       "<br>Month:", Month,
+                                       "<br>Proportion:", scales::percent(prop)))) +
+  geom_col() +
+  scale_y_continuous(labels = scales::percent) +
+  labs(y = "Proportion", x = "Month", fill = "Phenology stage") +
+  facet_wrap(~PVT, ncol = 2) +
+  theme_minimal()
+
+
+ggplotly(p2, tooltip = "text")
+```
+
+```{r}
+#| warning: FALSE
+#| message: false
+comp %>%
+  count(Month, Pheno) %>%
+  group_by(Month) %>%
+  mutate(prop = n / sum(n)) %>%
+  ggplot(aes(x = Month, y = prop, color = Pheno, group = Pheno)) +
+  geom_smooth(se = FALSE, method = "loess", span = 0.8, size = 1.2) +
+  geom_point(size = 2) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(y = "Proportion", x = "Month", color = "Phenology stage") +
+  theme_minimal()
+```
+
+```{r}
+#| warning: FALSE
+#| message: false
+comp <- comp %>%
+  mutate(PVT = substr(PlotID, 4, 6))
+
+comp %>%
+  count(PVT, Month, Pheno) %>%
+  group_by(PVT, Month) %>%
+  mutate(prop = n / sum(n)) %>%
+  ggplot(aes(x = Month, y = prop, color = Pheno, group = Pheno)) +
+  geom_smooth(se = FALSE, method = "loess", span = 0.8, size = 1.2) +
+  geom_point(size = 2) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(y = "Proportion", x = "Month", color = "Phenology stage") +
+  facet_wrap(~PVT, ncol = 2) +   # adjust ncol to control layout
+  theme_minimal()
+```
+
+***biomass overtime?***
+
+## Quality Metrics
+
+This section looks at the quality metrics from the 2024 season. The DE and DP values here are still rough estimates for each sample. I used general values to get a preliminary sense of these metrics while waiting on additional nutrient information needed for a correction factor. That said, these estimates are mostly in line with what I expect the final values to be. The biggest shifts will occur in species with high tannin contents such as sagebrush.
+
+All results here are based on the 2024 samples. The 2025 quality data are still being processed, and once complete, we’ll have much more information—especially for the riparian areas.
+
+### Top Grass Species
+
+These first graphs shows the overall trend in quality metrics for different functional groups we observed. The dashed lines represent the energetic demand thresholds for a lactating female sheep. In theory, any species falling in the upper-right quadrant meets these energetic demands in a gram of forage. That said, these metrics don’t account for biomass, so take them with a grain of salt—some species may still make a substantial contribution to the total suitable biomass when available in larger quantities.
+
+I’m still working on biomass predictions, which will help determine how much suitable forage exists within the areas we sampled before scaling up to the landscape level. I hope to have those results soon.
+
+*(this one is interactive too)*
+
+```{r}
+#| warning: FALSE
+#| message: false
+q <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/quality/processed.data/24_quality_results.xlsx"
+
+quality <- read_excel(q, "24_quality_results")
+plant <- read_excel(db, "PlantList")
+
+plant <- plant %>% 
+  select(USDACode, Family, Genus, Spp, FunctionalGroup, FG_New, Status) %>% 
+  rename(Species = Spp,
+         Spp = USDACode)
+
+quality <- quality %>% 
+  select(Sample_ID, PVT, Spp, Pheno, Part, DP, DE) %>% 
+  left_join(plant, by = "Spp")
+
+grass <- quality %>% 
+  filter(str_detect(FunctionalGroup, "G")) %>% 
+  filter(Spp != "UNK GRASS")
+
+
+# Create ggplot with dashed reference lines
+p <- ggplot(grass, aes(
+  x = DE,
+  y = DP,
+  color = Status,
+  text = paste0( 
+    "Spp: ", Spp, 
+    "<br>Pheno: ", Pheno, 
+    "<br>Part: ", Part,
+    "<br>Status: ", Status,
+    "<br>DE: ", round(DE, 2),
+    "<br>DP: ", round(DP, 2)
+  )
+)) +
+  geom_point(size = 4) +
+  geom_vline(xintercept = 11.5, linetype = "dashed", color = "gray50") +
+  geom_hline(yintercept = 7.5, linetype = "dashed", color = "gray50") +
+  labs(
+    title = "Overall Quality Metrics of Observed Grasses",
+    x = "DE",
+    y = "DP",
+    color = "Status"
+  ) +
+  theme_minimal(base_size = 12)
+
+# Convert to interactive Plotly plot
+p_plotly <- ggplotly(p, tooltip = "text") %>%
+  layout(
+    legend = list(
+      title = list(text = ""),
+      orientation = "h",   # horizontal
+      x = 0.5,             # center horizontally
+      y = -0.2,            # below the x-axis
+      xanchor = "center",
+      yanchor = "top"
+    )
+  )
+
+p_plotly
+
+```
+
+This graph is a zoomed-in look at the previous one, focusing only on the species that landed in the upper right quadrant. I think the "VUMIM_C" and "AGCR_FL" values might be outliers—at least for "VUMIM_C", I have other quality metrics that fall below both the DE and DP thresholds, which is more in line with what I’d expect.
+
+As expected, cheatgrass and ripgut brome came out on top for grass species with the highest quality metrics, with bluebunch wheatgrass and basin wildrye not far behind. It’s worth noting that all of these measurements were taken when the species were still in their newly emergent stage.
+
+*(this one is not sorry)*
+
+```{r}
+#| warning: FALSE
+#| message: false
+
+library(ggrepel)  # optional, for non-overlapping labels
+
+# Create plot
+ggplot(grass, aes(x = DE, y = DP)) +
+  geom_point(aes(color = Status), size = 3) +  # points colored by Status
+  # Label each point
+  geom_text_repel(aes(label = paste(Spp, Pheno, sep = "_")), size = 3) +  # uses ggrepel to avoid overlap
+  # Set axis starting points
+  xlim(11, max(grass$DE) + 0.5) +
+  ylim(7, max(grass$DP) + 0.5) +
+  labs(
+    title = "Top Grass Species",
+    x = "DE",
+    y = "DP",
+    color = "Status"
+  ) +
+  theme_minimal(base_size = 12)
+```
+
+###  Top Forb Species
+
+Looking at the forbs is a little more chaotic. There are more species that meet both the DE and DP thresholds, but there are still a substantial number that fall below those thresholds.
+
+```{r}
+#| warning: FALSE
+#| message: false
+forb <- quality %>% 
+  filter(str_detect(FunctionalGroup, "F"))
+
+
+p2 <- ggplot(forb, aes(
+  x = DE,
+  y = DP,
+  color = Status,
+  text = paste0( 
+    "Spp: ", Spp, 
+    "<br>Pheno: ", Pheno, 
+    "<br>Part: ", Part,
+    "<br>Status: ", Status,
+    "<br>DE: ", round(DE, 2),
+    "<br>DP: ", round(DP, 2)
+  )
+)) +
+  geom_point(size = 3) +
+  geom_vline(xintercept = 11.5, linetype = "dashed", color = "gray50") +
+  geom_hline(yintercept = 7.5, linetype = "dashed", color = "gray50") +
+  labs(
+    title = "Overall Quality Metrics of Observed Forbs",
+    x = "DE",
+    y = "DP",
+    color = "Status"
+  ) +
+  theme_minimal(base_size = 12) 
+
+# Convert to interactive Plotly plot
+
+p2_plotly <- ggplotly(p2, tooltip = "text") %>%
+  layout(
+    legend = list(
+      title = list(text = ""),
+      orientation = "h",   # horizontal
+      x = 0.5,             # center horizontally
+      y = -0.2,            # below the x-axis
+      xanchor = "center",
+      yanchor = "top"
+    )
+  )
+
+p2_plotly
+
+
+```
+
+Instead of making everyone test their knowledge of plant codes, I put together a quick cheat sheet for the species included in this figure.
+
+It is interesting to see that most of the species that fall above both the DE and DP thresholds are various Lomatiums and Balsamroots which are everywhere in the spring and typically what we observed the sheep snacking on the most during our hours of observation. There also is several phenologies of the Lupine species—but obviously those aren’t edible for the sheep.
+
+```{r}
+#| warning: FALSE
+#| message: false
+# Create plot
+ggplot(forb, aes(x = DE, y = DP)) +
+  geom_point(aes(color = Status), size = 3) +  # points colored by Status
+  # Label each point
+  geom_text_repel(aes(label = paste(Spp, Pheno, sep = "_")), size = 3) +  # uses ggrepel to avoid overlap
+  # Set axis starting points
+  xlim(11, max(grass$DE) + 0.5) +
+  ylim(7, 18) +
+  labs(
+    title = "Top Forb Species",
+    x = "DE",
+    y = "DP",
+    color = "Status"
+  ) +
+  theme_minimal(base_size = 12)
+```
+
+### Top Shrub Species
+
+Lastly I lumped all of the Tree/Vine/Shrubs into one group. Again there are consistent low metrics for most of the species.
+
+```{r}
+#| warning: FALSE
+#| message: false
+shrub <- quality %>% 
+ filter(FunctionalGroup %in% c("ES", "S", "T", "V"))
+
+
+p3 <- ggplot(shrub, aes(
+  x = DE,
+  y = DP,
+  color = Status,   # still mapped for tooltip/legend
+  text = paste0( 
+    "Spp: ", Spp, 
+    "<br>Pheno: ", Pheno, 
+    "<br>Part: ", Part,
+    "<br>Status: ", Status,
+    "<br>DE: ", round(DE, 2),
+    "<br>DP: ", round(DP, 2)
+  )
+)) +
+  geom_point(size = 4, color = "#12bec7") +
+  geom_vline(xintercept = 11.5, linetype = "dashed", color = "gray50") +
+  geom_hline(yintercept = 7.5, linetype = "dashed", color = "gray50") +
+  labs(
+    title = "Overall Quality Metrics of Observed Shrubs/Trees",
+    x = "DE",
+    y = "DP",
+    color = "Status"
+  ) +
+  theme_minimal(base_size = 12)
+
+p3_plotly <- ggplotly(p3, tooltip = "text") %>%
+  layout(
+    legend = list(
+      title = list(text = ""),
+      orientation = "h",   # horizontal
+      x = 0.5,             # center horizontally
+      y = -0.2,            # below the x-axis
+      xanchor = "center",
+      yanchor = "top"
+    )
+  )
+
+p3_plotly
+```
+
+```{r}
+#| warning: FALSE
+#| message: false
+# Create plot
+ggplot(shrub, aes(x = DE, y = DP)) +
+  geom_point(aes(color = Status), size = 3) +  # points colored by Status
+  # Label each point
+  geom_text_repel(aes(label = paste(Spp, Pheno, sep = "_")), size = 3) +  # uses ggrepel to avoid overlap
+  # Set axis starting points
+  xlim(11, max(grass$DE) + 0.5) +
+  ylim(7, max(grass$DP) + 0.5) +
+  labs(
+    title = "Top Shrub or Tree Species",
+    x = "DE",
+    y = "DP",
+    color = "Status"
+  ) +
+  theme_minimal(base_size = 12)
+```
+
+It was interesting to notice that digestible protein values stayed pretty low across most species, no matter the functional group or phenology stage. This matches up with what Katey was seeing in Asotin Creek. I’m hoping the suitable biomass measurements will give us a better idea of how this population does so well even when many of the plants don’t seem all that nutrient-rich. My guess is that the sheer volume they’re able to consume of some of the species has a lot to do with it.
+
+## Invasive vs Native Species
+
+comparison of top native vs invasive grass quality metrics
+
+```{r}
+# ggplot with facets
+invasive <- ggplot(grass, aes(
+  x = DE,
+  y = DP,
+  color = Status,
+  text = paste0(
+    "Spp: ", Spp,
+    "<br>Pheno: ", Pheno,
+    "<br>Part: ", Part,
+    "<br>Status: ", Status,
+    "<br>DE: ", round(DE, 2),
+    "<br>DP: ", round(DP, 2)
+  )
+)) +
+  geom_point(size = 3) +
+  facet_wrap(~Status, scales = "free") +   # facet into separate panels
+  geom_vline(xintercept = 11.5, linetype = "dashed", color = "gray50") +
+  geom_hline(yintercept = 7.5, linetype = "dashed", color = "gray50") +
+  labs(
+    title = "Grass Quality Metrics by Status",
+    x = "DE",
+    y = "DP"
+  ) +
+  theme_minimal(base_size = 12)
+
+# Convert to interactive plotly
+ggplotly(invasive, tooltip = "text")
+```
+
+frequency of observations of invasive species in different PVTs
+
+```{r}
+status <- plant %>% 
+  select(Spp, Status, FunctionalGroup, FG_New)
+
+df <- comp %>% 
+  left_join(status, by = "Spp")
+
+df <- df %>% 
+    mutate(Pheno = na_if(Status, "NA")) %>% 
+  filter(!is.na(Status))
+
+df %>%
+  count(Month, Status) %>%
+  group_by(Month) %>%
+  mutate(prop = n / sum(n)) %>%
+  ggplot(aes(x = Month, y = prop, fill = Status)) +
+  geom_col(position = "stack") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(
+    x = "Month",
+    y = "Proportion",
+    fill = "Status"
+  ) +
+  theme_minimal()
+```
+
+```{r}
+df %>%
+  count(PVT, Status) %>%
+  group_by(PVT) %>%
+  mutate(prop = n / sum(n)) %>%
+  ggplot(aes(x = PVT, y = prop, fill = Status)) +
+  geom_col(position = "stack") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(
+    x = "PVT",
+    y = "Proportion",
+    fill = "Status"
+  ) +
+  theme_minimal()
+```
+
+## Next Steps
+
+Complete biomass predictions so I can determine suitable biomass using the FRESH model
+
+Finish extracting covariates to include within my GAM (the nutritional landscape map)
+
+Begin building HSF and iSSA
