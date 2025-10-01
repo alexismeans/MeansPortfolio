@@ -34,13 +34,13 @@ transect$easting <- st_coordinates(utm)[,1]
 transect$northing<- st_coordinates(utm)[,2]
 
 transect <- transect %>% 
-  mutate(PVT = recode(PVT,
-                      '672' = "Grassland",
-                      '682' = "Riparian",
-                      '668' = "Scabland",
-                      '669' = "Shrubland",
-                      '674' = "Intermediate",
-                      '660' = "Sparse"))
+  mutate(PVT = dplyr::recode(PVT,
+                      `672` = "Grassland",
+                      `682` = "Riparian",
+                      `668` = "Scabland",
+                      `669` = "Shrubland",
+                      `674` = "Intermediate",
+                      `660` = "Sparse"))
 
 ```
 
@@ -135,9 +135,9 @@ ggplot(transect, aes(x = easting, y = northing, color = PVT))+
   theme(legend.position = "right")
 ```
 
-## Timing of "Green-up" 
+## Timing of "Green-up"
 
-### Overall timing 
+### Overall timing
 
 Next, I wanted to look at the overall timing of green-up in the canyon. The first graph combines results from both summers. As expected, the peak of “New” growth is around March–April, while the biggest transition to “Cured” plants occurs around May–June. It’s neat to see this line up with what Emily found regarding the birth pulse, with the most new (and highly nutritious) forage coinciding with peak lambing.
 
@@ -312,15 +312,14 @@ I’m still working on biomass predictions, which will help determine how much s
 ```{r}
 #| warning: FALSE
 #| message: false
+db <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/VegDatabases/Working.composition.data.xlsx"
 q <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/quality/processed.data/24_quality_results.xlsx"
 
 quality <- read_excel(q, "24_quality_results")
 plant <- read_excel(db, "PlantList")
 
 plant <- plant %>% 
-  select(USDACode, Family, Genus, Spp, FunctionalGroup, FG_New, Status) %>% 
-  rename(Species = Spp,
-         Spp = USDACode)
+  select(Spp, Family, Genus, Species, FunctionalGroup, FG_New, Status)
 
 quality <- quality %>% 
   select(Sample_ID, PVT, Spp, Pheno, Part, DP, DE) %>% 
@@ -359,6 +358,7 @@ p <- ggplot(grass, aes(
 # Convert to interactive Plotly plot
 p_plotly <- ggplotly(p, tooltip = "text") %>%
   layout(
+    showlegend = TRUE,
     legend = list(
       title = list(text = ""),
       orientation = "h",   # horizontal
@@ -402,7 +402,7 @@ ggplot(grass, aes(x = DE, y = DP)) +
   theme_minimal(base_size = 12)
 ```
 
-###  Top Forb Species
+### Top Forb Species
 
 Looking at the forbs is a little more chaotic. There are more species that meet both the DE and DP thresholds, but there are still a substantial number that fall below those thresholds.
 
@@ -628,6 +628,35 @@ df %>%
     fill = "Status"
   ) +
   theme_minimal()
+```
+
+## Fecal Collections
+
+```{r}
+f <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/VegDatabases/Fecal.xlsx"
+
+fecal <- read_excel(f, "Sheet1")
+
+fecal <- fecal %>% 
+    mutate(
+    DATE = as.Date(
+      suppressWarnings(as.numeric(DATE)),  # force numeric, ignore warnings
+      origin = "1899-12-30"                # Windows Excel default
+    )
+  ) %>%  mutate(DOY = yday(DATE),
+        Year = factor(year(DATE)))
+
+ggplot(fecal, aes(x = DOY, y = ID, color = Year)) +
+         geom_point()+
+         scale_x_continuous(breaks = c( 75, 105, 136, 166, 197, 228),
+                      labels = c("March", "Apr", "May", "June", "July", "Aug"))+
+         labs(title = "Sampling Dates",
+              x = "Month",
+              y = "Sample ID",
+              color = "Year") +
+         theme_bw()
+
+#DATE IS BEING READ WRONG
 ```
 
 ## Next Steps

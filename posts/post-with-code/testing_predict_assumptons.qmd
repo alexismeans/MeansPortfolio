@@ -1,0 +1,135 @@
+---
+title: "Checking Bio Predict Assumptions"
+format:
+  html:
+    toc: true
+    toc-location: left
+    toc-depth: 3
+editor: visual
+code-fold: true
+---
+
+```{r}
+spp_model <- readRDS("C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/regression_equations/24and25-Biomass-Regression-Species-Top-Model-List.rds")
+
+fam_model <- readRDS("C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/regression_equations/24and25-Biomass-Regression-Family-Top-Model-List.rds")
+
+genus_model <- readRDS("C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/regression_equations/24and25-Biomass-Regression-Genus-Top-Model-List.rds")
+
+fg_model <- readRDS("C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/regression_equations/24and25-Biomass-Regression-Functional-Group-Top-Model-List.rds")
+
+all_models <- list(
+  spp   = spp_model,
+  fam   = fam_model,
+  genus = genus_model,
+  fg    = fg_model
+)
+                      
+```
+
+## Predicted Biomass Values
+
+Here are my current predicted biomass values based on the linear equations at the bottom of the page. I didn’t include the code I used to generate them in this document, but I can send it over if you’d like to take a look. Right now, all the biomass values are in grams rather than kilograms. I’m not sure if that affects the predictions, but my plan was to scale them up to kilograms before rerunning the FRESH model.
+
+A couple of things stood out to me. First, quite a few of the predicted values came out negative. I’m assuming that’s a modeling issue, since biomass really shouldn’t be negative even in predictions. I just wanted to make sure I’m thinking about that correctly. Second, some of the values seem a bit off compared to others for the same species. They’re not wildly unrealistic, but they’re different enough that they caught my attention.
+
+```{r}
+#| warning: FALSE
+library(readr)
+library(readxl)
+library(DT)
+
+df <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/24and25predictions.xlsx"
+
+predictions <- read_excel(df, "Sheet1")
+
+datatable(predictions, options = list(pageLength = 10))
+```
+
+## Assumption Test P-values
+
+Because of the weird prediction numbers, I ran four different assumption tests on each of the linear models:
+
+-   Breusch–Pagan test (bptest) for homoscedasticity
+
+-   Shapiro–Wilk test for normality of residuals
+
+-   Durbin–Watson test (dwtest) for autocorrelation
+
+-   Cook’s distance for influential observations
+
+I’m not sure if there are other tests that would be better to run instead. I could also use some guidance on which p-values should be considered “red flags” that suggest I need to use a different equation. I rounded everything to four decimal places to make the results easier to read, so any zeros you see are just very small values above zero
+
+```{r}
+#| warning: FALSE
+library(tidyverse)
+library(lmtest)
+library(purrr)
+library(DT)
+
+check_lm_assumptions <- function(model) {
+  if (!inherits(model, "lm")) return(NULL)
+  
+  res <- residuals(model)
+  
+  list(
+    shapiro_p = tryCatch(round(shapiro.test(res)$p.value, 4), 
+                         error = function(e) NA),
+    bp_test   = tryCatch(round(lmtest::bptest(model)$p.value, 4), 
+                         error = function(e) NA),
+    dw_test   = tryCatch(round(lmtest::dwtest(model)$p.value, 4), 
+                         error = function(e) NA),
+    cook_max  = tryCatch(round(max(cooks.distance(model), na.rm = TRUE), 4), 
+                         error = function(e) NA)
+  )
+}
+
+diagnostics <- imap_dfr(all_models, function(model_list, group_name) {
+  map_dfr(model_list, check_lm_assumptions, .id = "model_name") %>%
+    mutate(group = group_name, .before = 1)
+})
+
+
+datatable(diagnostics, options = list(pageLength = 10))
+```
+
+## Diagnostic Plots and Equations
+
+Here are the diagnostic plots for each of the linear models: Breusch–Pagan test (top left), Shapiro–Wilk test (top right), Durbin–Watson test (bottom left), and Cook’s distance (bottom right). Below the plots, I’ve also included each of the linear equations I’m using to predict biomass.
+
+```{r}
+#| warning: FALSE
+library(ggfortify)
+library(gridExtra)
+
+plot_diagnostics <- function(model, model_name, group_name) {
+  
+  p1 <- autoplot(model, which = 1)[[1]] + 
+    ggtitle(paste("Residuals vs Fitted for", model_name, "in", group_name))
+  
+  p2 <- autoplot(model, which = 2)[[1]] + 
+    ggtitle(paste("Normal Q-Q for", model_name, "in", group_name))
+  
+  p3 <- autoplot(model, which = 3)[[1]] + 
+    ggtitle(paste("Scale-Location for", model_name, "in", group_name))
+  
+  p4 <- autoplot(model, which = 5)[[1]] + 
+    ggtitle(paste("Residuals vs Leverage for", model_name, "in", group_name))
+  
+  gridExtra::grid.arrange(p1, p2, p3, p4, ncol = 2)
+}
+
+imap(all_models, function(model_list, group_name) {
+  walk2(model_list, names(model_list), ~ {
+    plot_diagnostics(.x, .y, group_name)
+  })
+})
+```
+
+## Questions
+
+1.  I’m having a hard time figuring out which plots are bad enough that they justify trying a different linear model. Did any of them stick out to you?
+
+2.  Are there any assumption tests that I should be taking with a grain of salt? Ryan mentioned that one of them might not matter as much since our main goal with the linear models is prediction.
+
+3.  Currently, I only have the top regression equation saved for each species, genus, etc. Before I go back and rerun the model dredging process to generate more equations, I wanted to check if you had any other suggestions on how I could improve the predictions.
