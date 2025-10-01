@@ -203,7 +203,7 @@ pheno_plot <- ggplot(phenos, aes(
   )
 )) +
   geom_point(size = 3) +
-  geom_vline(xintercept = 13.5, linetype = "dashed", color = "red") +
+  geom_vline(xintercept = 11.5, linetype = "dashed", color = "red") +
   geom_hline(yintercept = 7.5, linetype = "dashed", color = "red") +
   labs(
     title = "Comparing Species by Phenological Stage",
@@ -223,19 +223,6 @@ scale_y_continuous(
   theme_minimal(base_size = 12)
 
 ggplotly(pheno_plot, tooltip = "text")
-```
-
-```{r}
-biomass_DE <- data %>% 
-  group_by(Code, Phenology, Part) %>% 
-  left_join(
-    data %>%
-      select(Code, Phenology, Part, Status, Biomass) %>%
-      distinct(), 
-    by = c("Code", "Phenology", "Part")
-  ) %>%
-  mutate(combo_label = paste(Code, Phenology, Part, sep = "_"))
-
 ```
 
 ## Grass Species
@@ -271,7 +258,7 @@ p5 <- ggplot(grass, aes(
   )
 )) +
   geom_point(size = 4) +
-  geom_vline(xintercept = 13.5, linetype = "dashed", color = "red") +
+  geom_vline(xintercept = 11.5, linetype = "dashed", color = "red") +
   geom_hline(yintercept = 7.5, linetype = "dashed", color = "red") +
   labs(
     title = "Top 20 Grass Species by Mean DE and DP",
@@ -371,7 +358,7 @@ p_combined <- ggplot(grass_combined, aes(
   )
 )) +
   geom_point(size = 3) +
-  geom_vline(xintercept = 13.5, linetype = "dashed", color = "red") +
+  geom_vline(xintercept = 11.5, linetype = "dashed", color = "red") +
   geom_hline(yintercept = 7.5, linetype = "dashed", color = "red") +
   labs(
     title = "Comparing Grass Species by Phenological Stage",
