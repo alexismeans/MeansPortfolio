@@ -30,11 +30,15 @@ all_models <- list(
 
 ```
 
+
+
 ## Predicted Biomass Values
 
 Here are my current predicted biomass values based on the linear equations at the bottom of the page. I didn’t include the code I used to generate them in this document, but I can send it over if you’d like to take a look. Right now, all the biomass values are in grams rather than kilograms. I’m not sure if that affects the predictions, but my plan was to scale them up to kilograms before rerunning the FRESH model.
 
 A couple of things stood out to me. First, quite a few of the predicted values came out negative. I’m assuming that’s a modeling issue, since biomass really shouldn’t be negative even in predictions. I just wanted to make sure I’m thinking about that correctly. Second, some of the values seem a bit off compared to others for the same species. They’re not wildly unrealistic, but they’re different enough that they caught my attention.
+
+
 
 ```{r}
 #| warning: FALSE
@@ -49,6 +53,8 @@ predictions <- read_excel(df, "Sheet1")
 datatable(predictions, options = list(pageLength = 10))
 ```
 
+
+
 ## Assumption Test P-values
 
 Because of the weird prediction numbers, I ran four different assumption tests on each of the linear models:
@@ -62,6 +68,8 @@ Because of the weird prediction numbers, I ran four different assumption tests o
 -   Cook’s distance for influential observations
 
 I’m not sure if there are other tests that would be better to run instead. I could also use some guidance on which p-values should be considered “red flags” that suggest I need to use a different equation. I rounded everything to four decimal places to make the results easier to read, so any zeros you see are just very small values above zero
+
+
 
 ```{r}
 #| warning: FALSE
@@ -96,9 +104,13 @@ diagnostics <- imap_dfr(all_models, function(model_list, group_name) {
 datatable(diagnostics, options = list(pageLength = 10))
 ```
 
+
+
 ## Diagnostic Plots and Equations
 
 Here are the diagnostic plots for each of the linear models: Breusch–Pagan test (top left), Shapiro–Wilk test (top right), Durbin–Watson test (bottom left), and Cook’s distance (bottom right). Below the plots, I’ve also included each of the linear equations I’m using to predict biomass.
+
+
 
 ```{r}
 #| warning: FALSE
@@ -129,6 +141,8 @@ imap(all_models, function(model_list, group_name) {
 })
 ```
 
+
+
 ## Questions
 
 1.  I’m having a hard time figuring out which plots are bad enough that they justify trying a different linear model. Did any of them stick out to you?
@@ -136,3 +150,4 @@ imap(all_models, function(model_list, group_name) {
 2.  Are there any assumption tests that I should be taking with a grain of salt? Ryan mentioned that one of them might not matter as much since our main goal with the linear models is prediction.
 
 3.  Currently, I only have the top regression equation saved for each species, genus, etc. Before I go back and rerun the model dredging process to generate more equations, I wanted to check if you had any other suggestions on how I could improve the predictions.
+
