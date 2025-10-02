@@ -13,6 +13,7 @@ editor: visual
 ## Data Wrangling
 
 ```{r}
+#| warning: FALSE
 library(tidyverse)
 library(MuMIn)
 library(terra)
@@ -155,6 +156,7 @@ model.x <- comp %>%
 ## Transform Covariates
 
 ```{r}
+#| warning: FALSE
 # Define covariate transformations
 transformations <- function(x) {
   data.frame(
@@ -200,6 +202,7 @@ data$DryWeight= as.numeric(data$DryWeight)
 ## Biomass Predict Function
 
 ```{r}
+#| warning: FALSE
 fill_dryweight <- function(data, spp_models, genus_models, family_models, functionalgroup_models) {
   # initialize column with observed values
   data$DryWeight_pred <- data$DryWeight
