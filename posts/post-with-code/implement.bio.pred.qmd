@@ -1,6 +1,8 @@
 ---
 title: "Implementing Biomass Predictions"
 author: "Alexis Means"
+date: "2025-10-1"
+description: This document provides the code used to implement my linear regressions equations on my dataset and compute the missing biomass values. 
 format:
   html:
     toc: true

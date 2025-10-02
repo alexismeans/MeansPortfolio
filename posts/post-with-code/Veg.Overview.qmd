@@ -1,6 +1,8 @@
 ---
 title: "John Day Vegetation Recap"
-Date: 2025-09-04
+date: 2025-09-04
+author: Alexis Means
+description: This document provides a rudimentary overview of the progress made in 2024 and 2025 field seasons.
 format:
   html:
     toc: true

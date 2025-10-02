@@ -1,6 +1,8 @@
 ---
 title: "Creating Regression Equations"
 author: "Alexis Means"
+date: "2025-10-01"
+description: This document provides the code used to create linear regression models that will predict missing biomass values within my dataset.
 format:
   html:
     toc: true
