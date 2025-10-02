@@ -1,0 +1,501 @@
+---
+title: "Creating Regression Equations"
+author: "Alexis Means"
+format:
+  html:
+    toc: true
+    toc-location: left
+    toc-depth: 3
+    code-fold: true
+editor: visual
+---
+
+## Data wrangling
+
+```{r}
+#| eval: false
+library(tidyverse)
+library(terra)
+library(readxl)
+library(readr)
+library(sf)
+
+#model dredging packages
+library(caret)
+library(recipes)
+
+setwd("C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code")
+
+
+#2024 and 2025 observations
+db <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/VegDatabases/Working.composition.data.xlsx"
+biomass <- read_excel(db, "Biomass")
+comp <- read_excel(db, "Composition")
+transect <- read_excel(db, "Transect")
+plant <- read_excel(db, "PlantList")
+
+
+#Organizing and joining databases####
+comp <- comp %>%
+mutate( Date = ymd(Date),
+        julian = yday(Date)
+) %>%
+  select(julian, PlotID, Quadrat, Spp, Percent, Pheno, Part)
+
+
+biomass <- biomass %>%
+  rename(DryWeight = `DryWeight(g)`) %>%
+  select(PlotID, Quadrat, Spp, Pheno, Part, DryWeight)
+
+
+
+transect_sf <- st_as_sf(transect,
+                        coords = c("BeginLong", "BeginLat"),
+                        crs = 4326)   # WGS84 (lat/long)
+transect_utm <- st_transform(transect_sf, crs = 32610)
+coords <- st_coordinates(transect_utm)
+
+transect <- transect %>%
+  mutate(BeginUTM_Easting = coords[,1],
+         BeginUTM_Northing = coords[,2]) %>%
+  select(PVT, PlotID, BeginUTM_Northing, BeginUTM_Easting)
+
+
+
+plant <- plant %>%
+  select(Spp, Family, Genus, Species, FG_New) %>%
+  rename(FunctionalGroup = FG_New)
+
+
+
+#create object for inorganic matter
+abiotic <- c("LITTER","EARTH", "LICHEN", "WATER", "ROCKS", "DEADFALL")
+
+
+#combining and creating an overall %cover for inorganic matter in each quadrat
+comp <- comp %>%
+  group_by(PlotID, Quadrat) %>%
+  mutate(Abiotic.cover = sum(Percent[(Spp %in% abiotic)])) %>%
+  ungroup()
+
+
+#Left join biomass and comp by quadrat and plot_ID
+comp <- comp %>%
+  left_join(y = biomass,
+            by = c("PlotID", "Quadrat", "Spp", "Pheno", "Part"))
+
+
+#filtering out all quadrats where no biomass is recorded for the quadrat
+#filter out all of the abiotic observations
+comp <- comp %>%
+  filter(!(Spp %in% abiotic)) %>%
+  filter(!is.na(DryWeight))
+
+
+## left join columns from plant list, comp, biomass and transect to keep the necessary columns
+comp <- comp %>%
+  left_join(y = plant,
+            by = "Spp") %>%
+  left_join(y=transect,
+            by = "PlotID",
+            relationship = "many-to-one") #since there is multiple plotID duplicates this is necessary to join the transect database
+
+
+comp <- comp %>%
+  select(julian, PVT, PlotID, Quadrat, Spp, Pheno, Part, Abiotic.cover,
+         DryWeight, Percent, Family, Genus, Species, FunctionalGroup, BeginUTM_Easting,
+         BeginUTM_Northing)
+View(comp)
+
+
+
+
+#Loading Covariates####
+#create empty list to load the covariates into
+covariates <-  vector(mode = 'list')
+
+#List all the covariates that you want to use
+covariates$asp <- rast("C:/Users/Alexis Means/OneDrive/OneDrive - University of Idaho/DocuMents/Project/Nutrition Sampling/Rasters/LF_Asp/LC20_Asp_220.tif")
+covariates$elev <- rast("C:/Users/Alexis Means/OneDrive/OneDrive - University of Idaho/DocuMents/Project/Nutrition Sampling/Rasters/LF_Elev/LC20_Elev_220.tif")
+
+#can add more covariates here without updating for loop
+
+
+#make a shape object out of the coordinates that exist in comp
+coords <- vect(comp,
+               geom = c("BeginUTM_Easting","BeginUTM_Northing"),
+               crs = "EPSG:32610")
+
+
+
+
+#create a for loop####
+#goes over each covariate raster that we have and
+#reprojecting the UTM points into the the same ESPG of the imported rasters
+
+for (i in 1:length(covariates)){
+  proj.coords = project(x = coords,
+                        y = covariates[[i]])
+  out = extract(x = covariates[[i]],
+                y = proj.coords)
+  comp[,names(covariates[i])] = out [,2]
+}
+
+## THIS IS A CHECK IF YOU NEED IT
+# helps plot points to troubleshoot
+i = 1
+proj.coords <- project(x = coords,
+                       y = covariates[[i]])
+
+plot(covariates[[1]])
+points(proj.coords, col = "red", pch = 16)
+
+
+#restructure df
+comp <- comp %>%
+  select(PlotID, Spp, Family, Genus, DryWeight, Percent, julian, PVT, Abiotic.cover, elev, asp, FunctionalGroup)
+
+#If there are any 0 values it corrects them to 0.01
+comp$DryWeight = ifelse(comp$DryWeight == 0, .01, comp$DryWeight)
+
+
+#make sure everything is being read the way we want it to
+comp$elev = as.numeric(comp$elev)
+comp$Family = as.factor(comp$Family)
+comp$Genus= as.factor(comp$Genus)
+comp$FunctionalGroup= as.factor(comp$FunctionalGroup)
+comp$Spp= as.factor(comp$Spp)
+comp$DryWeight= as.numeric(comp$DryWeight)
+
+
+#remove unnecessary objects from environment
+rm(i, transect, plant, biomass)
+
+#calculate sample size for each hierarchical group####
+#species
+comp <- comp %>%
+  group_by(Spp) %>%
+  mutate(n.Species = sum(!is.na(Spp))) %>%
+  ungroup()
+
+comp <- comp %>%
+  group_by(Genus) %>%
+  mutate(n.Genus = sum(!is.na(Genus))) %>%
+  ungroup()
+
+comp <- comp %>%
+  group_by(Family) %>%
+  mutate(n.Family =  sum(!is.na(Family))) %>%
+  ungroup()
+
+comp <- comp %>%
+  group_by(FunctionalGroup) %>%
+  mutate(n.FunctionalGroup = sum(!is.na(FunctionalGroup))) %>%
+  ungroup()
+
+model.y <- comp %>%
+  select( PVT, PlotID, Spp, Family, Genus,FunctionalGroup, DryWeight, n.Species, n.Genus, n.Family, n.FunctionalGroup)
+model.x <- comp %>%
+  select(Percent, julian, Abiotic.cover, elev, asp)
+```
+
+## Transform Covariates
+
+```{# {r}
+#| eval: false
+#Define covariate transformations
+transformations = function(x) {
+  data.frame(
+    identity = x,
+    sin = sin(x),
+    cos = cos(x),
+    quadratic = x^2,
+    cubic = x^3,
+    log = ifelse(x > 0, log(x), NA),
+    sqrt = ifelse(x > 0, sqrt(x), NA)
+  )
+}
+
+
+#calculate transformed covariates
+transform.covars = lapply(X = model.x,
+                          FUN = transformations)
+transform.covars = do.call(cbind, transform.covars)
+View(transform.covars)
+
+#rename columns
+colnames(transform.covars) = unlist(lapply(X = c("Percent", "julian", "Abiotic.cover", "elev", "asp"),
+                                           FUN = function(var) {
+                                             paste0(var, '_', c('identity', 'sin', 'cos', 'quadratic', 'cubic', 'log', 'sqrt'))
+                                           }))
+
+
+
+#scale and center predictor variables
+model.x = transform.covars %>%
+  mutate(across(everything(), ~ (.-mean(.))/sd(.))) %>%
+  select_if(~ !any(is.na(.)))
+
+# Combine y and x (keeping transformed predictors)
+df <- cbind(model.y, model.x)
+
+#write.csv(df, "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/processed.data/24and25.prepped.biomass.db")
+```
+
+## Create Regression Equations
+
+### Species Level
+
+```{# {r}
+#| eval: false
+#select only species with 10 or more observations of biomass
+species.df <- df %>% filter(n.Species >= 10)
+species.df$Spp <- as.character(species.df$Spp)
+species.names <- unique(species.df$Spp)
+species.model.list <- list()
+
+for(i in seq_along(species.names)) {
+  species.name <- species.names[i]
+
+  dat <- species.df %>% filter(Spp == species.name)
+
+  y <- dat$DryWeight
+  X <- dat[, colnames(model.x)]  # only use the predictors
+
+  # remove constant columns
+  X <- X[, apply(X, 2, sd) > 0]
+
+  # correlation filter
+  cor.matrix <- cor(X, use = "pairwise.complete.obs")
+  high.cor <- findCorrelation(cor.matrix, cutoff = 0.6)
+  X <- X[, -high.cor]
+
+  z <- cbind(y, X)
+
+  # fit model, dredge, select top model
+  gm <- lm(y ~ 0 + ., data = z, na.action = na.fail)
+  model.set <- dredge(global.model = gm,
+                      beta = 'sd',
+                      evaluate = TRUE,
+                      rank = 'AICc',
+                      m.lim = c(1,6),
+                      trace = FALSE)
+  best.model <- get.models(model.set, 1)[[1]]
+
+  # store with proper name
+  species.model.list[[species.name]] <- best.model
+
+  message(paste0(i, "/", length(species.names), " Species Completed"))
+}
+
+names(species.model.list)
+
+#save R object for species regressions in case R crashes
+#saveRDS(species.model.list, 'C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/regression_equations/24and25-Biomass-Regression-Species-Top-Model-List.rds')
+
+#clean up global environment
+rm(z,gm,dat,best.model,model.set,species.df,i)
+```
+
+### Genus Equations
+
+```{# {r}
+#| eval: false
+#filter data
+genus.df <- df %>%
+  filter(n.Genus >= 10)
+
+genus.df$Genus <- as.character(genus.df$Genus)
+# create empty list
+genus.model.list <- list()
+
+# get unique genera once
+genus.names <- unique(genus.df$Genus)
+
+# loop through each genus
+for(i in seq_along(genus.names)) {
+
+  genus.name <- genus.names[i]  # current genus
+  dat <- genus.df %>%
+    filter(Genus == genus.name)  # filter for this genus
+
+  y <- dat$DryWeight
+  X <- dat[, colnames(model.x)]
+
+  # remove columns with constant values
+  X <- X[, apply(X, 2, sd) > 0]
+
+  # create correlation matrix to identify correlated predictors
+  cor.matrix <- cor(X, use = "pairwise.complete.obs")
+  high.cor <- findCorrelation(cor.matrix, cutoff = 0.6)
+
+  # remove highly correlated columns
+  X <- X[, -high.cor]
+
+  # bind regression data
+  z <- cbind(y, X)
+  rm(cor.matrix, X, y, high.cor)
+
+  # fit global model
+  gm <- lm(y ~ 0 + ., data = z, na.action = na.fail)
+
+  # stepwise model selection
+  model.set <- dredge(global.model = gm,
+                      beta = 'sd',
+                      evaluate = TRUE,
+                      rank = 'AICc',
+                      m.lim = c(1,6),
+                      trace = FALSE)
+
+  # grab top model
+  best.model <- get.models(model.set, 1)[[1]]
+
+  # store best model with genus name
+  genus.model.list[[genus.name]] <- best.model
+
+  # print progress
+  message(paste0(i, "/", length(genus.names), " Genera Completed"))
+}
+
+# check names
+names(genus.model.list)
+
+#save genus level regression data
+#saveRDS(genus.model.list, 'C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/regression_equations/24and25-Biomass-Regression-Genus-Top-Model-List.rds')
+
+#clean global environment
+rm(dat,genus.df,gm,model.set,z,best.model)
+```
+
+### Family Equations
+
+```{# {r}
+#| eval: false
+#filter data frame
+family.df = df %>%
+  filter(n.Family >= 10)
+
+family.df$Family <- as.character(family.df$Family)
+
+#create empty list
+family.model.list = list()
+
+# get unique genera once
+family.names <- unique(family.df$Family)
+
+
+# Family regression loop
+for(i in seq_along(family.names)) {
+  family.name <- family.names[i]
+
+  # Filter for current family
+  dat <- family.df %>% filter(Family == family.name)
+
+  y <- dat$DryWeight
+  X <- dat[, colnames(model.x), drop = FALSE]
+
+  # Remove constant columns
+  X <- X[, apply(X, 2, sd) > 0, drop = FALSE]
+
+  # Correlation filter
+  cor.matrix <- cor(X, use = "pairwise.complete.obs")
+  high.cor <- findCorrelation(cor.matrix, cutoff = 0.6)
+  X <- X[, -high.cor, drop = FALSE]
+
+  # Bind regression data
+  z <- cbind(y, X)
+
+  # Fit model, dredge, select top model
+  gm <- lm(y ~ 0 + ., data = z, na.action = na.fail)
+  model.set <- dredge(global.model = gm,
+                      beta = 'sd',
+                      evaluate = TRUE,
+                      rank = 'AICc',
+                      m.lim = c(1,6),
+                      trace = FALSE)
+  best.model <- get.models(model.set, 1)[[1]]
+
+  # Store best model with proper name
+  family.model.list[[family.name]] <- best.model
+
+  # Print iteration
+  message(paste0(i, "/", length(family.names), " Families Completed"))
+}
+
+names(family.model.list)
+
+#save genus level regression data
+#saveRDS(family.model.list, 'C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/regression_equations/24and25-Biomass-Regression-Family-Top-Model-List.rds')
+
+```
+
+### Functional Group Equations
+
+```{# {r}
+#| eval: false
+# filter data frame
+functional.group.df <- df %>%
+  filter(n.FunctionalGroup >= 10)
+
+functional.group.df$FunctionalGroup <- as.character(functional.group.df$FunctionalGroup)
+# create empty list
+functional.group.model.list <- list()
+
+# get unique functional groups once
+fg.names <- unique(functional.group.df$FunctionalGroup)
+
+
+# loop through each functional group
+for(i in seq_along(fg.names)) {
+
+  fg.name <- fg.names[i]  # current functional group
+  dat <- functional.group.df %>%
+    filter(FunctionalGroup == fg.name)  # filter for this group
+
+  y <- dat$DryWeight
+  X <- dat[, colnames(model.x)]
+
+  # remove columns with constant values
+  X <- X[, apply(X, 2, sd) > 0]
+
+  # create correlation matrix to identify correlated predictors
+  cor.matrix <- cor(X, use = "pairwise.complete.obs")
+  high.cor <- findCorrelation(cor.matrix, cutoff = 0.6)
+
+  # remove highly correlated columns
+  X <- X[, -high.cor]
+
+  # bind regression data
+  z <- cbind(y, X)
+  rm(cor.matrix, X, y, high.cor)
+
+  # fit global model
+  gm <- lm(y ~ 0 + ., data = z, na.action = na.fail)
+
+  # stepwise model selection
+  model.set <- dredge(global.model = gm,
+                      beta = 'sd',
+                      evaluate = TRUE,
+                      rank = 'AICc',
+                      m.lim = c(1,6),
+                      trace = FALSE)
+
+  # grab top model
+  best.model <- get.models(model.set, 1)[[1]]
+
+  # store best model with functional group name
+  functional.group.model.list[[fg.name]] <- best.model
+
+  # print progress
+  message(paste0(i, "/", length(fg.names), " Functional Groups Completed"))
+}
+
+# check names
+names(functional.group.model.list)
+
+#save genus level regression data
+#saveRDS(functional.group.model.list, "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/regression_equations/24and25-Biomass-Regression-Functional-Group-Top-Model-List.rds")
+
+#clean up global environment
+rm(best.model,dat, family.df,gm,model.set,model.x,model.y,z,i)
+```

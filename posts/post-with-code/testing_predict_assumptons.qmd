@@ -24,7 +24,7 @@ all_models <- list(
   genus = genus_model,
   fg    = fg_model
 )
-                      
+
 ```
 
 ## Predicted Biomass Values

@@ -1,0 +1,269 @@
+---
+title: "Implementing Biomass Predictions"
+author: "Alexis Means"
+format:
+  html:
+    toc: true
+    toc-location: left
+    toc-depth: 3
+    code-fold: true
+editor: visual
+---
+
+## Data Wrangling
+
+```{r}
+library(tidyverse)
+library(MuMIn)
+library(terra)
+library(broom)
+library(readr)
+library(readxl)
+library(sf)
+
+setwd("C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass")
+
+# Load the global models
+spp_models <- readRDS('regression_equations/24and25-Biomass-Regression-Species-Top-Model-List.rds')
+genus_models <- readRDS('regression_equations/24and25-Biomass-Regression-Genus-Top-Model-List.rds')
+family_models <- readRDS('regression_equations/24and25-Biomass-Regression-Family-Top-Model-List.rds')
+functionalgroup_models <- readRDS('regression_equations/24and25-Biomass-Regression-Functional-Group-Top-Model-List.rds')
+
+
+#2024 and 2025 observations 
+db <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/VegDatabases/Working.composition.data.xlsx"
+biomass <- read_excel(db, "Biomass")
+comp <- read_excel(db, "Composition")
+transect <- read_excel(db, "Transect")
+plant <- read_excel(db, "PlantList")
+
+#Organizing and joining databases####
+comp <- comp %>% 
+  mutate( Date = ymd(Date),          
+          julian = yday(Date)         
+  ) %>% 
+  select(julian, PlotID, Quadrat, Spp, Percent, Pheno, Part)
+
+
+biomass <- biomass %>% 
+  rename(DryWeight = `DryWeight(g)`) %>% 
+  select(PlotID, Quadrat, Spp, Pheno, Part, DryWeight)
+
+
+
+transect_sf <- st_as_sf(transect,
+                        coords = c("BeginLong", "BeginLat"), 
+                        crs = 4326)   # WGS84 (lat/long)
+transect_utm <- st_transform(transect_sf, crs = 32610)
+coords <- st_coordinates(transect_utm)
+
+transect <- transect %>%
+  mutate(BeginUTM_Easting = coords[,1],
+         BeginUTM_Northing = coords[,2]) %>% 
+  select(PVT, PlotID, BeginUTM_Northing, BeginUTM_Easting)
+
+
+
+plant <- plant %>% 
+  select(Spp, Family, Genus, Species, FG_New) %>% 
+  rename(FunctionalGroup = FG_New)
+
+
+
+#create object for inorganic matter 
+abiotic <- c("LITTER","EARTH", "LICHEN", "WATER", "ROCKS")
+
+
+#combining and creating an overall %cover for inorganic matter in each quadrat
+comp <- comp %>% 
+  group_by(PlotID, Quadrat) %>% 
+  mutate(Abiotic.cover = sum(Percent[(Spp %in% abiotic)])) %>% 
+  ungroup()
+
+
+#Left join biomass and comp by quadrat and plot_ID
+comp <- comp %>% 
+  left_join(y = biomass,
+            by = c("PlotID", "Quadrat", "Spp", "Pheno", "Part")) 
+
+
+#filtering out all quadrats where no biomass is recorded for the quadrat
+#filter out all of the abiotic observations
+comp <- comp %>% 
+  filter(!(Spp %in% abiotic)) 
+
+
+## left join columns from plant list, comp, biomass and transect to keep the necessary columns 
+comp <- comp %>% 
+  left_join(y = plant,
+            by = "Spp") %>%  
+  left_join(y=transect,
+            by = "PlotID", 
+            relationship = "many-to-one") #since there is multiple plotID duplicates this is necessary to join the transect database
+
+
+comp <- comp %>% 
+  select(julian, PVT, PlotID, Quadrat, Spp, Pheno, Part, Abiotic.cover,
+         DryWeight, Percent, Family, Genus, Species, FunctionalGroup, BeginUTM_Easting,
+         BeginUTM_Northing)
+
+
+# Ensure there's an id column
+if (!"ID" %in% colnames(comp)) {
+  comp$ID <- 1:nrow(comp)
+}
+
+# Create empty list to load the covariates into
+covariates <- vector(mode = 'list')
+
+# List all the covariates that you want to use
+covariates$asp <- rast("C:/Users/Alexis Means/OneDrive/OneDrive - University of Idaho/DocuMents/Project/Nutrition Sampling/Rasters/LF_Asp/LC20_Asp_220.tif")
+covariates$elev <- rast("C:/Users/Alexis Means/OneDrive/OneDrive - University of Idaho/DocuMents/Project/Nutrition Sampling/Rasters/LF_Elev/LC20_Elev_220.tif")
+
+# Make a shape object out of the coordinates that exist in comp
+coords <- vect(comp,
+               geom = c("BeginUTM_Easting","BeginUTM_Northing"),
+               crs = "EPSG:32610")
+
+for (i in 1:length(covariates)){
+  proj.coords = project(x = coords,
+                        y = covariates[[i]])
+  out = extract(x = covariates[[i]],
+                y = proj.coords)
+  comp[,names(covariates[i])] = out [,2]
+}
+
+#make sure everything is being read the way we want it to 
+comp$elev = as.numeric(comp$elev)
+comp$Family = as.factor(comp$Family)
+comp$Genus= as.factor(comp$Genus)
+comp$asp = as.numeric(comp$asp)
+comp$Spp= as.factor(comp$Spp)
+comp$DryWeight= as.numeric(comp$DryWeight)
+
+
+#restructure df 
+comp <- comp %>% 
+  select(ID, PlotID, Spp, Family, Genus, DryWeight, Percent, julian, PVT, Abiotic.cover, elev, asp, FunctionalGroup)
+
+model.y <- comp %>% 
+  select(ID, PlotID, Spp, Family, Genus, DryWeight, PVT, FunctionalGroup)
+model.x <- comp %>% 
+  select(Percent, julian, Abiotic.cover, elev, asp) 
+```
+
+## Transform Covariates
+
+```{r}
+# Define covariate transformations
+transformations <- function(x) {
+  data.frame(
+    identity = x,
+    sin = sin(x),
+    cos = cos(x),
+    quadratic = x^2,
+    cubic = x^3,
+    log = ifelse(x > 0, log(x), NA),
+    sqrt = ifelse(x > 0, sqrt(x), NA)
+  )
+}
+
+
+#calculate transformed covariates
+transform.covars = lapply(X = model.x,
+                          FUN = transformations)
+transform.covars = do.call(cbind, transform.covars)
+
+
+#rename columns
+colnames(transform.covars) = unlist(lapply(X = c("Percent", "julian", "Abiotic.cover", "elev", "asp"),
+                                           FUN = function(var) {
+                                             paste0(var, '_', c('identity', 'sin', 'cos', 'quadratic', 'cubic', 'log', 'sqrt'))
+                                           }))
+
+
+
+#scale and center predictor variables
+model.x = transform.covars %>% 
+  mutate(across(everything(), ~ (.-mean(.))/sd(.))) %>% 
+  select_if(~ !any(is.na(.)))
+
+data <- cbind(model.y, model.x)
+
+
+data$Family = as.character(data$Family)
+data$Genus= as.character(data$Genus)
+data$Spp= as.character(data$Spp)
+data$DryWeight= as.numeric(data$DryWeight)
+```
+
+## Biomass Predict Function
+
+```{r}
+fill_dryweight <- function(data, spp_models, genus_models, family_models, functionalgroup_models) {
+  # initialize column with observed values
+  data$DryWeight_pred <- data$DryWeight
+  
+  # loop over rows with missing DryWeight
+  for (i in which(is.na(data$DryWeight))) {
+    row <- data[i, , drop = FALSE]  # keep it as a dataframe
+    pred <- NA
+    
+    # try species model
+    if ("Spp" %in% names(row) && !is.na(row$Spp) && row$Spp %in% names(spp_models)) {
+      mod <- spp_models[[row$Spp]]
+      pred <- predict(mod, newdata = row)
+    }
+    
+    # fallback: genus model
+    if (is.na(pred) && "Genus" %in% names(row) && !is.na(row$Genus) && row$Genus %in% names(genus_models)) {
+      mod <- genus_models[[row$Genus]]
+      pred <- predict(mod, newdata = row)
+    }
+    
+    # fallback: family model
+    if (is.na(pred) && "Family" %in% names(row) && !is.na(row$Family) && row$Family %in% names(family_models)) {
+      mod <- family_models[[row$Family]]
+      pred <- predict(mod, newdata = row)
+    }
+    
+    # fallback: functional group model
+    if (is.na(pred) && "FunctionalGroup" %in% names(row) && !is.na(row$FunctionalGroup) && row$FunctionalGroup %in% names(functionalgroup_models)) {
+      mod <- functionalgroup_models[[row$FunctionalGroup]]
+      pred <- predict(mod, newdata = row)
+    }
+    
+    # save prediction if found, rounded to 2 decimals
+    if (!is.na(pred)) {
+      data$DryWeight_pred[i] <- round(pred, 2)
+    }
+  }
+  
+  return(data)
+}
+
+df <- fill_dryweight(
+  data, 
+  spp_models, 
+  genus_models, 
+  family_models, 
+  functionalgroup_models
+)
+
+predictions <- df %>% 
+  select(ID, PlotID, Spp, DryWeight, DryWeight_pred)
+
+
+percent <- comp %>% 
+  select(ID, Percent)
+
+predictions <- predictions %>% 
+  left_join(percent, by = "ID")
+
+View(predictions)
+#library(writexl)
+
+# save dataframe to Excel
+#write_xlsx(predictions, "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/24and25predictions.xlsx")
+
+```

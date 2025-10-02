@@ -1,12 +1,16 @@
 ---
-title: "Project Recap"
-code-fold: TRUE
-Date: 9/4/2025
+title: "John Day Vegetation Recap"
+Date: 2025-09-04
+format:
+  html:
+    toc: true
+    toc-location: left
+    toc-depth: 3
+    code-fold: true
+editor: visual
 ---
 
-# Project Recap
-
-## Sample Timing
+# Sample Timing
 
 ```{r}
 #| warning: FALSE
@@ -44,7 +48,7 @@ transect <- transect %>%
 
 ```
 
-### Total Transects Sampled
+## Total Transects Sampled
 
 Between 2024 and 2025, we sampled 109 transects across six different vegetation communities in the canyon. Most of these were in Grassland (58 transects), with fewer in Intermediate (13), Riparian (12), Scabland (11), Shrubland (11), and Sparse (4). The number of transects in each community reflected how much of the study area that community covered, based on Landfire data. Since Grassland makes up more than 85% of the site, it naturally had the most sampling, while the other communities only covered about 1–5% each. As you all know, there are plenty of rocky(sparse) areas that sheep often use, but because they were tough to get to and didn't usually have much plant diversity, we ended up sampling fewer transects within these communities. Still, I think the sampling we did was enough to capture what’s going on in that community.
 
@@ -61,7 +65,7 @@ ggplot(transect, aes (x = PVT))+
   theme_grey()
 ```
 
-### Timing of Sampling
+## Timing of Sampling
 
 In our first year, we focused heavily on the grassland community and sampled transects more strictly in proportion to the area each vegetation community covered. Grassland was sampled two to three times a week, with fewer visits to the other communities, which didn’t give us much coverage outside grassland. In the second year, we shifted more effort toward the other vegetation communities to better capture their phenology timing.
 
@@ -105,7 +109,7 @@ ggplot(transect, aes(x = DOY, y = PVT, color = Year)) +
          theme_bw()
 ```
 
-### Sample Locations
+## Sample Locations
 
 I also wanted to share a visual of where our transects were distributed. In the first year, since we didn’t yet have collar data on summer movements, we focused on a boundary within two miles of the river, prioritizing points closer to the river over those further away on top of the canyon.
 
@@ -135,9 +139,9 @@ ggplot(transect, aes(x = easting, y = northing, color = PVT))+
   theme(legend.position = "right")
 ```
 
-## Timing of "Green-up"
+# Timing of "Green-up"
 
-### Overall timing
+## Overall timing
 
 Next, I wanted to look at the overall timing of green-up in the canyon. The first graph combines results from both summers. As expected, the peak of “New” growth is around March–April, while the biggest transition to “Cured” plants occurs around May–June. It’s neat to see this line up with what Emily found regarding the birth pulse, with the most new (and highly nutritious) forage coinciding with peak lambing.
 
@@ -232,7 +236,7 @@ p <- ggplot(df_plot, aes(x = Month, y = prop, fill = Pheno,
 ggplotly(p, tooltip = "text")
 ```
 
-### Timing by Vegetation Community
+## Timing by Vegetation Community
 
 I was also curious to see how green-up timing varied across the different vegetation communities, especially in the riparian areas. The timing in Grassland, Intermediate, and Shrubland communities was fairly similar, while Scabland and Sparse areas progressed the fastest. As expected, the Riparian areas showed a slower progression through green-up compared to the other communities, likely providing more nutritious forage into late June or early July—just as lactation is hopefully slowing for many of the ewes.
 
@@ -295,13 +299,13 @@ comp %>%
 
 ***biomass overtime?***
 
-## Quality Metrics
+# Quality Metrics
 
 This section looks at the quality metrics from the 2024 season. The DE and DP values here are still rough estimates for each sample. I used general values to get a preliminary sense of these metrics while waiting on additional nutrient information needed for a correction factor. That said, these estimates are mostly in line with what I expect the final values to be. The biggest shifts will occur in species with high tannin contents such as sagebrush.
 
 All results here are based on the 2024 samples. The 2025 quality data are still being processed, and once complete, we’ll have much more information—especially for the riparian areas.
 
-### Top Grass Species
+## Top Grass Species
 
 These first graphs shows the overall trend in quality metrics for different functional groups we observed. The dashed lines represent the energetic demand thresholds for a lactating female sheep. In theory, any species falling in the upper-right quadrant meets these energetic demands in a gram of forage. That said, these metrics don’t account for biomass, so take them with a grain of salt—some species may still make a substantial contribution to the total suitable biomass when available in larger quantities.
 
@@ -402,7 +406,7 @@ ggplot(grass, aes(x = DE, y = DP)) +
   theme_minimal(base_size = 12)
 ```
 
-### Top Forb Species
+## Top Forb Species
 
 Looking at the forbs is a little more chaotic. There are more species that meet both the DE and DP thresholds, but there are still a substantial number that fall below those thresholds.
 
@@ -480,7 +484,7 @@ ggplot(forb, aes(x = DE, y = DP)) +
   theme_minimal(base_size = 12)
 ```
 
-### Top Shrub Species
+## Top Shrub Species
 
 Lastly I lumped all of the Tree/Vine/Shrubs into one group. Again there are consistent low metrics for most of the species.
 
@@ -552,9 +556,11 @@ ggplot(shrub, aes(x = DE, y = DP)) +
 
 It was interesting to notice that digestible protein values stayed pretty low across most species, no matter the functional group or phenology stage. This matches up with what Katey was seeing in Asotin Creek. I’m hoping the suitable biomass measurements will give us a better idea of how this population does so well even when many of the plants don’t seem all that nutrient-rich. My guess is that the sheer volume they’re able to consume of some of the species has a lot to do with it.
 
-## Invasive vs Native Species
+# Invasive vs Native Species
 
-comparison of top native vs invasive grass quality metrics
+In this section I wanted to compare the quality metrics of the native and non-native (invasive) species that we observed within our transects, specifically the grasses. This first graph is similar to the sections above but splits apart the native and non-native grass species in all phenological stages. This graph has the same outliers as the previous graph so the "AGCR" and "VUMIM" measurements within the top right quadrants should be ignored.
+
+Although more non-native grass species meet the energetic thresholds than native species (two versus one lol) , the quality metrics of native species appear to decline less sharply.
 
 ```{r}
 # ggplot with facets
@@ -572,7 +578,7 @@ invasive <- ggplot(grass, aes(
   )
 )) +
   geom_point(size = 3) +
-  facet_wrap(~Status, scales = "free") +   # facet into separate panels
+  facet_wrap(~Status, scales = "fixed") +   # same x and y for both facets
   geom_vline(xintercept = 11.5, linetype = "dashed", color = "gray50") +
   geom_hline(yintercept = 7.5, linetype = "dashed", color = "gray50") +
   labs(
@@ -580,13 +586,14 @@ invasive <- ggplot(grass, aes(
     x = "DE",
     y = "DP"
   ) +
+  coord_cartesian(xlim = c(9, 14), ylim = c(-2, 20)) +  # set same x and y limits
   theme_minimal(base_size = 12)
 
 # Convert to interactive plotly
 ggplotly(invasive, tooltip = "text")
 ```
 
-frequency of observations of invasive species in different PVTs
+I also looked at whether the percentage of invasive species observed at our transects increased at any point during the season. Overall, the number of non-native species remained fairly consistent throughout the year, with a small spike in the spring. However, because fewer transects were sampled in April, it is unclear whether this pattern accurately reflects conditions on the landscape at that time.
 
 ```{r}
 status <- plant %>% 
@@ -614,6 +621,8 @@ df %>%
   theme_minimal()
 ```
 
+I also examined how native and non-native species compared across different vegetation communities. The patterns were fairly consistent across communities, although I did observe a slightly higher abundance of non-native species in riparian areas, likely due to increased disturbance from animal traffic and run-off.
+
 ```{r}
 df %>%
   count(PVT, Status) %>%
@@ -630,36 +639,52 @@ df %>%
   theme_minimal()
 ```
 
-## Fecal Collections
+# Fecal Collections
+
+This section shows a timeline of when our fecal samples were collected across both seasons. To simplify the visualization, I condensed multiple observations from the same date into a single point to highlight the overall timing of sampling. On most sampling days, at least two to three samples were collected from a group when available, and on some days we encountered multiple groups in different areas of the canyon. These instances are still represented by a single datapoint on the graph.
+
+I think we did a fairly good job of collecting fecal samples throughout the summer. There is, however, a gap in the first two weeks of the season in both years, which makes sense since this period coincides with our priority of monitoring lambs during the beginning of the birth pulse. Because we have a substantial number of samples on either side of this gap, I am not overly concerned; the surrounding samples should still provide a solid understanding of the sheep’s feeding habits during that time frame.
 
 ```{r}
+#| warning: FALSE
 f <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/VegDatabases/Fecal.xlsx"
 
 fecal <- read_excel(f, "Sheet1")
 
+
 fecal <- fecal %>% 
-    mutate(
+  filter(!ID %in% c("25_045", "25_061")) %>% 
+  mutate(
     DATE = as.Date(
-      suppressWarnings(as.numeric(DATE)),  # force numeric, ignore warnings
-      origin = "1899-12-30"                # Windows Excel default
+      suppressWarnings(as.numeric(DATE)),  # convert Excel numbers to Date
+      origin = "1899-12-30"                # Excel date origin
     )
-  ) %>%  mutate(DOY = yday(DATE),
-        Year = factor(year(DATE)))
+  ) %>%  
+  filter(!is.na(DATE)) %>%        # remove rows where DATE is NA
+  distinct(DATE, .keep_all = TRUE) %>%  # keep only one row per DATE
+  mutate(
+    DOY  = yday(DATE),
+    Year = factor(year(DATE))
+  )
+  
 
-ggplot(fecal, aes(x = DOY, y = ID, color = Year)) +
-         geom_point()+
-         scale_x_continuous(breaks = c( 75, 105, 136, 166, 197, 228),
-                      labels = c("March", "Apr", "May", "June", "July", "Aug"))+
-         labs(title = "Sampling Dates",
-              x = "Month",
-              y = "Sample ID",
-              color = "Year") +
-         theme_bw()
+ggplot(fecal, aes(x = DOY, y = Year, color = Year)) +
+  geom_jitter(height = 0.2, size = 3) +   # jitter vertically within each Year
+  scale_x_continuous(
+    breaks = c(75, 105, 136, 166, 197, 228),
+    labels = c("March", "Apr", "May", "June", "July", "Aug")
+  ) +
+  labs(
+    title = "Sampling Dates by Year",
+    x = "Month",
+    y = "Year",
+    color = "Year"
+  ) +
+  theme_bw()
 
-#DATE IS BEING READ WRONG
 ```
 
-## Next Steps
+# Next Steps
 
 Complete biomass predictions so I can determine suitable biomass using the FRESH model
 
