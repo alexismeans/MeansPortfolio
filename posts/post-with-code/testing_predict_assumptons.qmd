@@ -34,7 +34,7 @@ all_models <- list(
 
 Here are my current predicted biomass values based on the linear equations at the bottom of the page. I didn’t include the code I used to generate them in this document, but I can send it over if you’d like to take a look. Right now, all the biomass values are in grams rather than kilograms. I’m not sure if that affects the predictions, but my plan was to scale them up to kilograms before rerunning the FRESH model.
 
-A couple of things stood out to me. First, quite a few of the predicted values came out negative. I’m assuming that’s a modeling issue, since biomass really shouldn’t be negative even in predictions. I just wanted to make sure I’m thinking about that correctly. Second, some of the values seem a bit off compared to others for the same species. They’re not wildly unrealistic, but they’re different enough that they caught my attention.
+IGNORE THIS FOR NOW
 
 ```{r}
 #| warning: FALSE
@@ -49,9 +49,43 @@ predictions <- read_excel(df, "Sheet1")
 datatable(predictions, options = list(pageLength = 10))
 ```
 
-## Assumption Test P-values
+## R2, AIC and Coefficients 
 
-Because of the weird prediction numbers, I ran four different assumption tests on each of the linear models:
+A lot of the r-squared values look much better. The FG results still do not look great.
+
+```{r}
+spp <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/processed.data/spp_models_diagnostics.xlsx"
+
+spp_predictions <- read_excel(spp, "Sheet1")
+
+datatable(spp_predictions, options = list(pageLength = 10))
+```
+
+```{r}
+genus <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/processed.data/genus_models_diagnostics.xlsx"
+
+genus_predictions <- read_excel(genus, "Sheet1")
+
+datatable(genus_predictions, options = list(pageLength = 10))
+```
+
+```{r}
+fam <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/processed.data/family_models_diagnostics.xlsx"
+
+fam_predictions <- read_excel(fam, "Sheet1")
+
+datatable(fam_predictions, options = list(pageLength = 10))
+```
+
+```{r}
+fg <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/processed.data/fg_models_diagnostics.xlsx"
+
+fg_predictions <- read_excel(fg, "Sheet1")
+
+datatable(fg_predictions, options = list(pageLength = 10))
+```
+
+## Assumption Test P-values
 
 -   Breusch–Pagan test (bptest) for homoscedasticity
 
@@ -76,14 +110,11 @@ check_lm_assumptions <- function(model) {
   res <- residuals(model)
   
   list(
-    shapiro_p = tryCatch(round(shapiro.test(res)$p.value, 4), 
-                         error = function(e) NA),
-    bp_test   = tryCatch(round(lmtest::bptest(model)$p.value, 4), 
-                         error = function(e) NA),
-    dw_test   = tryCatch(round(lmtest::dwtest(model)$p.value, 4), 
-                         error = function(e) NA),
-    cook_max  = tryCatch(round(max(cooks.distance(model), na.rm = TRUE), 4), 
-                         error = function(e) NA)
+    r_squared = tryCatch(round(summary(model)$r.squared, 4), error = function(e) NA),
+    shapiro_p = tryCatch(round(shapiro.test(res)$p.value, 4), error = function(e) NA),
+    bp_test   = tryCatch(round(lmtest::bptest(model)$p.value, 4), error = function(e) NA),
+    dw_test   = tryCatch(round(lmtest::dwtest(model)$p.value, 4), error = function(e) NA),
+    cook_max  = tryCatch(round(max(cooks.distance(model), na.rm = TRUE), 4), error = function(e) NA)
   )
 }
 
@@ -92,8 +123,27 @@ diagnostics <- imap_dfr(all_models, function(model_list, group_name) {
     mutate(group = group_name, .before = 1)
 })
 
+#--------------------------------------------------------------
+# 3️⃣ Extract model base name (everything before trailing number)
+#     Example: "BRTE_GREEN1" → "BRTE_GREEN"
+#--------------------------------------------------------------
+diagnostics <- diagnostics %>%
+  mutate(model_base = str_trim(str_extract(model_name, ".*(?=\\d+$)")))
 
-datatable(diagnostics, options = list(pageLength = 10))
+#--------------------------------------------------------------
+# 4️⃣ Identify and remove model families with any R² > 0.4
+#--------------------------------------------------------------
+high_r2_bases <- diagnostics %>%
+  group_by(model_base) %>%
+  summarize(any_high_r2 = any(r_squared > 0.4, na.rm = TRUE)) %>%
+  filter(any_high_r2) %>%
+  pull(model_base)
+
+diagnostics_low_r2 <- diagnostics %>%
+  filter(!model_base %in% high_r2_bases)
+
+
+datatable(diagnostics_low_r2, options = list(pageLength = 10))
 ```
 
 ## Diagnostic Plots and Equations
@@ -123,7 +173,17 @@ plot_diagnostics <- function(model, model_name, group_name) {
 }
 
 imap(all_models, function(model_list, group_name) {
-  walk2(model_list, names(model_list), ~ {
+  
+  # Filter only models from this group that passed the R² criteria
+  keep_models <- diagnostics_low_r2 %>%
+    filter(group == group_name) %>%
+    pull(model_name)
+  
+  # Subset model list to those models
+  model_list_filtered <- model_list[names(model_list) %in% keep_models]
+  
+  # Plot only the retained models
+  walk2(model_list_filtered, names(model_list_filtered), ~ {
     plot_diagnostics(.x, .y, group_name)
   })
 })
