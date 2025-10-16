@@ -49,7 +49,7 @@ predictions <- read_excel(df, "Sheet1")
 datatable(predictions, options = list(pageLength = 10))
 ```
 
-## R2, AIC and Coefficients 
+## R2, AIC and Coefficients
 
 A lot of the r-squared values look much better. The FG results still do not look great.
 
@@ -86,6 +86,8 @@ datatable(fg_predictions, options = list(pageLength = 10))
 ```
 
 ## Assumption Test P-values
+
+I ran assumption tests on only the models that did not have a single model with an r-squared value higher than 0.4 (this was the value that Katey used, I can adjust it if needed)
 
 -   Breusch–Pagan test (bptest) for homoscedasticity
 
@@ -189,10 +191,6 @@ imap(all_models, function(model_list, group_name) {
 })
 ```
 
-## Questions
+## What's next
 
-1.  I’m having a hard time figuring out which plots are bad enough that they justify trying a different linear model. Did any of them stick out to you?
-
-2.  Are there any assumption tests that I should be taking with a grain of salt? Ryan mentioned that one of them might not matter as much since our main goal with the linear models is prediction.
-
-3.  Currently, I only have the top regression equation saved for each species, genus, etc. Before I go back and rerun the model dredging process to generate more equations, I wanted to check if you had any other suggestions on how I could improve the predictions.
+I am going to rerun the prediction equations with an interaction term between JD and cover like we discussed in lab meeting and see how that improves any of the models.

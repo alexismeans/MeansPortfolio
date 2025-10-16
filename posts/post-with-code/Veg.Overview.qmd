@@ -238,6 +238,21 @@ p <- ggplot(df_plot, aes(x = Month, y = prop, fill = Pheno,
 ggplotly(p, tooltip = "text")
 ```
 
+```{r}
+#| warning: FALSE
+#| message: false
+comp %>%
+  count(Month, Pheno) %>%
+  group_by(Month) %>%
+  mutate(prop = n / sum(n)) %>%
+  ggplot(aes(x = Month, y = prop, color = Pheno, group = Pheno)) +
+  geom_smooth(se = FALSE, method = "loess", span = 0.8, size = 1.2) +
+  geom_point(size = 2) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(y = "Proportion", x = "Month", color = "Phenology stage") +
+  theme_minimal()
+```
+
 ## Timing by Vegetation Community
 
 I was also curious to see how green-up timing varied across the different vegetation communities, especially in the riparian areas. The timing in Grassland, Intermediate, and Shrubland communities was fairly similar, while Scabland and Sparse areas progressed the fastest. As expected, the Riparian areas showed a slower progression through green-up compared to the other communities, likely providing more nutritious forage into late June or early July—just as lactation is hopefully slowing for many of the ewes.
@@ -263,40 +278,6 @@ p2 <- ggplot(pvt_comp, aes(x = Month, y = prop, fill = Pheno,
 
 
 ggplotly(p2, tooltip = "text")
-```
-
-```{r}
-#| warning: FALSE
-#| message: false
-comp %>%
-  count(Month, Pheno) %>%
-  group_by(Month) %>%
-  mutate(prop = n / sum(n)) %>%
-  ggplot(aes(x = Month, y = prop, color = Pheno, group = Pheno)) +
-  geom_smooth(se = FALSE, method = "loess", span = 0.8, size = 1.2) +
-  geom_point(size = 2) +
-  scale_y_continuous(labels = scales::percent) +
-  labs(y = "Proportion", x = "Month", color = "Phenology stage") +
-  theme_minimal()
-```
-
-```{r}
-#| warning: FALSE
-#| message: false
-comp <- comp %>%
-  mutate(PVT = substr(PlotID, 4, 6))
-
-comp %>%
-  count(PVT, Month, Pheno) %>%
-  group_by(PVT, Month) %>%
-  mutate(prop = n / sum(n)) %>%
-  ggplot(aes(x = Month, y = prop, color = Pheno, group = Pheno)) +
-  geom_smooth(se = FALSE, method = "loess", span = 0.8, size = 1.2) +
-  geom_point(size = 2) +
-  scale_y_continuous(labels = scales::percent) +
-  labs(y = "Proportion", x = "Month", color = "Phenology stage") +
-  facet_wrap(~PVT, ncol = 2) +   # adjust ncol to control layout
-  theme_minimal()
 ```
 
 ***biomass overtime?***
@@ -333,7 +314,8 @@ quality <- quality %>%
 
 grass <- quality %>% 
   filter(str_detect(FunctionalGroup, "G")) %>% 
-  filter(Spp != "UNK GRASS")
+  filter(Spp != "UNK GRASS") %>% 
+  filter(!Sample_ID %in% c(251, 275, 264))
 
 
 # Create ggplot with dashed reference lines
@@ -379,9 +361,7 @@ p_plotly
 
 ```
 
-This graph is a zoomed-in look at the previous one, focusing only on the species that landed in the upper right quadrant. I think the "VUMIM_C" and "AGCR_FL" values might be outliers—at least for "VUMIM_C", I have other quality metrics that fall below both the DE and DP thresholds, which is more in line with what I’d expect.
-
-As expected, cheatgrass and ripgut brome came out on top for grass species with the highest quality metrics, with bluebunch wheatgrass and basin wildrye not far behind. It’s worth noting that all of these measurements were taken when the species were still in their newly emergent stage.
+This graph is a zoomed-in look at the previous one, focusing only on the species that landed in the upper right quadrant. As expected, cheatgrass and ripgut brome came out on top for grass species with the highest quality metrics, with bluebunch wheatgrass and basin wildrye not far behind. It’s worth noting that all of these measurements were taken when the species were still in their newly emergent stage.
 
 *(this one is not sorry)*
 
@@ -416,7 +396,10 @@ Looking at the forbs is a little more chaotic. There are more species that meet 
 #| warning: FALSE
 #| message: false
 forb <- quality %>% 
-  filter(str_detect(FunctionalGroup, "F"))
+  filter(str_detect(FunctionalGroup, "F")) %>% 
+  filter(!Sample_ID %in% "308")
+
+#remove lara-FL
 
 
 p2 <- ggplot(forb, aes(
