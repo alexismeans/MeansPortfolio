@@ -11,7 +11,7 @@ about:
 
 ## About Me
 
-My name is Alexis Means! I’m a research assistant working with the University of Idaho and the Oregon Department of Fish and Wildlife to study one of Oregon’s most successful bighorn sheep populations. My research focuses on how these sheep navigate their environment and make tough decisions about what to eat when faced with difficult tradeoffs.
+My name is Alexis Means. I’m a research assistant working with the University of Idaho and the Oregon Department of Fish and Wildlife to study one of Oregon’s most successful bighorn sheep populations. My research focuses on how these sheep navigate their environment and make tough decisions about what to eat when faced with difficult tradeoffs.
 
 Early on, I’ll be analyzing vegetation data to see how different plant species and growth stages change across multiple vegetation communities and seasons. In the long run, I’ll use this information to build a model that maps the nutritional landscape, helping us better understand bighorn sheep movement.
 

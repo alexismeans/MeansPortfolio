@@ -7,6 +7,6 @@ categories: [news]
 
 ## Welcome
 
-Hi! I’m Alexis Means, a master’s student teaming up with the University of Idaho and the Oregon Department of Fish and Wildlife. Together, we’re diving into the wild world of bighorn sheep, exploring how their nutritional choices shape their populations. You could say I’m studying what’s on the menu for our fuzzy friends—and how it impacts their survival and growth!
+I’m Alexis Means, a master’s student collaborating with the University of Idaho and the Oregon Department of Fish and Wildlife. My research focuses on bighorn sheep, examining how their nutritional choices influence population dynamics, survival, and growth. I’m analyzing both forage availability and quality across different habitats in the John Day Canyon to understand how seasonal and spatial variation in nutrition affects sheep foraging behavior and overall health.
 
 ![John Day, Bighorn Sheep Capture - 2024](images/Sheep%20Capture%202024-01.jpg)
