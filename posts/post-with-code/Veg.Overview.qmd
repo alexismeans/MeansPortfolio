@@ -122,6 +122,14 @@ In the second year, we refined the boundary using GPS data from the previous sum
 #| message: false
 library(ggmap)
 
+
+river <- st_read("C:/Users/Alexis Means/Documents/Project/JohnDayRiver_shp/JohnDayRiver.shp")
+jd <- st_read("C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/2025_GRTS/25_StudyArea/25_LJD_StudyArea_all.shp")
+
+jd <- st_transform(st_zm(jd), crs = 32610)
+river <- st_transform(st_zm(river), crs = 32610)
+river <- st_intersection(river, jd)
+
 #plot without map in background
 ggplot(transect, aes(x = easting, y = northing, color = PVT))+
   geom_point(size = 2, alpha = 0.8)+
@@ -139,6 +147,47 @@ ggplot(transect, aes(x = easting, y = northing, color = PVT))+
        color = "Vegetation Type")+
   theme_minimal()+
   theme(legend.position = "right")
+
+ggplot() +
+  # John Day boundary (outline only)
+  geom_sf(data = jd, fill = NA, color = "black", size = 0.6) +
+  
+  # River shapefile
+  geom_sf(data = river, color = "blue", size = 0.8) +
+  
+  # Transect points from your dataframe
+  geom_point(
+    data = transect,
+    aes(x = easting, y = northing, color = PVT),
+    size = 2,
+    alpha = 0.8
+  ) +
+  
+  # Color scheme
+  scale_color_manual(values = c(
+    "Grassland" = "green",
+    "Riparian" = "blue",
+    "Sparse" = "brown",
+    "Intermediate" = "yellow",
+    "Scabland" = "purple",
+    "Shrubland" = "red"
+  )) +
+  
+  # Labels and theme
+  labs(
+    title = "Sample Locations within the John Day",
+    x = "Easting",
+    y = "Northing",
+    color = "Vegetation Type"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "right")
+
+coord_sf(
+  xlim = range(transect$easting) + c(-500, 500),
+  ylim = range(transect$northing) + c(-500, 500),
+  expand = FALSE
+)
 ```
 
 # Timing of "Green-up"
@@ -543,9 +592,9 @@ It was interesting to notice that digestible protein values stayed pretty low ac
 
 # Invasive vs Native Species
 
-In this section I wanted to compare the quality metrics of the native and non-native (invasive) species that we observed within our transects, specifically the grasses. This first graph is similar to the sections above but splits apart the native and non-native grass species in all phenological stages. This graph has the same outliers as the previous graph so the "AGCR" and "VUMIM" measurements within the top right quadrants should be ignored.
+In this section I wanted to compare the quality metrics of the native and non-native (invasive) species that we observed within our transects, specifically the grasses. This first graph is similar to the sections above but splits apart the native and non-native grass species in all phenological stages.
 
-Although more non-native grass species meet the energetic thresholds than native species (two versus one lol) , the quality metrics of native species appear to decline less sharply.
+Although more non-native grass species meet the energetic thresholds than native species (two versus one lol) , the quality metrics of native species appear to retain higher quality metrics throughout the later phenological stages.
 
 ```{r}
 # ggplot with facets
@@ -571,7 +620,7 @@ invasive <- ggplot(grass, aes(
     x = "DE",
     y = "DP"
   ) +
-  coord_cartesian(xlim = c(9, 14), ylim = c(-2, 20)) +  # set same x and y limits
+  coord_cartesian(xlim = c(9, 14), ylim = c(-2, 12)) +  # set same x and y limits
   theme_minimal(base_size = 12)
 
 # Convert to interactive plotly
@@ -589,16 +638,24 @@ df <- comp %>%
 
 df <- df %>% 
     mutate(Pheno = na_if(Status, "NA")) %>% 
-  filter(!is.na(Status))
+  filter(!is.na(Status)) %>% 
+    mutate(PVT = dplyr::recode(PVT,
+                      `672` = "Grassland",
+                      `682` = "Riparian",
+                      `668` = "Scabland",
+                      `669` = "Shrubland",
+                      `674` = "Intermediate",
+                      `660` = "Sparse"))
 
 df %>%
   count(Month, Status) %>%
   group_by(Month) %>%
   mutate(prop = n / sum(n)) %>%
   ggplot(aes(x = Month, y = prop, fill = Status)) +
-  geom_col(position = "stack") +
+  geom_col(position = "dodge") +
   scale_y_continuous(labels = scales::percent) +
   labs(
+    title = "Status Composition based on Month",
     x = "Month",
     y = "Proportion",
     fill = "Status"
@@ -614,9 +671,10 @@ df %>%
   group_by(PVT) %>%
   mutate(prop = n / sum(n)) %>%
   ggplot(aes(x = PVT, y = prop, fill = Status)) +
-  geom_col(position = "stack") +
+  geom_col(position = "dodge") +
   scale_y_continuous(labels = scales::percent) +
   labs(
+    title = "Status Composition based on PVT",
     x = "PVT",
     y = "Proportion",
     fill = "Status"
@@ -656,8 +714,8 @@ fecal <- fecal %>%
 ggplot(fecal, aes(x = DOY, y = Year, color = Year)) +
   geom_jitter(height = 0.2, size = 3) +   # jitter vertically within each Year
   scale_x_continuous(
-    breaks = c(75, 105, 136, 166, 197, 228),
-    labels = c("March", "Apr", "May", "June", "July", "Aug")
+    breaks = c(1, 32, 61, 92, 122, 153, 183, 213),
+    labels = c("Jan", "Feb", "March", "Apr", "May", "June", "July", "Aug")
   ) +
   labs(
     title = "Sampling Dates by Year",
@@ -671,8 +729,8 @@ ggplot(fecal, aes(x = DOY, y = Year, color = Year)) +
 
 # Next Steps
 
-Complete biomass predictions so I can determine suitable biomass using the FRESH model
+-   Finalize my biomass predictions, so I can determine suitable biomass using the FRESH model
 
-Finish extracting covariates to include within my GAM (the nutritional landscape map)
+-   Finish extracting and preprojecting my remaining covariates that I plan to include within my GAM (the nutritional landscape map).
 
-Begin building HSF and iSSA
+-   Once I have my suitable biomass measurements and GAM, I can begin to build my HSF and iSSA.
