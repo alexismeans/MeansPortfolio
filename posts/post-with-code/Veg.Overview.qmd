@@ -52,7 +52,7 @@ transect <- transect %>%
 
 ## Total Transects Sampled
 
-Between 2024 and 2025, we sampled 109 transects across six different vegetation communities in the canyon. Most of these were in Grassland (58 transects), with fewer in Intermediate (13), Riparian (12), Scabland (11), Shrubland (11), and Sparse (4). The number of transects in each community reflected how much of the study area that community covered, based on Landfire data. Since Grassland makes up more than 85% of the site, it naturally had the most sampling, while the other communities only covered about 1–5% each. As you all know, there are plenty of rocky(sparse) areas that sheep often use, but because they were tough to get to and didn't usually have much plant diversity, we ended up sampling fewer transects within these communities. Still, I think the sampling we did was enough to capture what’s going on in that community.
+Between 2024 and 2025, we sampled 109 transects across six different vegetation communities in the canyon. Most of these were in Grassland (58 transects), with fewer in Intermediate (13), Riparian (12), Scabland (11), Shrubland (11), and Sparse (4). The number of transects in each community reflected how much of the study area that community covered, based on Landfire data. Since Grassland makes up more than 85% of the site, it naturally had the most sampling, while the other communities only covered about 1–5% each. As you all know, there are plenty of rocky(sparse) areas that sheep often use, but because they were tough to get to and didn't usually have much plant diversity, we ended up sampling fewer transects within these communities. Still, I think the sampling we did was enough to capture any variation in that community.
 
 ```{r}
 #| warning: FALSE
@@ -71,7 +71,7 @@ ggplot(transect, aes (x = PVT))+
 
 In our first year, we focused heavily on the grassland community and sampled transects more strictly in proportion to the area each vegetation community covered. Grassland was sampled two to three times a week, with fewer visits to the other communities, which didn’t give us much coverage outside grassland. In the second year, we shifted more effort toward the other vegetation communities to better capture their phenology timing.
 
-The first graph shows the timing of transects were sampled in both 2024 and 2025, and the second gives a better picture of how the sampling timing overlapped for each vegetation community in both years. Overall, I think we did a good job filling gaps in the smaller (but equally important) vegetation communities, giving us a clearer picture of how phenology timing varies across them.
+The first graph shows the timing of transects were sampled in both 2024 and 2025, and the second gives a better picture of how the sampling timing overlapped for each vegetation community in both years. Overall, I think we did a good job filling gaps in the smaller vegetation communities, giving us a clearer picture of how phenology timing varies across them.
 
 ```{r}
 #| warning: FALSE
@@ -113,18 +113,25 @@ ggplot(transect, aes(x = DOY, y = PVT, color = Year)) +
 
 ## Sample Locations
 
-I also wanted to share a visual of where our transects were distributed. In the first year, since we didn’t yet have collar data on summer movements, we focused on a boundary within two miles of the river, prioritizing points closer to the river over those further away on top of the canyon.
+I also wanted to share a visual of how our transects were distributed throughout the canyon. In the first year, since we didn’t yet have collar data on the sheep's summer movements, we decided to use a boundary and stay within two miles of the river, prioritizing points closer to the river over those further away on top of the canyon.
 
-In the second year, we refined the boundary using GPS data from the previous summer. The shape stayed similar but narrowed further into the canyon. The extra floats were a big help for reaching those tougher spots at the bottom of the canyon (thanks again to everyone who helped with those!). Overall, I’m really happy with how the distribution turned out. The only areas with lighter sampling were on the West side where access was limited, but the floats went a long way toward filling in those gaps.
+In the second year, we refined the boundary using GPS data from the previous summer. The overall shape of our boundary stayed similar but narrowed further into the canyon. The extra floats were a big help for reaching those tougher spots at the bottom of the canyon (thanks again to everyone who helped with those!). Overall, I’m really happy with how the distribution turned out. The only areas with lighter sampling were on the West side where access was limited, but the floats helped a lot to fill in some of those gaps. The points that are outside the study area on the left are a few sampling spots that we did up jackknife.
 
 ```{r}
 #| warning: FALSE
-#| message: false
+#| message: FALSE
 library(ggmap)
 
 
-river <- st_read("C:/Users/Alexis Means/Documents/Project/JohnDayRiver_shp/JohnDayRiver.shp")
-jd <- st_read("C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/2025_GRTS/25_StudyArea/25_LJD_StudyArea_all.shp")
+river <- st_read(
+  "C:/Users/Alexis Means/Documents/Project/JohnDayRiver_shp/JohnDayRiver.shp",
+  quiet = TRUE
+)
+
+jd <- st_read(
+  "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/2025_GRTS/25_StudyArea/25_LJD_StudyArea_all.shp",
+  quiet = TRUE
+)
 
 jd <- st_transform(st_zm(jd), crs = 32610)
 river <- st_transform(st_zm(river), crs = 32610)
@@ -132,21 +139,14 @@ river <- st_intersection(river, jd)
 
 
 ggplot() +
-  # John Day boundary (outline only)
   geom_sf(data = jd, fill = NA, color = "black", size = 0.6) +
-  
-  # River shapefile
   geom_sf(data = river, color = "blue", size = 0.8) +
-  
-  # Transect points from your dataframe
   geom_point(
     data = transect,
     aes(x = easting, y = northing, color = PVT),
     size = 2,
     alpha = 0.8
   ) +
-  
-  # Color scheme
   scale_color_manual(values = c(
     "Grassland" = "green",
     "Riparian" = "blue",
@@ -155,9 +155,7 @@ ggplot() +
     "Scabland" = "purple",
     "Shrubland" = "red"
   )) +
-  
-  # Labels and theme
-  labs(
+    labs(
     title = "Sample Locations within the John Day",
     x = "Easting",
     y = "Northing",
@@ -176,7 +174,7 @@ Next, I wanted to look at the overall timing of green-up in the canyon. The firs
 
 I also compared the timing between years. Overall, the trends look fairly similar. Anecdotally, I thought green-up in 2025 might have moved faster due to lower rainfall, but that doesn’t seem to be reflected in the month-to-month observations.
 
-*(P.S. The graphs for this section are interactive! If you are interested, you can hover over each box to see the actual percentages of each group and compare them across months.)*
+*(P.S. The graphs for this section are interactive. If you are interested, you can hover over each box to see the actual percentages of each group and compare them across months.)*
 
 ```{r}
 #| warning: FALSE
@@ -235,7 +233,7 @@ p1 <-  ggplot(comp_plot, aes(x = Month, y = prop, fill = Pheno,
                                         "<br>Proportion:", scales::percent(prop)))) +
   geom_col() +
   scale_y_continuous(labels = scales::percent) +
-  labs(y = "Proportion", x = "Month", fill = "Phenology stage") +
+  labs(title = "Combined Phenology Timing", y = "Proportion", x = "Month", fill = "Phenology stage") +
   theme_minimal()
 
 # Convert to interactive Plotly plot
@@ -257,13 +255,15 @@ p <- ggplot(df_plot, aes(x = Month, y = prop, fill = Pheno,
                                       "<br>Proportion:", scales::percent(prop)))) +
   geom_col() +
   scale_y_continuous(labels = scales::percent) +
-  labs(y = "Proportion", x = "Month", fill = "Phenology stage") +
+  labs(title = "Phenology Timing Split by Year", y = "Proportion", x = "Month", fill = "Phenology stage") +
   facet_wrap(~Year, ncol = 1) +
   theme_minimal()
 
 # Convert to interactive plotly plot
 ggplotly(p, tooltip = "text")
 ```
+
+**(NOTE FOR RYAN: I am not sure if a line graph like the one below or the stacked bar graph that I used above is a better representation of the data in this section.)**
 
 ```{r}
 #| warning: FALSE
@@ -276,13 +276,13 @@ comp %>%
   geom_smooth(se = FALSE, method = "loess", span = 0.8, size = 1.2) +
   geom_point(size = 2) +
   scale_y_continuous(labels = scales::percent) +
-  labs(y = "Proportion", x = "Month", color = "Phenology stage") +
+  labs(title = "Combined Phenology Timing", y = "Proportion", x = "Month", color = "Phenology stage") +
   theme_minimal()
 ```
 
 ## Timing by Vegetation Community
 
-I was also curious to see how green-up timing varied across the different vegetation communities, especially in the riparian areas. The timing in Grassland, Intermediate, and Shrubland communities was fairly similar, while Scabland and Sparse areas progressed the fastest. As expected, the Riparian areas showed a slower progression through green-up compared to the other communities, likely providing more nutritious forage into late June or early July—just as lactation is hopefully slowing for many of the ewes.
+I was curious to see how green-up timing varied across the different vegetation communities, especially in the riparian areas. The timing in Grassland, Intermediate, and Shrubland communities was fairly similar, while Scabland and Sparse areas progressed the fastest. As expected, the Riparian areas showed a slower progression through green-up compared to the other communities, likely providing more nutritious forage into late June or early July—just as lactation is hopefully slowing for many of the ewes.
 
 ```{r}
 pvt_comp <- comp %>%
@@ -299,7 +299,7 @@ p2 <- ggplot(pvt_comp, aes(x = Month, y = prop, fill = Pheno,
                                        "<br>Proportion:", scales::percent(prop)))) +
   geom_col() +
   scale_y_continuous(labels = scales::percent) +
-  labs(y = "Proportion", x = "Month", fill = "Phenology stage") +
+  labs(title = "Phenology Timing Across PVTs", y = "Proportion", x = "Month", fill = "Phenology stage") +
   facet_wrap(~PVT, ncol = 2) +
   theme_minimal()
 
@@ -307,17 +307,13 @@ p2 <- ggplot(pvt_comp, aes(x = Month, y = prop, fill = Pheno,
 ggplotly(p2, tooltip = "text")
 ```
 
-***biomass overtime?***
-
 # Quality Metrics
 
-This section looks at the quality metrics from the 2024 season. The DE and DP values here are still rough estimates for each sample. I used general values to get a preliminary sense of these metrics while waiting on additional nutrient information needed for a correction factor. That said, these estimates are mostly in line with what I expect the final values to be. The biggest shifts will occur in species with high tannin contents such as sagebrush.
-
-All results here are based on the 2024 samples. The 2025 quality data are still being processed, and once complete, we’ll have much more information—especially for the riparian areas.
+All results in this section are based on the 2024 samples. The 2025 quality samples are still being processed. Once they’re complete, we’ll have much more information, especially for the species observed in the smaller vegetation communities. I’ve also included a key for each section so that no one has to guess the species codes.
 
 ## Top Grass Species
 
-These first graphs shows the overall trend in quality metrics for different functional groups we observed. The dashed lines represent the energetic demand thresholds for a lactating female sheep. In theory, any species falling in the upper-right quadrant meets these energetic demands in a gram of forage. That said, these metrics don’t account for biomass, so take them with a grain of salt—some species may still make a substantial contribution to the total suitable biomass when available in larger quantities.
+The first graph shows the overall trend in quality metrics for different grasses that we observed. The dashed lines represent the nutritional requirement for a lactating female sheep (Digestible Energy "DE" = 11.5, Digestible Protein "DP" 7.5). In theory, any species falling in the upper-right quadrant meets these nutritional requirements. That said, these metrics don’t account for biomass, so take them with a grain of salt, some species may still make a substantial contribution to the total suitable biomass when available in larger quantities.
 
 I’m still working on biomass predictions, which will help determine how much suitable forage exists within the areas we sampled before scaling up to the landscape level. I hope to have those results soon.
 
@@ -326,6 +322,8 @@ I’m still working on biomass predictions, which will help determine how much s
 ```{r}
 #| warning: FALSE
 #| message: false
+
+library(DT)
 db <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/VegDatabases/Working.composition.data.xlsx"
 q <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/quality/processed.data/24_quality_results.xlsx"
 
@@ -333,7 +331,7 @@ quality <- read_excel(q, "24_quality_results")
 plant <- read_excel(db, "PlantList")
 
 plant <- plant %>% 
-  select(Spp, Family, Genus, Species, FunctionalGroup, FG_New, Status)
+  select(Spp, Genus, Species, CommonName, FunctionalGroup, Status)
 
 quality <- quality %>% 
   select(Sample_ID, PVT, Spp, Pheno, Part, DP, DE) %>% 
@@ -343,6 +341,11 @@ grass <- quality %>%
   filter(str_detect(FunctionalGroup, "G")) %>% 
   filter(Spp != "UNK GRASS") %>% 
   filter(!Sample_ID %in% c(251, 275, 264))
+
+grass.list <- plant %>% 
+  filter(str_detect(FunctionalGroup, "G"))
+
+datatable(grass.list, options = list(pageLength = 10))
 
 
 # Create ggplot with dashed reference lines
@@ -388,7 +391,7 @@ p_plotly
 
 ```
 
-This graph is a zoomed-in look at the previous one, focusing only on the species that landed in the upper right quadrant. As expected, cheatgrass and ripgut brome came out on top for grass species with the highest quality metrics, with bluebunch wheatgrass and basin wildrye not far behind. It’s worth noting that all of these measurements were taken when the species were still in their newly emergent stage.
+This graph is a zoomed-in look at the previous one, focusing only on the species that landed in the upper right quadrant. As expected, cheatgrass(BRTE) and ripgut brome (BRDI3) came out as the top for grass species with the highest quality metrics, with bluebunch wheatgrass(PSSP6) and basin wildrye (LECI4) not far behind.
 
 *(this one is not sorry)*
 
@@ -417,7 +420,7 @@ ggplot(grass, aes(x = DE, y = DP)) +
 
 ## Top Forb Species
 
-Looking at the forbs is a little more chaotic. There are more species that meet both the DE and DP thresholds, but there are still a substantial number that fall below those thresholds.
+Looking at the forbs is a bit more chaotic because of the larger number of species observed. More species meet both the DE and DP thresholds, but a substantial number still fall below those nutritional requirements.
 
 ```{r}
 #| warning: FALSE
@@ -426,8 +429,10 @@ forb <- quality %>%
   filter(str_detect(FunctionalGroup, "F")) %>% 
   filter(!Sample_ID %in% "308")
 
-#remove lara-FL
+forb.list <- plant %>% 
+  filter(str_detect(FunctionalGroup, "F"))
 
+datatable(forb.list, options = list(pageLength = 10))
 
 p2 <- ggplot(forb, aes(
   x = DE,
@@ -472,8 +477,6 @@ p2_plotly
 
 ```
 
-Instead of making everyone test their knowledge of plant codes, I put together a quick cheat sheet for the species included in this figure.
-
 It is interesting to see that most of the species that fall above both the DE and DP thresholds are various Lomatiums and Balsamroots which are everywhere in the spring and typically what we observed the sheep snacking on the most during our hours of observation. There also is several phenologies of the Lupine species—but obviously those aren’t edible for the sheep.
 
 ```{r}
@@ -498,7 +501,7 @@ ggplot(forb, aes(x = DE, y = DP)) +
 
 ## Top Shrub Species
 
-Lastly I lumped all of the Tree/Vine/Shrubs into one group. Again there are consistent low metrics for most of the species.
+Lastly I lumped all of the Tree/Vine/Shrubs species into one group to compare.
 
 ```{r}
 #| warning: FALSE
@@ -506,6 +509,10 @@ Lastly I lumped all of the Tree/Vine/Shrubs into one group. Again there are cons
 shrub <- quality %>% 
  filter(FunctionalGroup %in% c("ES", "S", "T", "V"))
 
+shrub.list <- plant %>% 
+  filter(FunctionalGroup %in% c("ES", "S", "T", "V"))
+
+datatable(shrub.list, options = list(pageLength = 10))
 
 p3 <- ggplot(shrub, aes(
   x = DE,
@@ -566,13 +573,13 @@ ggplot(shrub, aes(x = DE, y = DP)) +
   theme_minimal(base_size = 12)
 ```
 
-It was interesting to notice that digestible protein values stayed pretty low across most species, no matter the functional group or phenology stage. This matches up with what Katey was seeing in Asotin Creek. I’m hoping the suitable biomass measurements will give us a better idea of how this population does so well even when many of the plants don’t seem all that nutrient-rich. My guess is that the sheer volume they’re able to consume of some of the species has a lot to do with it.
+It was interesting to notice that DP values stayed pretty low across most species, no matter the functional group or phenology stage. This matches up with what Katey was seeing in Asotin Creek. I’m hoping the suitable biomass measurements will give us a better idea of how this population does so well even when many of the plants don’t seem all that nutrient-rich. My guess is that the sheer volume they’re able to consume of some of the species has a lot to do with it.
 
 # Invasive vs Native Species
 
-In this section I wanted to compare the quality metrics of the native and non-native (invasive) species that we observed within our transects, specifically the grasses. This first graph is similar to the sections above but splits apart the native and non-native grass species in all phenological stages.
+In this section, I wanted to compare the quality metrics of the native and non-native (invasive) species observed within our transects, focusing specifically on the grasses. The first graph is similar to the sections above but separates native and non-native grass species across all phenological stages.
 
-Although more non-native grass species meet the energetic thresholds than native species (two versus one lol) , the quality metrics of native species appear to retain higher quality metrics throughout the later phenological stages.
+Although more non-native grass species meet the nutrient requirements than native species (two versus one, lol), the quality metrics of the native species appear to remain higher throughout the later phenological stages.
 
 ```{r}
 # ggplot with facets
@@ -605,11 +612,11 @@ invasive <- ggplot(grass, aes(
 ggplotly(invasive, tooltip = "text")
 ```
 
-I also looked at whether the percentage of invasive species observed at our transects increased at any point during the season. Overall, the number of non-native species remained fairly consistent throughout the year, with a small spike in the spring. However, because fewer transects were sampled in April, it is unclear whether this pattern accurately reflects conditions on the landscape at that time.
+I also looked at whether the percentage of non-native species observed at our transects increased at any point during the season. Overall, the number of non-native species remained fairly consistent throughout the year, with a small spike in the spring. However, since much fewer transects were sampled in April compared to any other month, it’s unclear whether this pattern accurately reflects conditions across the landscape at that time.
 
 ```{r}
 status <- plant %>% 
-  select(Spp, Status, FunctionalGroup, FG_New)
+  select(Spp, Status, FunctionalGroup)
 
 df <- comp %>% 
   left_join(status, by = "Spp")
@@ -641,7 +648,7 @@ df %>%
   theme_minimal()
 ```
 
-I also examined how native and non-native species compared across different vegetation communities. The patterns were fairly consistent across communities, although I did observe a slightly higher abundance of non-native species in riparian areas, likely due to increased disturbance from animal traffic and run-off.
+Lastly, I examined how native and non-native species compared across different vegetation communities. The patterns were fairly consistent across communities, although I did observe a slightly higher abundance of non-native species in riparian areas, which I assume is likely due to increased disturbance from animal traffic or erosion.
 
 ```{r}
 df %>%
@@ -662,9 +669,9 @@ df %>%
 
 # Fecal Collections
 
-This section shows a timeline of when our fecal samples were collected across both seasons. To simplify the visualization, I condensed multiple observations from the same date into a single point to highlight the overall timing of sampling. On most sampling days, at least two to three samples were collected from a group when available, and on some days we encountered multiple groups in different areas of the canyon. These instances are still represented by a single datapoint on the graph.
+This section shows a timeline of when our fecal samples were collected across both seasons. To simplify the visualization, I condensed multiple observations from the same date into a single point to highlight the overall timing of sampling. On most sampling days, at least two to three samples were collected from a group when available, and on some days we encountered multiple groups in different areas of the canyon. These instances are still represented by a single datapoint on the first graph.
 
-I think we did a fairly good job of collecting fecal samples throughout the summer. There is, however, a gap in the first two weeks of the season in both years, which makes sense since this period coincides with our priority of monitoring lambs during the beginning of the birth pulse. Because we have a substantial number of samples on either side of this gap, I am not overly concerned; the surrounding samples should still provide a solid understanding of the sheep’s feeding habits during that time frame.
+Overall, I think we did a good job with the timing of our fecal collections throughout the summer. There is, however, a gap in the first two weeks of the season in both years, which makes sense since this period coincides with our priority of monitoring lambs during the beginning of the birth pulse. Because we have a substantial number of samples on either side of this gap, I am not overly concerned; the surrounding samples should still provide a solid understanding of the sheep’s feeding habits during that time frame.
 
 ```{r}
 #| warning: FALSE
@@ -673,7 +680,7 @@ f <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/VegDatabases/Fe
 fecal <- read_excel(f, "Sheet1")
 
 
-fecal <- fecal %>% 
+fecal.time <- fecal %>% 
   filter(!ID %in% c("25_045", "25_061")) %>% 
   mutate(
     DATE = as.Date(
@@ -689,7 +696,7 @@ fecal <- fecal %>%
   )
   
 
-ggplot(fecal, aes(x = DOY, y = Year, color = Year)) +
+ggplot(fecal.time, aes(x = DOY, y = Year, color = Year)) +
   geom_jitter(height = 0.2, size = 3) +   # jitter vertically within each Year
   scale_x_continuous(
     breaks = c(1, 32, 61, 92, 122, 153, 183, 213),
@@ -705,10 +712,45 @@ ggplot(fecal, aes(x = DOY, y = Year, color = Year)) +
 
 ```
 
+Lastly, this plot shows the locations of all the samples we collected, both from capture and across both field seasons. I’m happy with the coverage and distribution we were able to achieve during both capture and summer sampling. I think there is a good range in sample collection times throughout the year as well as how they are spread throughout the canyon.
+
+```{r}
+#| warning: FALSE
+fecal.loc <- fecal %>% 
+  filter(!is.na(LAT) & !is.na(LONG)) %>% 
+  filter(!ID %in% c("25_045", "25_061", "25_048")) %>%
+  st_as_sf(coords = c("LONG", "LAT"), crs = 4326)  # convert to sf
+
+jd <- st_transform(st_zm(jd), crs = 4326)
+river <- st_transform(st_zm(river), crs = 4326)
+river <- st_intersection(river, jd)
+
+ggplot() +
+  geom_sf(data = jd, fill = NA, color = "black", size = 0.6) +
+  geom_sf(data = river, color = "blue", size = 0.8) +
+  geom_sf(data = fecal.loc, aes(color = QUALITY), size = 2, alpha = 0.8) +
+  labs(
+    title = "Sample Locations within the John Day",
+    x = "Longitude",
+    y = "Latitude",
+    color = "Sample Freshness"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "right") +
+  scale_x_continuous(
+    breaks = pretty(range(st_coordinates(jd)[,1]), n = 3)
+  ) +
+  scale_y_continuous(
+    breaks = pretty(range(st_coordinates(jd)[,2]), n = 3)
+  ) 
+```
+
 # Next Steps
 
--   Finalize my biomass predictions, so I can determine suitable biomass using the FRESH model
+-   I’m getting really close to finalizing my biomass predictions. Right now, I’m refining the linear regression models to make sure they’re accurately predicting usable biomass across transects using the FRESH model.
 
--   Finish extracting and preprojecting my remaining covariates that I plan to include within my GAM (the nutritional landscape map).
+-   I’m still processing the quality samples from this summer, but I should have everything ground and submitted for analysis before Thanksgiving. Hopefully, we’ll have the 2025 quality results back around January. In the meantime, I can start building most of my models using the 2024 quality results and rerun them once the 2025 results are available.
 
--   Once I have my suitable biomass measurements and GAM, I can begin to build my HSF and iSSA.
+-   I’ve also been working on extracting and reprojecting the remaining covariates I’ll include in my GAM (the nutritional landscape map). It’s mostly a tedious process, but I’m almost done and will soon be ready to build the model.
+
+-   Once I have both the suitable biomass estimates and my GAM, I can start building the HSF and iSSA to finally look at how the sheep are making space-use decisions based on the nutritional landscape.
