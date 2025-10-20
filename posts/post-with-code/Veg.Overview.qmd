@@ -747,10 +747,8 @@ ggplot() +
 
 # Next Steps
 
--   I’m getting really close to finalizing my biomass predictions. Right now, I’m refining the linear regression models to make sure they’re accurately predicting usable biomass across transects using the FRESH model.
+-   I’m getting really close to finalizing my biomass predictions. Right now, I’m refining the linear regression models to make sure they’re accurately predicting unclipped biomass before I can use the FRESH model to predict suitable biomass at each of the sampled transects.
 
--   I’m still processing the quality samples from this summer, but I should have everything ground and submitted for analysis before Thanksgiving. Hopefully, we’ll have the 2025 quality results back around January. In the meantime, I can start building most of my models using the 2024 quality results and rerun them once the 2025 results are available.
+-   I’m still processing the quality samples from this summer, but I should have everything ground and submitted for analysis before Thanksgiving. Hopefully, we’ll have the 2025 quality results back shortly following that. In the meantime, I can start building most of my models using the 2024 quality results and rerun them once the 2025 results are available.
 
 -   I’ve also been working on extracting and reprojecting the remaining covariates I’ll include in my GAM (the nutritional landscape map). It’s mostly a tedious process, but I’m almost done and will soon be ready to build the model.
-
--   Once I have both the suitable biomass estimates and my GAM, I can start building the HSF and iSSA to finally look at how the sheep are making space-use decisions based on the nutritional landscape.
