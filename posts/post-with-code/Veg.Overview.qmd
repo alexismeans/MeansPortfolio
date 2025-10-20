@@ -130,23 +130,6 @@ jd <- st_transform(st_zm(jd), crs = 32610)
 river <- st_transform(st_zm(river), crs = 32610)
 river <- st_intersection(river, jd)
 
-#plot without map in background
-ggplot(transect, aes(x = easting, y = northing, color = PVT))+
-  geom_point(size = 2, alpha = 0.8)+
-  scale_color_manual (values = c(
-    "Grassland" = "green",
-    "Riparian" = "blue",
-    "Sparse" = "brown",
-    "Intermediate" = "yellow",
-    "Scabland" = "purple",
-    "Shrubland" = "red"
-  ))+
-  labs(title = "Sample locations within the John Day",
-       x = "Easting",
-       y = "Northing",
-       color = "Vegetation Type")+
-  theme_minimal()+
-  theme(legend.position = "right")
 
 ggplot() +
   # John Day boundary (outline only)
@@ -183,11 +166,6 @@ ggplot() +
   theme_minimal() +
   theme(legend.position = "right")
 
-coord_sf(
-  xlim = range(transect$easting) + c(-500, 500),
-  ylim = range(transect$northing) + c(-500, 500),
-  expand = FALSE
-)
 ```
 
 # Timing of "Green-up"
