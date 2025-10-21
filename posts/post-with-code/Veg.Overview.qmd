@@ -62,7 +62,7 @@ library(ggplot2)
 ggplot(transect, aes (x = PVT))+
   geom_bar(fill = "darkblue")+
   labs(title = "Number of Transects Sampled",
-       x = "PVT Type",
+       x = "Potential Vegetation Type",
        y = "Count") +
   theme_grey()
 ```
@@ -71,7 +71,7 @@ ggplot(transect, aes (x = PVT))+
 
 In our first year, we focused heavily on the grassland community and sampled transects more strictly in proportion to the area each vegetation community covered. Grassland was sampled two to three times a week, with fewer visits to the other communities, which didn’t give us much coverage outside grassland. In the second year, we shifted more effort toward the other vegetation communities to better capture their phenology timing.
 
-The first graph shows the timing of transects were sampled in both 2024 and 2025, and the second gives a better picture of how the sampling timing overlapped for each vegetation community in both years. Overall, I think we did a good job filling gaps in the smaller vegetation communities, giving us a clearer picture of how phenology timing varies across them.
+The first graph shows the timing of sampling in both 2024 and 2025, and the second gives a better picture of how the sampling timing overlapped for each vegetation community in both years. Overall, I think we did a good job filling gaps in the smaller vegetation communities, giving us a clearer picture of how phenology timing varies across them.
 
 ```{r}
 #| warning: FALSE
@@ -88,7 +88,7 @@ ggplot(transect, aes(x = Date, y = PVT)) +
          scale_x_date(date_labels = "%b")+
          labs(title = "Sampling Dates",
               x = "Month",
-              y = "PVT Category") +
+              y = "Potential Vegetation Type") +
          facet_wrap(~ Year, scales = "free_x") +
          theme_bw()
 ```
@@ -106,7 +106,7 @@ ggplot(transect, aes(x = DOY, y = PVT, color = Year)) +
                       labels = c("March", "Apr", "May", "June", "July", "Aug"))+
          labs(title = "Sampling Dates",
               x = "Month",
-              y = "PVT Category",
+              y = "Potential Vegetation Type",
               color = "Year") +
          theme_bw()
 ```
@@ -263,23 +263,6 @@ p <- ggplot(df_plot, aes(x = Month, y = prop, fill = Pheno,
 ggplotly(p, tooltip = "text")
 ```
 
-**(NOTE FOR RYAN: I am not sure if a line graph like the one below or the stacked bar graph that I used above is a better representation of the data in this section.)**
-
-```{r}
-#| warning: FALSE
-#| message: false
-comp %>%
-  count(Month, Pheno) %>%
-  group_by(Month) %>%
-  mutate(prop = n / sum(n)) %>%
-  ggplot(aes(x = Month, y = prop, color = Pheno, group = Pheno)) +
-  geom_smooth(se = FALSE, method = "loess", span = 0.8, size = 1.2) +
-  geom_point(size = 2) +
-  scale_y_continuous(labels = scales::percent) +
-  labs(title = "Combined Phenology Timing", y = "Proportion", x = "Month", color = "Phenology stage") +
-  theme_minimal()
-```
-
 ## Timing by Vegetation Community
 
 I was curious to see how green-up timing varied across the different vegetation communities, especially in the riparian areas. The timing in Grassland, Intermediate, and Shrubland communities was fairly similar, while Scabland and Sparse areas progressed the fastest. As expected, the Riparian areas showed a slower progression through green-up compared to the other communities, likely providing more nutritious forage into late June or early July—just as lactation is hopefully slowing for many of the ewes.
@@ -299,7 +282,7 @@ p2 <- ggplot(pvt_comp, aes(x = Month, y = prop, fill = Pheno,
                                        "<br>Proportion:", scales::percent(prop)))) +
   geom_col() +
   scale_y_continuous(labels = scales::percent) +
-  labs(title = "Phenology Timing Across PVTs", y = "Proportion", x = "Month", fill = "Phenology stage") +
+  labs(title = "Phenology Timing Across Vegetation Types", y = "Proportion", x = "Month", fill = "Phenology stage") +
   facet_wrap(~PVT, ncol = 2) +
   theme_minimal()
 
@@ -659,8 +642,8 @@ df %>%
   geom_col(position = "dodge") +
   scale_y_continuous(labels = scales::percent) +
   labs(
-    title = "Status Composition based on PVT",
-    x = "PVT",
+    title = "Status Composition based on Vegetation Type",
+    x = "Potential Vegetation Type",
     y = "Proportion",
     fill = "Status"
   ) +
