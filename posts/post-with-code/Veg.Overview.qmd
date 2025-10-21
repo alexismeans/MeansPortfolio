@@ -236,18 +236,18 @@ p1 <-  ggplot(comp_plot, aes(x = Month, y = prop, fill = Pheno,
   labs(title = "Combined Phenology Timing", y = "Proportion", x = "Month", fill = "Phenology stage") +
   theme_minimal()
 
-# Convert to interactive Plotly plot
+
 ggplotly(p1, tooltip = "text")
 ```
 
 ```{r}
-# Prepare the data
+
 df_plot <- comp %>%
   count(Year, Month, Pheno) %>%
   group_by(Year, Month) %>%
   mutate(prop = n / sum(n))
 
-# Base ggplot
+
 p <- ggplot(df_plot, aes(x = Month, y = prop, fill = Pheno,
                          text = paste("Phenology:", Pheno,
                                       "<br>Month:", Month,
@@ -259,7 +259,7 @@ p <- ggplot(df_plot, aes(x = Month, y = prop, fill = Pheno,
   facet_wrap(~Year, ncol = 1) +
   theme_minimal()
 
-# Convert to interactive plotly plot
+
 ggplotly(p, tooltip = "text")
 ```
 
@@ -331,7 +331,7 @@ grass.list <- plant %>%
 datatable(grass.list, options = list(pageLength = 10))
 
 
-# Create ggplot with dashed reference lines
+
 p <- ggplot(grass, aes(
   x = DE,
   y = DP,
@@ -356,15 +356,15 @@ p <- ggplot(grass, aes(
   ) +
   theme_minimal(base_size = 12)
 
-# Convert to interactive Plotly plot
+
 p_plotly <- ggplotly(p, tooltip = "text") %>%
   layout(
     showlegend = TRUE,
     legend = list(
       title = list(text = ""),
-      orientation = "h",   # horizontal
-      x = 0.5,             # center horizontally
-      y = -0.2,            # below the x-axis
+      orientation = "h",   
+      x = 0.5,             
+      y = -0.2,            
       xanchor = "center",
       yanchor = "top"
     )
@@ -382,14 +382,12 @@ This graph is a zoomed-in look at the previous one, focusing only on the species
 #| warning: FALSE
 #| message: false
 
-library(ggrepel)  # optional, for non-overlapping labels
+library(ggrepel) 
 
-# Create plot
+
 ggplot(grass, aes(x = DE, y = DP)) +
-  geom_point(aes(color = Status), size = 3) +  # points colored by Status
-  # Label each point
-  geom_text_repel(aes(label = paste(Spp, Pheno, sep = "_")), size = 3) +  # uses ggrepel to avoid overlap
-  # Set axis starting points
+  geom_point(aes(color = Status), size = 3) +  
+  geom_text_repel(aes(label = paste(Spp, Pheno, sep = "_")), size = 3) +  
   xlim(11, max(grass$DE) + 0.5) +
   ylim(7, max(grass$DP) + 0.5) +
   labs(
@@ -441,15 +439,15 @@ p2 <- ggplot(forb, aes(
   ) +
   theme_minimal(base_size = 12) 
 
-# Convert to interactive Plotly plot
+
 
 p2_plotly <- ggplotly(p2, tooltip = "text") %>%
   layout(
     legend = list(
       title = list(text = ""),
-      orientation = "h",   # horizontal
-      x = 0.5,             # center horizontally
-      y = -0.2,            # below the x-axis
+      orientation = "h",  
+      x = 0.5,             
+      y = -0.2,            
       xanchor = "center",
       yanchor = "top"
     )
@@ -465,12 +463,10 @@ It is interesting to see that most of the species that fall above both the DE an
 ```{r}
 #| warning: FALSE
 #| message: false
-# Create plot
+
 ggplot(forb, aes(x = DE, y = DP)) +
-  geom_point(aes(color = Status), size = 3) +  # points colored by Status
-  # Label each point
-  geom_text_repel(aes(label = paste(Spp, Pheno, sep = "_")), size = 3) +  # uses ggrepel to avoid overlap
-  # Set axis starting points
+  geom_point(aes(color = Status), size = 3) + 
+  geom_text_repel(aes(label = paste(Spp, Pheno, sep = "_")), size = 3) +  
   xlim(11, max(grass$DE) + 0.5) +
   ylim(7, 18) +
   labs(
@@ -500,7 +496,7 @@ datatable(shrub.list, options = list(pageLength = 10))
 p3 <- ggplot(shrub, aes(
   x = DE,
   y = DP,
-  color = Status,   # still mapped for tooltip/legend
+  color = Status,   
   text = paste0( 
     "Spp: ", Spp, 
     "<br>Pheno: ", Pheno, 
@@ -539,12 +535,10 @@ p3_plotly
 ```{r}
 #| warning: FALSE
 #| message: false
-# Create plot
+
 ggplot(shrub, aes(x = DE, y = DP)) +
-  geom_point(aes(color = Status), size = 3) +  # points colored by Status
-  # Label each point
-  geom_text_repel(aes(label = paste(Spp, Pheno, sep = "_")), size = 3) +  # uses ggrepel to avoid overlap
-  # Set axis starting points
+  geom_point(aes(color = Status), size = 3) + 
+  geom_text_repel(aes(label = paste(Spp, Pheno, sep = "_")), size = 3) + 
   xlim(11, max(grass$DE) + 0.5) +
   ylim(7, max(grass$DP) + 0.5) +
   labs(
@@ -565,7 +559,7 @@ In this section, I wanted to compare the quality metrics of the native and non-n
 Although more non-native grass species meet the nutrient requirements than native species (two versus one, lol), the quality metrics of the native species appear to remain higher throughout the later phenological stages.
 
 ```{r}
-# ggplot with facets
+
 invasive <- ggplot(grass, aes(
   x = DE,
   y = DP,
@@ -580,7 +574,7 @@ invasive <- ggplot(grass, aes(
   )
 )) +
   geom_point(size = 3) +
-  facet_wrap(~Status, scales = "fixed") +   # same x and y for both facets
+  facet_wrap(~Status, scales = "fixed") +   
   geom_vline(xintercept = 11.5, linetype = "dashed", color = "gray50") +
   geom_hline(yintercept = 7.5, linetype = "dashed", color = "gray50") +
   labs(
@@ -588,10 +582,10 @@ invasive <- ggplot(grass, aes(
     x = "DE",
     y = "DP"
   ) +
-  coord_cartesian(xlim = c(9, 14), ylim = c(-2, 12)) +  # set same x and y limits
+  coord_cartesian(xlim = c(9, 14), ylim = c(-2, 12)) +  
   theme_minimal(base_size = 12)
 
-# Convert to interactive plotly
+
 ggplotly(invasive, tooltip = "text")
 ```
 
@@ -667,12 +661,12 @@ fecal.time <- fecal %>%
   filter(!ID %in% c("25_045", "25_061")) %>% 
   mutate(
     DATE = as.Date(
-      suppressWarnings(as.numeric(DATE)),  # convert Excel numbers to Date
-      origin = "1899-12-30"                # Excel date origin
+      suppressWarnings(as.numeric(DATE)),  
+      origin = "1899-12-30"               
     )
   ) %>%  
-  filter(!is.na(DATE)) %>%        # remove rows where DATE is NA
-  distinct(DATE, .keep_all = TRUE) %>%  # keep only one row per DATE
+  filter(!is.na(DATE)) %>%        
+  distinct(DATE, .keep_all = TRUE) %>%  
   mutate(
     DOY  = yday(DATE),
     Year = factor(year(DATE))
@@ -680,7 +674,7 @@ fecal.time <- fecal %>%
   
 
 ggplot(fecal.time, aes(x = DOY, y = Year, color = Year)) +
-  geom_jitter(height = 0.2, size = 3) +   # jitter vertically within each Year
+  geom_jitter(height = 0.2, size = 3) +   
   scale_x_continuous(
     breaks = c(1, 32, 61, 92, 122, 153, 183, 213),
     labels = c("Jan", "Feb", "March", "Apr", "May", "June", "July", "Aug")
@@ -702,7 +696,7 @@ Lastly, this plot shows the locations of all the samples we collected, both from
 fecal.loc <- fecal %>% 
   filter(!is.na(LAT) & !is.na(LONG)) %>% 
   filter(!ID %in% c("25_045", "25_061", "25_048")) %>%
-  st_as_sf(coords = c("LONG", "LAT"), crs = 4326)  # convert to sf
+  st_as_sf(coords = c("LONG", "LAT"), crs = 4326) 
 
 jd <- st_transform(st_zm(jd), crs = 4326)
 river <- st_transform(st_zm(river), crs = 4326)
