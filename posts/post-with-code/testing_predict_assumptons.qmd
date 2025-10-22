@@ -34,8 +34,6 @@ all_models <- list(
 
 Here are my current predicted biomass values based on the linear equations at the bottom of the page. I didn’t include the code I used to generate them in this document, but I can send it over if you’d like to take a look. Right now, all the biomass values are in grams rather than kilograms. I’m not sure if that affects the predictions, but my plan was to scale them up to kilograms before rerunning the FRESH model.
 
-IGNORE THIS FOR NOW
-
 ```{r}
 #| warning: FALSE
 library(readr)
