@@ -152,6 +152,7 @@ Here are the diagnostic plots for each of the linear models: Breusch–Pagan tes
 
 ```{r}
 #| warning: FALSE
+#| eval: FALSE
 library(ggfortify)
 library(gridExtra)
 
