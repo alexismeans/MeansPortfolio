@@ -30,32 +30,21 @@ all_models <- list(
 
 ```
 
-## Predicted Biomass Values
+## R-squared, AIC and Coefficients Values
 
-After including the interaction term between Julian Day and Percent cover in my linear regression models, here are the new predicted biomass outputs. I included a column that references which regression equation was used to predict the biomass. Relatively they are starting to look better, but there are still a lot of predicted zeros. The end of this documents includes scatterplots to better compare the predicted vs observed biomass values for each species.
+Here are the updated R-squared and AIC values of the new regression equations that include an interaction term between various transformations of Julian Day and Percent cover. Ryan helped me code the interaction term into the dredging model, so every combination should have been considered. I currently have it displaying the top three models for each species, genus etc because the highest R-squared value did not necessarily always equal the lowest AIC. I wanted to keep them just as a comparison. To actually run the predictions, I used whichever equation had the best R-squared value.
 
-These predictions do not include any of the species that were observed as 1% of cover in \>80% of the quadrats that the species was observed. I removed those to both create the linear regression equations as well as before predicting biomass for the remaining species. I followed Katey's procedure and predicted the biomass for those 1% species by taking the mean of the measured biomass values and upscaling it when needed. Currently I have the predictions using whichever equation ends up having the highest R2 value if none of the equations meet a 0.6 value which usually defaults back to the species level regression.
+A lot of the species level regressions look pretty good and I believe are the main source of prediction. There are still a few that do not meet the R-squared cutoff of 0.6. As you move up through the hierarchy of regression equations they progressively get worse. I am not sure what to do next to improve them. Or if it is worth working to improve them rather than just resulting in using the functional group like Katey did. However, most of the functional group regression equations currently have the worst R-squared values. Ryan Martin suggested potentially recategorizing my functional groups to reflect the size of the plants observed (e.g. short forb vs tall forb instead of annual vs perennial)
+
+### Species Level Regressions
 
 ```{r}
 #| warning: FALSE
+library(tidyverse)
 library(readr)
 library(readxl)
 library(DT)
 
-df <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/24and25predictions.xlsx"
-
-predictions <- read_excel(df, "Sheet1")
-
-datatable(predictions, options = list(pageLength = 10))
-```
-
-## R2, AIC and Coefficients Values
-
-A lot of the species level regressions look a lot better and I believe are the main source of prediction. There are still a few that do not meet the R2 cutoff of 0.6. As you move up through the hierarchy of regression equations they progressively get worse. I am not sure what to do next to improve them. Or if it is worth working to improve them rather than just resulting in using the functional group like Katey did. However, most of the functional group regression equations currently have the worst R2 values.
-
-### Species Level Regressions 
-
-```{r}
 spp <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/processed.data/spp_models_diagnostics.xlsx"
 
 spp_predictions <- read_excel(spp, "Sheet1")
@@ -63,7 +52,7 @@ spp_predictions <- read_excel(spp, "Sheet1")
 datatable(spp_predictions, options = list(pageLength = 10))
 ```
 
-### Genus Level Regressions 
+### Genus Level Regressions
 
 ```{r}
 genus <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/processed.data/genus_models_diagnostics.xlsx"
@@ -84,7 +73,7 @@ fam_predictions <- read_excel(fam, "Sheet1")
 datatable(fam_predictions, options = list(pageLength = 10))
 ```
 
-### Functional Group Regressions 
+### Functional Group Regressions
 
 ```{r}
 fg <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/processed.data/fg_models_diagnostics.xlsx"
@@ -94,82 +83,152 @@ fg_predictions <- read_excel(fg, "Sheet1")
 datatable(fg_predictions, options = list(pageLength = 10))
 ```
 
-```{r}
-#ASSUMPTION TESTS
-#| warning: FALSE
-#| eval: FALSE
-#| echo: FALSE
-library(tidyverse)
-library(lmtest)
-library(purrr)
-library(DT)
+## Predicted Biomass Values
 
-check_lm_assumptions <- function(model) {
-  if (!inherits(model, "lm")) return(NULL)
-  
-  res <- residuals(model)
-  
-  list(
-    r_squared = tryCatch(round(summary(model)$r.squared, 4), error = function(e) NA),
-    shapiro_p = tryCatch(round(shapiro.test(res)$p.value, 4), error = function(e) NA),
-    bp_test   = tryCatch(round(lmtest::bptest(model)$p.value, 4), error = function(e) NA),
-    dw_test   = tryCatch(round(lmtest::dwtest(model)$p.value, 4), error = function(e) NA),
-    cook_max  = tryCatch(round(max(cooks.distance(model), na.rm = TRUE), 4), error = function(e) NA)
+After including the interaction term between Julian Day and Percent cover in my linear regression models, here are the new predicted biomass outputs. I included a column that references which regression equation was used to predict the biomass. If the none of the regressions were above an R-squared value of 0.6 I had it fall back to use which ever equation had the highest value (typically the species regression). Relatively they are starting to look better, but there are still a lot of predicted zeros. The end of this documents includes scatterplots to better compare the predicted vs observed biomass values for each species.
+
+These predictions do not include any of the species that were observed as 1% of cover in \>80% of the quadrats that the species was observed. I removed those to both create the linear regression equations as well as before predicting biomass for the remaining species. I followed Katey's procedure and predicted the biomass for those 1% species by taking the mean of the measured biomass values and upscaling it when needed.
+
+```{r}
+#|warning: FALSE
+df <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/24and25predictions.xlsx"
+
+predictions <- read_excel(df, "Sheet1")
+
+plant_list <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/VegDatabases/Working.composition.data.xlsx"
+plant <- read_excel(plant_list, "PlantList")
+
+plant <- plant %>% 
+  select(Spp, Family, Genus, FG_New) %>% 
+  rename(Code = Spp,
+         FunctionalGroup = FG_New)
+
+# Create color grouping
+predictions <- predictions %>%
+  mutate(Code = str_extract(Spp, "^[^_]+")) %>%  
+  left_join(plant, by = "Code")  
+
+datatable(predictions, options = list(pageLength = 10))
+```
+
+## Regression Equations Used
+
+```{r}
+# ---- Helper function to pick best model per group ----
+select_best_models <- function(model_list) {
+  model_info <- tibble(
+    model_name = names(model_list),
+    base_name = str_remove(model_name, "\\d+$"),  # remove trailing digits
+    r2 = map_dbl(model_list, ~ summary(.x)$r.squared)
   )
+  
+  best_models <- model_info %>%
+    group_by(base_name) %>%
+    slice_max(order_by = r2, n = 1, with_ties = FALSE) %>%
+    ungroup()
+  
+  selected <- model_list[best_models$model_name]
+  names(selected) <- best_models$base_name
+  return(selected)
 }
 
-diagnostics <- imap_dfr(all_models, function(model_list, group_name) {
-  map_dfr(model_list, check_lm_assumptions, .id = "model_name") %>%
-    mutate(group = group_name, .before = 1)
-})
+# ---- Apply to each list ----
+spp_model_best   <- select_best_models(spp_model)
+fam_model_best   <- select_best_models(fam_model)
+genus_model_best <- select_best_models(genus_model)
+fg_model_best    <- select_best_models(fg_model)
 
-#--------------------------------------------------------------
-# 3️⃣ Extract model base name (everything before trailing number)
-#     Example: "BRTE_GREEN1" → "BRTE_GREEN"
-#--------------------------------------------------------------
-diagnostics <- diagnostics %>%
-  mutate(model_base = str_trim(str_extract(model_name, ".*(?=\\d+$)")))
+# ---- Combine into one master list ----
+all_models_best <- list(
+  spp   = spp_model_best,
+  fam   = fam_model_best,
+  genus = genus_model_best,
+  fg    = fg_model_best
+)
 
-#--------------------------------------------------------------
-# 4️⃣ Identify and remove model families with any R² > 0.4
-#--------------------------------------------------------------
-high_r2_bases <- diagnostics %>%
-  group_by(model_base) %>%
-  summarize(any_high_r2 = any(r_squared > 0.4, na.rm = TRUE)) %>%
-  filter(any_high_r2) %>%
-  pull(model_base)
+# Function to display all model formulas and R² for a given list
+print_all_models <- function(model_list, level_name) {
+  cat("\n==============================\n")
+  cat("=== ", toupper(level_name), " MODELS ===\n")
+  cat("==============================\n")
+  
+  for (nm in names(model_list)) {
+    mod <- model_list[[nm]]
+    r2  <- summary(mod)$r.squared
+    cat("\n", nm, "\n")
+    print(formula(mod))
+    cat("R² =", round(r2, 3), "\n")
+  }
+}
 
-diagnostics_low_r2 <- diagnostics %>%
-  filter(!model_base %in% high_r2_bases)
+# Run for each level
+print_all_models(spp_model_best, "species")
+print_all_models(fam_model_best, "family")
+print_all_models(genus_model_best, "genus")
+print_all_models(fg_model_best, "functional group")
 
 
-datatable(diagnostics_low_r2, options = list(pageLength = 10))
 ```
 
 ## Scatterplots of Predicted vs Observed Biomass
 
 Sorry in advance for the extensive amounts of scatterplots below. I plotted the biomass measurement based on observation ID as well as Percent cover in order to compare the predicted vs observed biomass values. The plot with the observation ID is meant more to flag any points that I may need to remove in order to help the predictions.
 
+On the plots where the species equation was used to predict, it is displayed on the graph. I am working on getting all of the formulas displayed to make it easier to look at but it is taking me a little bit to figure it out. You can still see the formula based on the prediction source in the biomass prediction dataframe it will just be more scrolling back and forth.
+
 ```{r}
-#| message: false
-#| warning: false
-#| fig.height: 4
-#| fig.width: 10
-#| fig.align: center
 
+library(patchwork)
 
-library(patchwork)  # <-- important for combining plots
+plant_list <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/VegDatabases/Working.composition.data.xlsx"
+plant <- read_excel(plant_list, "PlantList")
+
+plant <- plant %>% 
+  select(Spp, Family, Genus, FG_New) %>% 
+  rename(Code = Spp,
+         FunctionalGroup = FG_New)
 
 # Create color grouping
 predictions <- predictions %>%
-  mutate(source_group = ifelse(pred_source == "Observed", "Observed", "Predicted"))
+  mutate(
+    pred_source = ifelse(pred_source == "spp_fallback", "Spp", pred_source),
+    pred_source = ifelse(pred_source == "Species", "Spp", pred_source),
+    source_group = ifelse(pred_source == "Observed", "Observed", "Predicted"),
+    Code = str_extract(Spp, "^[^_]+")
+  ) %>%
+  left_join(plant, by = "Code")
 
-# Get unique species list
 species_list <- unique(predictions$Spp)
 
-# Loop through species and print each combined plot
 for (sp in species_list) {
   dat <- filter(predictions, Spp == sp)
+  
+  # Identify unique pred_source values in this subset
+  pred_sources <- unique(dat$pred_source)
+  
+  # Default: no model found
+  formula_text <- "No matching model found"
+  
+  # Loop through pred_sources for this species
+  for (ps in pred_sources) {
+    if (ps == "Spp" & sp %in% names(all_models_best$spp)) {
+      model_formula <- formula(all_models_best$spp[[sp]])
+      r2_value <- summary(all_models_best$spp[[sp]])$r.squared
+      formula_text <- paste0(deparse(model_formula), " (R²=", round(r2_value, 3), ")")
+    } else if (ps == "Genus" & sp %in% names(all_models_best$genus)) {
+      model_formula <- formula(all_models_best$genus[[sp]])
+      r2_value <- summary(all_models_best$genus[[sp]])$r.squared
+      formula_text <- paste0(deparse(model_formula), " (R²=", round(r2_value, 3), ")")
+    } else if (ps == "Fam" & sp %in% names(all_models_best$fam)) {
+      model_formula <- formula(all_models_best$fam[[sp]])
+      r2_value <- summary(all_models_best$fam[[sp]])$r.squared
+      formula_text <- paste0(deparse(model_formula), " (R²=", round(r2_value, 3), ")")
+    } else if (ps == "FG" & sp %in% names(all_models_best$fg)) {
+      model_formula <- formula(all_models_best$fg[[sp]])
+      r2_value <- summary(all_models_best$fg[[sp]])$r.squared
+      formula_text <- paste0(deparse(model_formula), " (R²=", round(r2_value, 3), ")")
+    }
+  }
   
   # Plot 1: x = ID
   p1 <- ggplot(dat, aes(x = factor(ID), y = pred_DryWeight, color = source_group)) +
@@ -202,21 +261,23 @@ for (sp in species_list) {
     theme_bw() +
     theme(
       plot.title = element_text(face = "bold", size = 11),
-      legend.position = "top",
-      legend.direction = "vertical"
+      legend.position = "bottom",
+      legend.direction = "horizontal"
     )
   
-  # Combine side-by-side and share legend vertically above both plots
+  # Combine side-by-side
   combined <- (p1 + p2) +
     plot_layout(guides = "collect") &
-    theme(legend.position = "top", legend.direction = "vertical")
+    theme(legend.position = "bottom", legend.direction = "horizontal")
   
-  # Add species name as a single annotation above everything
+  # Add species name + model formula as annotation
   final_plot <- combined +
     plot_annotation(
       title = paste("Predicted Dry Weight for", sp),
+      subtitle = formula_text,
       theme = theme(
-        plot.title = element_text(size = 14, face = "bold", hjust = 0.5)
+        plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
+        plot.subtitle = element_text(size = 11, hjust = 0.5)
       )
     )
   
@@ -225,8 +286,12 @@ for (sp in species_list) {
 }
 ```
 
+## 
+
 ## What's next?
 
 -   removing points and rerunning regression equations?
 
 -   restructuring my functional groups to be more specific about tall vs short forbs and things like that.
+
+-   flag which ones stick out to me
