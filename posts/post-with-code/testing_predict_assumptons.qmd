@@ -148,46 +148,79 @@ datatable(diagnostics_low_r2, options = list(pageLength = 10))
 
 ## Diagnostic Plots and Equations
 
-Here are the diagnostic plots for each of the linear models: Breusch–Pagan test (top left), Shapiro–Wilk test (top right), Durbin–Watson test (bottom left), and Cook’s distance (bottom right). Below the plots, I’ve also included each of the linear equations I’m using to predict biomass.
-
 ```{r}
-#| warning: FALSE
-#| eval: FALSE
-library(ggfortify)
-library(gridExtra)
+#| message: false
+#| warning: false
+#| fig.height: 4
+#| fig.width: 10
+#| fig.align: center
 
-plot_diagnostics <- function(model, model_name, group_name) {
+
+library(patchwork)  # <-- important for combining plots
+
+# Create color grouping
+predictions <- predictions %>%
+  mutate(source_group = ifelse(pred_source == "Observed", "Observed", "Predicted"))
+
+# Get unique species list
+species_list <- unique(predictions$Spp)
+
+# Loop through species and print each combined plot
+for (sp in species_list) {
+  dat <- filter(predictions, Spp == sp)
   
-  p1 <- autoplot(model, which = 1)[[1]] + 
-    ggtitle(paste("Residuals vs Fitted for", model_name, "in", group_name))
+  # Plot 1: x = ID
+  p1 <- ggplot(dat, aes(x = factor(ID), y = pred_DryWeight, color = source_group)) +
+    geom_point(size = 2, alpha = 0.8) +
+    scale_color_manual(values = c("Observed" = "steelblue", "Predicted" = "orange")) +
+    labs(
+      title = "By Observation ID",
+      x = "Observation ID",
+      y = "Predicted Dry Weight (g)",
+      color = "Data Source"
+    ) +
+    theme_bw() +
+    theme(
+      plot.title = element_text(face = "bold", size = 11),
+      legend.position = "top",
+      legend.direction = "vertical",
+      axis.text.x = element_text(angle = 45, hjust = 1)
+    )
   
-  p2 <- autoplot(model, which = 2)[[1]] + 
-    ggtitle(paste("Normal Q-Q for", model_name, "in", group_name))
+  # Plot 2: x = Percent
+  p2 <- ggplot(dat, aes(x = Percent, y = pred_DryWeight, color = source_group)) +
+    geom_point(size = 2, alpha = 0.8) +
+    scale_color_manual(values = c("Observed" = "steelblue", "Predicted" = "orange")) +
+    labs(
+      title = "By Percent Cover",
+      x = "Percent",
+      y = "Predicted Dry Weight (g)",
+      color = "Data Source"
+    ) +
+    theme_bw() +
+    theme(
+      plot.title = element_text(face = "bold", size = 11),
+      legend.position = "top",
+      legend.direction = "vertical"
+    )
   
-  p3 <- autoplot(model, which = 3)[[1]] + 
-    ggtitle(paste("Scale-Location for", model_name, "in", group_name))
+  # Combine side-by-side and share legend vertically above both plots
+  combined <- (p1 + p2) +
+    plot_layout(guides = "collect") &
+    theme(legend.position = "top", legend.direction = "vertical")
   
-  p4 <- autoplot(model, which = 5)[[1]] + 
-    ggtitle(paste("Residuals vs Leverage for", model_name, "in", group_name))
+  # Add species name as a single annotation above everything
+  final_plot <- combined +
+    plot_annotation(
+      title = paste("Predicted Dry Weight for", sp),
+      theme = theme(
+        plot.title = element_text(size = 14, face = "bold", hjust = 0.5)
+      )
+    )
   
-  gridExtra::grid.arrange(p1, p2, p3, p4, ncol = 2)
+  print(final_plot)
+  cat("\n\n")
 }
-
-imap(all_models, function(model_list, group_name) {
-  
-  # Filter only models from this group that passed the R² criteria
-  keep_models <- diagnostics_low_r2 %>%
-    filter(group == group_name) %>%
-    pull(model_name)
-  
-  # Subset model list to those models
-  model_list_filtered <- model_list[names(model_list) %in% keep_models]
-  
-  # Plot only the retained models
-  walk2(model_list_filtered, names(model_list_filtered), ~ {
-    plot_diagnostics(.x, .y, group_name)
-  })
-})
 ```
 
 ## What's next
