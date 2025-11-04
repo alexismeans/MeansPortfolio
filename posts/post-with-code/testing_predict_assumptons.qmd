@@ -32,7 +32,9 @@ all_models <- list(
 
 ## Predicted Biomass Values
 
-Here are my current predicted biomass values based on the linear equations at the bottom of the page. I didn’t include the code I used to generate them in this document, but I can send it over if you’d like to take a look. Right now, all the biomass values are in grams rather than kilograms. I’m not sure if that affects the predictions, but my plan was to scale them up to kilograms before rerunning the FRESH model.
+After including the interaction term between Julian Day and Percent cover in my linear regression models, here are the new predicted biomass outputs. I included a column that references which regression equation was used to predict the biomass. Relatively they are starting to look better, but there are still a lot of predicted zeros. The end of this documents includes scatterplots to better compare the predicted vs observed biomass values for each species.
+
+These predictions do not include any of the species that were observed as 1% of cover in \>80% of the quadrats that the species was observed. I removed those to both create the linear regression equations as well as before predicting biomass for the remaining species. I followed Katey's procedure and predicted the biomass for those 1% species by taking the mean of the measured biomass values and upscaling it when needed. Currently I have the predictions using whichever equation ends up having the highest R2 value if none of the equations meet a 0.6 value which usually defaults back to the species level regression.
 
 ```{r}
 #| warning: FALSE
@@ -47,9 +49,11 @@ predictions <- read_excel(df, "Sheet1")
 datatable(predictions, options = list(pageLength = 10))
 ```
 
-## R2, AIC and Coefficients
+## R2, AIC and Coefficients Values
 
-A lot of the r-squared values look much better. The FG results still do not look great.
+A lot of the species level regressions look a lot better and I believe are the main source of prediction. There are still a few that do not meet the R2 cutoff of 0.6. As you move up through the hierarchy of regression equations they progressively get worse. I am not sure what to do next to improve them. Or if it is worth working to improve them rather than just resulting in using the functional group like Katey did. However, most of the functional group regression equations currently have the worst R2 values.
+
+### Species Level Regressions 
 
 ```{r}
 spp <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/processed.data/spp_models_diagnostics.xlsx"
@@ -59,13 +63,18 @@ spp_predictions <- read_excel(spp, "Sheet1")
 datatable(spp_predictions, options = list(pageLength = 10))
 ```
 
+### Genus Level Regressions 
+
 ```{r}
 genus <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/processed.data/genus_models_diagnostics.xlsx"
 
 genus_predictions <- read_excel(genus, "Sheet1")
 
 datatable(genus_predictions, options = list(pageLength = 10))
+
 ```
+
+### Family Level Regressions
 
 ```{r}
 fam <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/processed.data/family_models_diagnostics.xlsx"
@@ -75,6 +84,8 @@ fam_predictions <- read_excel(fam, "Sheet1")
 datatable(fam_predictions, options = list(pageLength = 10))
 ```
 
+### Functional Group Regressions 
+
 ```{r}
 fg <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/processed.data/fg_models_diagnostics.xlsx"
 
@@ -83,22 +94,11 @@ fg_predictions <- read_excel(fg, "Sheet1")
 datatable(fg_predictions, options = list(pageLength = 10))
 ```
 
-## Assumption Test P-values
-
-I ran assumption tests on only the models that did not have a single model with an r-squared value higher than 0.4 (this was the value that Katey used, I can adjust it if needed)
-
--   Breusch–Pagan test (bptest) for homoscedasticity
-
--   Shapiro–Wilk test for normality of residuals
-
--   Durbin–Watson test (dwtest) for autocorrelation
-
--   Cook’s distance for influential observations
-
-I’m not sure if there are other tests that would be better to run instead. I could also use some guidance on which p-values should be considered “red flags” that suggest I need to use a different equation. I rounded everything to four decimal places to make the results easier to read, so any zeros you see are just very small values above zero
-
 ```{r}
+#ASSUMPTION TESTS
 #| warning: FALSE
+#| eval: FALSE
+#| echo: FALSE
 library(tidyverse)
 library(lmtest)
 library(purrr)
@@ -146,7 +146,9 @@ diagnostics_low_r2 <- diagnostics %>%
 datatable(diagnostics_low_r2, options = list(pageLength = 10))
 ```
 
-## Diagnostic Plots and Equations
+## Scatterplots of Predicted vs Observed Biomass
+
+Sorry in advance for the extensive amounts of scatterplots below. I plotted the biomass measurement based on observation ID as well as Percent cover in order to compare the predicted vs observed biomass values. The plot with the observation ID is meant more to flag any points that I may need to remove in order to help the predictions.
 
 ```{r}
 #| message: false
@@ -223,6 +225,8 @@ for (sp in species_list) {
 }
 ```
 
-## What's next
+## What's next?
 
-I am going to rerun the prediction equations with an interaction term between JD and cover like we discussed in lab meeting and see how that improves any of the models.
+-   removing points and rerunning regression equations?
+
+-   restructuring my functional groups to be more specific about tall vs short forbs and things like that.
