@@ -1,5 +1,5 @@
 ---
-title: "Checking Bio Predict Assumptions"
+title: "Checking Biomass Predictions"
 author: "Alexis Means"
 date: "2025-10-2"
 description: This document contains assumption tests and plots to analyze my linear regression equations for biomass predictions. 
@@ -10,6 +10,9 @@ format:
     toc-depth: 3
 editor: visual
 code-fold: true
+execute: 
+  warning: false
+  message: false
 ---
 
 ```{r}
@@ -234,8 +237,6 @@ plot_species_predictions <- function(species_name, predictions, save_plots = FAL
 species_list <- unique(predictions$Spp)
 walk(species_list, ~plot_species_predictions(.x, predictions))
 ```
-
-## 
 
 ## Questions?
 
