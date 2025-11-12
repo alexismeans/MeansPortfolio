@@ -33,7 +33,7 @@ all_models <- list(
 
 ```
 
-## Used Equations
+## Predicted Biomass 
 
 ```{r}
 #| warning: FALSE
@@ -65,90 +65,27 @@ used_equations <- predictions %>%
   select(-DryWeight, -pred_DryWeight, -Percent, -source_group, -ID, -PlotID)
 
 
-datatable(used_equations, options = list(pageLength = 10))
+datatable(
+  pred,
+  options = list(
+    pageLength = 20,        # show more rows per page
+    scrollX = TRUE,         # horizontal scrolling for wide tables
+    scrollY = "400px",      # limit vertical size
+    dom = "tip",            # minimal controls (t = table, i = info, p = pagination)
+    columnDefs = list(
+      list(className = 'dt-center', targets = "_all")  # center-align
+    )
+  ),
+  class = "compact stripe hover",
+  caption = "Predicted Biomass"
+)
 
 ```
-
-## Regression Coefficients 
-
-Here are the updated R-squared and AIC values of the new regression equations that include an interaction term between various transformations of Julian Day and Percent cover. Ryan helped me code the interaction term into the dredging model, so every combination should have been considered. I currently have it displaying the top three models for each species, genus etc because the highest R-squared value did not necessarily always equal the lowest AIC. I wanted to keep them just as a comparison. To actually run the predictions, I used whichever equation had the best R-squared value.
-
-A lot of the species level regressions look pretty good and I believe are the main source of prediction. There are still a few that do not meet the R-squared cutoff of 0.6. As you move up through the hierarchy of regression equations they progressively get worse. I am not sure what to do next to improve them. Or if it is worth working to improve them rather than just resulting in using the functional group like Katey did. However, most of the functional group regression equations currently have the worst R-squared values. Ryan Martin suggested potentially recategorizing my functional groups to reflect the size of the plants observed (e.g. short forb vs tall forb instead of annual vs perennial)
-
-### Species Level Regressions
 
 ```{r}
 #| warning: FALSE
-
-used_spp_predictions <- used_equations %>% 
-  filter(pred_source == "Spp") %>%  
-  select(Spp, R2, Formula) %>%
-  left_join(spp_predictions, by = "R2") %>% 
-  select(-Spp.y) %>% 
-  rename(Spp = Spp.x) %>% 
-  mutate(across(where(is.numeric), ~ round(.x, 4)))
-
-datatable(used_spp_predictions, options = list(pageLength = 10))
-```
-
-### Genus Level Regressions
-
-```{r}
-
-used_genus_predictions <- used_equations %>% 
-  filter(pred_source == "Genus") %>% 
-  select(Genus, R2, Formula) %>% 
-  left_join(genus_predictions, by = "R2") %>% 
-  select(-Spp) %>% 
-    mutate(across(where(is.numeric), ~ round(.x, 4)))
-
-
-
-datatable(used_genus_predictions, options = list(pageLength = 10))
-
-
-
-```
-
-### Family Level Regressions
-
-```{r}
-used_fam_predictions <- used_equations %>% 
-  filter(pred_source == "Family") %>% 
-  select(Family, R2, Formula) %>% 
-  left_join(fam_predictions, by = "R2") %>% 
-  select(-Spp) %>% 
-    mutate(across(where(is.numeric), ~ round(.x, 4)))
-
-
-
-datatable(used_fam_predictions, options = list(pageLength = 10))
-```
-
-### Functional Group Regressions
-
-```{r}
-used_fg_predictions <- used_equations %>% 
-  filter(pred_source == "FunctionalGroup") %>% 
-  select(FunctionalGroup, R2, Formula) %>% 
-  left_join(fg_predictions, by = "R2") %>% 
-  select(-Spp) %>% 
-    mutate(across(where(is.numeric), ~ round(.x, 4)))
-
-
-datatable(used_fg_predictions, options = list(pageLength = 10))
-```
-
-## Flagged Regression Equations  
-
-After including the interaction term between Julian Day and Percent cover in my linear regression models, here are the new predicted biomass outputs. I included a column that references which regression equation was used to predict the biomass. If the none of the regressions were above an R-squared value of 0.6 I had it fall back to use which ever equation had the highest value (typically the species regression). Relatively they are starting to look better, but there are still a lot of predicted zeros. The end of this documents includes scatterplots to better compare the predicted vs observed biomass values for each species.
-
-These predictions do not include any of the species that were observed as 1% of cover in \>80% of the quadrats that the species was observed. I removed those to both create the linear regression equations as well as before predicting biomass for the remaining species. I followed Katey's procedure and predicted the biomass for those 1% species by taking the mean of the measured biomass values and upscaling it when needed.
-
-### Low R-squared
-
-```{r}
-#|warning: FALSE
+#| eval: false
+#| echo: false
 
 #left join this to covariate dbs
 used_equations <- predictions %>% 
@@ -160,29 +97,65 @@ low_r <- predictions %>%
   filter(R2 < 0.6) %>% 
   select(Spp, Family, Genus, FunctionalGroup, pred_source, R2, Formula)
 
-datatable(low_r, options = list(pageLength = 10))
+# datatable(
+#   low_r,
+#   options = list(
+#     pageLength = 20,        # show more rows per page
+#     scrollX = TRUE,         # horizontal scrolling for wide tables
+#     scrollY = "400px",      # limit vertical size
+#     dom = "tip",            # minimal controls (t = table, i = info, p = pagination)
+#     columnDefs = list(
+#       list(className = 'dt-center', targets = "_all")  # center-align
+#     )
+#   ),
+#   class = "compact stripe hover",
+#   caption = "Low R-Squared"
+# )
 
 
-
-```
-
-### Low Biomass
-
-```{r}
 zeros <- predictions %>% 
  filter(Percent > 20 & pred_DryWeight == 0) %>% 
   select(ID, Spp, Family, Genus, FunctionalGroup, pred_DryWeight, Percent,pred_source, R2, Formula)
 
-datatable(zeros, options = list(pageLength = 10))
 
 
+# datatable(
+#   zeros,
+#   options = list(
+#     pageLength = 20,        # show more rows per page
+#     scrollX = TRUE,         # horizontal scrolling for wide tables
+#     scrollY = "400px",      # limit vertical size
+#     dom = "tip",            # minimal controls (t = table, i = info, p = pagination)
+#     columnDefs = list(
+#       list(className = 'dt-center', targets = "_all")  # center-align
+#     )
+#   ),
+#   class = "compact stripe hover",
+#   caption = "Flagged Predictions with Low Biomass"
+# )
 ```
 
 ## Scatterplots of Predicted vs Observed Biomass
 
-Sorry in advance for the extensive amounts of scatterplots below. I plotted the biomass measurement based on observation ID as well as Percent cover in order to compare the predicted vs observed biomass values. The plot with the observation ID is meant more to flag any points that I may need to remove in order to help the predictions.
+The stars indicate that it has both a low R-Squared value as well as it predicting low biomass for high percent cover in at least one instance.
 
 ### Species
+
+-   BRTE_BROWN
+
+-   BRTE_GREEN\*\*\*
+
+-   ELEL5_GREEN
+
+-   ERST4_ENTIRE
+
+-   PHLO2_ENTIRE
+
+-   POSE_BROWN\*\*\*
+
+-   PSSP6_GREEN
+
+-   VUMIM_BROWN
 
 ```{r}
 library(ggplot2)
@@ -268,6 +241,24 @@ walk(unique(spp_predictions_filtered$Spp), ~plot_species_predictions(.x, spp_pre
 
 ### Genus 
 
+-   ASTRAGULUS
+
+-   BALSAMORHIZA
+
+-   BROMUS
+
+-   ERIOCOMA
+
+-   ERIOGONUM
+
+-   FESTUCA
+
+-   LOMATIUM
+
+-   POA\*\*\*\*
+
+-   PSEUDOROEGNERIA\*\*\*
+
 ```{r}
 
 genus_pred_species <- predictions %>%
@@ -344,6 +335,12 @@ walk(unique(genus_predictions_filtered$Genus), ~plot_genus_predictions(.x, genus
 ```
 
 ### Family
+
+-   APIACEAE
+
+-   ASTERACEAE
+
+-   POACEAE\*\*\*
 
 ```{r}
 fam_pred_species <- predictions %>%
@@ -422,6 +419,10 @@ walk(unique(fam_predictions_filtered$Family), ~plot_fam_predictions(.x, fam_pred
 
 ### Functional Group
 
+-   AF\*\*\*
+
+-   PF
+
 ```{r}
 #|warning: False
 #|Message: False
@@ -499,12 +500,116 @@ plot_fg_predictions <- function(fg_name, predictions, save_plots = FALSE) {
 walk(unique(fg_predictions_filtered$FunctionalGroup), ~plot_fg_predictions(.x, fg_predictions_filtered))
 ```
 
-## Questions?
+## Regression Coefficients 
 
--   I think this is starting to look really good, but there are a handful of predicted zeros that I am still not sure what do to. A lot of them look like they are for 1% cover, so that is not as concerning, but there are a few that have upwards of 25 percent cover and it is still predicting a biomass weight of 0.
+Here are the updated R-squared, AIC, and Coeffecient values of the used regression equations that include an interaction term between various transformations of Julian Day and Percent cover. Ryan helped me code the interaction term into the dredging model, so every combination should have been considered.
 
--   There are 3 or 4 species that I don't have any regression equation for (the blanks in the predictions) because there was not enough of them observed even within the functional group to predict. I am not sure what to do with those observations.
+### Species Level Regressions
 
--   Is it worth restructuring my functional groups (into tall and short) and seeing if that improves some of the predictions
+```{r}
+#| warning: FALSE
 
--   I believe Ryan Martin mentioned that the scatterplots may be useful to identify points that could be throwing off the regressions. I don't know how extreme a point would need to be before removing it.
+used_spp_predictions <- used_equations %>% 
+  filter(pred_source == "Spp") %>%  
+  select(Spp, R2, Formula) %>%
+  left_join(spp_predictions, by = "R2") %>% 
+  select(-Spp.y) %>% 
+  rename(Spp = Spp.x) %>% 
+  mutate(across(where(is.numeric), ~ round(.x, 4)))
+
+
+datatable(
+  used_spp_predictions,
+  options = list(
+    pageLength = 20,        # show more rows per page
+    scrollX = TRUE,         # horizontal scrolling for wide tables
+    scrollY = "400px",      # limit vertical size
+    dom = "tip",            # minimal controls (t = table, i = info, p = pagination)
+    columnDefs = list(
+      list(className = 'dt-center', targets = "_all")  # center-align
+    )
+  ),
+  class = "compact stripe hover",
+  caption = "Species Coefficients"
+)
+```
+
+### Genus Level Regressions
+
+```{r}
+used_genus_predictions <- used_equations %>% 
+  filter(pred_source == "Genus") %>% 
+  select(Genus, R2, Formula) %>% 
+  left_join(genus_predictions, by = "R2") %>% 
+  select(-Spp) %>% 
+    mutate(across(where(is.numeric), ~ round(.x, 4)))
+
+datatable(
+  used_genus_predictions,
+  options = list(
+    pageLength = 20,        # show more rows per page
+    scrollX = TRUE,         # horizontal scrolling for wide tables
+    scrollY = "400px",      # limit vertical size
+    dom = "tip",            # minimal controls (t = table, i = info, p = pagination)
+    columnDefs = list(
+      list(className = 'dt-center', targets = "_all")  # center-align
+    )
+  ),
+  class = "compact stripe hover",
+  caption = "Genus Coefficients"
+)
+
+```
+
+### Family Level Regressions
+
+```{r}
+used_fam_predictions <- used_equations %>% 
+  filter(pred_source == "Family") %>% 
+  select(Family, R2, Formula) %>% 
+  left_join(fam_predictions, by = "R2") %>% 
+  select(-Spp) %>% 
+    mutate(across(where(is.numeric), ~ round(.x, 4)))
+
+datatable(
+  used_fam_predictions,
+  options = list(
+    pageLength = 20,        # show more rows per page
+    scrollX = TRUE,         # horizontal scrolling for wide tables
+    scrollY = "400px",      # limit vertical size
+    dom = "tip",            # minimal controls (t = table, i = info, p = pagination)
+    columnDefs = list(
+      list(className = 'dt-center', targets = "_all")  # center-align
+    )
+  ),
+  class = "compact stripe hover",
+  caption = "Familu Coefficients"
+)
+
+```
+
+### FG Level Regressions 
+
+```{r}
+used_fg_predictions <- used_equations %>% 
+  filter(pred_source == "FunctionalGroup") %>% 
+  select(FunctionalGroup, R2, Formula) %>% 
+  left_join(fg_predictions, by = "R2") %>% 
+  select(-Spp) %>% 
+    mutate(across(where(is.numeric), ~ round(.x, 4)))
+
+datatable(
+  used_fg_predictions,
+  options = list(
+    pageLength = 20,        # show more rows per page
+    scrollX = TRUE,         # horizontal scrolling for wide tables
+    scrollY = "400px",      # limit vertical size
+    dom = "tip",            # minimal controls (t = table, i = info, p = pagination)
+    columnDefs = list(
+      list(className = 'dt-center', targets = "_all")  # center-align
+    )
+  ),
+  class = "compact stripe hover",
+  caption = "Functional Group Coefficients"
+)
+```
