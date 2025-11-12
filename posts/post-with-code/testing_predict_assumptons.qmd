@@ -33,7 +33,43 @@ all_models <- list(
 
 ```
 
-## R-squared, AIC and Coefficients Values
+## Used Equations
+
+```{r}
+#| warning: FALSE
+library(tidyverse)
+library(readr)
+library(readxl)
+library(DT)
+library(openxlsx)
+
+spp <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/processed.data/spp_models_diagnostics.xlsx"
+genus <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/processed.data/genus_models_diagnostics.xlsx"
+fam <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/processed.data/family_models_diagnostics.xlsx"
+fg <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/processed.data/fg_models_diagnostics.xlsx"
+df <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/24and25predictions.xlsx"
+
+spp_predictions <- read_excel(spp, "Sheet1")
+genus_predictions <- read_excel(genus, "Sheet1")
+fam_predictions <- read_excel(fam, "Sheet1")
+fg_predictions <- read_excel(fg, "Sheet1")
+predictions <- read_excel(df, "Sheet1")
+
+pred <- predictions %>% 
+  select(ID, Spp, pred_DryWeight, Percent, pred_source)
+
+#left join this to covariate dbs
+used_equations <- predictions %>% 
+  distinct(Formula,.keep_all = TRUE) %>% 
+  filter(!if_any(everything(), ~ grepl("observed", .x, ignore.case = TRUE))) %>% 
+  select(-DryWeight, -pred_DryWeight, -Percent, -source_group, -ID, -PlotID)
+
+
+datatable(used_equations, options = list(pageLength = 10))
+
+```
+
+## Regression Coefficients 
 
 Here are the updated R-squared and AIC values of the new regression equations that include an interaction term between various transformations of Julian Day and Percent cover. Ryan helped me code the interaction term into the dredging model, so every combination should have been considered. I currently have it displaying the top three models for each species, genus etc because the highest R-squared value did not necessarily always equal the lowest AIC. I wanted to keep them just as a comparison. To actually run the predictions, I used whichever equation had the best R-squared value.
 
@@ -43,122 +79,101 @@ A lot of the species level regressions look pretty good and I believe are the ma
 
 ```{r}
 #| warning: FALSE
-library(tidyverse)
-library(readr)
-library(readxl)
-library(DT)
 
-spp <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/processed.data/spp_models_diagnostics.xlsx"
+used_spp_predictions <- used_equations %>% 
+  filter(pred_source == "Spp") %>%  
+  select(Spp, R2, Formula) %>%
+  left_join(spp_predictions, by = "R2") %>% 
+  select(-Spp.y) %>% 
+  rename(Spp = Spp.x) %>% 
+  mutate(across(where(is.numeric), ~ round(.x, 4)))
 
-spp_predictions <- read_excel(spp, "Sheet1")
-
-datatable(spp_predictions, options = list(pageLength = 10))
+datatable(used_spp_predictions, options = list(pageLength = 10))
 ```
 
 ### Genus Level Regressions
 
 ```{r}
-genus <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/processed.data/genus_models_diagnostics.xlsx"
 
-genus_predictions <- read_excel(genus, "Sheet1")
+used_genus_predictions <- used_equations %>% 
+  filter(pred_source == "Genus") %>% 
+  select(Genus, R2, Formula) %>% 
+  left_join(genus_predictions, by = "R2") %>% 
+  select(-Spp) %>% 
+    mutate(across(where(is.numeric), ~ round(.x, 4)))
 
-datatable(genus_predictions, options = list(pageLength = 10))
+
+
+datatable(used_genus_predictions, options = list(pageLength = 10))
+
+
 
 ```
 
 ### Family Level Regressions
 
 ```{r}
-fam <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/processed.data/family_models_diagnostics.xlsx"
+used_fam_predictions <- used_equations %>% 
+  filter(pred_source == "Family") %>% 
+  select(Family, R2, Formula) %>% 
+  left_join(fam_predictions, by = "R2") %>% 
+  select(-Spp) %>% 
+    mutate(across(where(is.numeric), ~ round(.x, 4)))
 
-fam_predictions <- read_excel(fam, "Sheet1")
 
-datatable(fam_predictions, options = list(pageLength = 10))
+
+datatable(used_fam_predictions, options = list(pageLength = 10))
 ```
 
 ### Functional Group Regressions
 
 ```{r}
-fg <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/processed.data/fg_models_diagnostics.xlsx"
+used_fg_predictions <- used_equations %>% 
+  filter(pred_source == "FunctionalGroup") %>% 
+  select(FunctionalGroup, R2, Formula) %>% 
+  left_join(fg_predictions, by = "R2") %>% 
+  select(-Spp) %>% 
+    mutate(across(where(is.numeric), ~ round(.x, 4)))
 
-fg_predictions <- read_excel(fg, "Sheet1")
 
-datatable(fg_predictions, options = list(pageLength = 10))
+datatable(used_fg_predictions, options = list(pageLength = 10))
 ```
 
-## Predicted Biomass Values
+## Flagged Regression Equations  
 
 After including the interaction term between Julian Day and Percent cover in my linear regression models, here are the new predicted biomass outputs. I included a column that references which regression equation was used to predict the biomass. If the none of the regressions were above an R-squared value of 0.6 I had it fall back to use which ever equation had the highest value (typically the species regression). Relatively they are starting to look better, but there are still a lot of predicted zeros. The end of this documents includes scatterplots to better compare the predicted vs observed biomass values for each species.
 
 These predictions do not include any of the species that were observed as 1% of cover in \>80% of the quadrats that the species was observed. I removed those to both create the linear regression equations as well as before predicting biomass for the remaining species. I followed Katey's procedure and predicted the biomass for those 1% species by taking the mean of the measured biomass values and upscaling it when needed.
 
+### Low R-squared
+
 ```{r}
 #|warning: FALSE
-df <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/24and25predictions.xlsx"
 
-predictions <- read_excel(df, "Sheet1")
+#left join this to covariate dbs
+used_equations <- predictions %>% 
+  distinct(Formula, .keep_all = TRUE) 
 
-pred <- predictions %>% 
-  select(ID, Spp, pred_DryWeight, Percent, pred_source)
 
-datatable(pred, options = list(pageLength = 10))
+low_r <- predictions %>% 
+  distinct(R2, .keep_all = TRUE) %>% 
+  filter(R2 < 0.6) %>% 
+  select(Spp, Family, Genus, FunctionalGroup, pred_source, R2, Formula)
+
+datatable(low_r, options = list(pageLength = 10))
+
+
+
 ```
 
-## Regression Equations Used
+### Low Biomass
 
 ```{r}
-# ---- Helper function to pick best model per group ----
-select_best_models <- function(model_list) {
-  model_info <- tibble(
-    model_name = names(model_list),
-    base_name = str_remove(model_name, "\\d+$"),  # remove trailing digits
-    r2 = map_dbl(model_list, ~ summary(.x)$r.squared)
-  )
-  
-  best_models <- model_info %>%
-    group_by(base_name) %>%
-    slice_max(order_by = r2, n = 1, with_ties = FALSE) %>%
-    ungroup()
-  
-  selected <- model_list[best_models$model_name]
-  names(selected) <- best_models$base_name
-  return(selected)
-}
+zeros <- predictions %>% 
+ filter(Percent > 20 & pred_DryWeight == 0) %>% 
+  select(ID, Spp, Family, Genus, FunctionalGroup, pred_DryWeight, Percent,pred_source, R2, Formula)
 
-# ---- Apply to each list ----
-spp_model_best   <- select_best_models(spp_model)
-fam_model_best   <- select_best_models(fam_model)
-genus_model_best <- select_best_models(genus_model)
-fg_model_best    <- select_best_models(fg_model)
-
-# ---- Combine into one master list ----
-all_models_best <- list(
-  spp   = spp_model_best,
-  fam   = fam_model_best,
-  genus = genus_model_best,
-  fg    = fg_model_best
-)
-
-# Function to display all model formulas and R² for a given list
-print_all_models <- function(model_list, level_name) {
-  cat("\n==============================\n")
-  cat("=== ", toupper(level_name), " MODELS ===\n")
-  cat("==============================\n")
-  
-  for (nm in names(model_list)) {
-    mod <- model_list[[nm]]
-    r2  <- summary(mod)$r.squared
-    cat("\n", nm, "\n")
-    print(formula(mod))
-    cat("R² =", round(r2, 3), "\n")
-  }
-}
-
-# Run for each level
-print_all_models(spp_model_best, "species")
-print_all_models(fam_model_best, "family")
-print_all_models(genus_model_best, "genus")
-print_all_models(fg_model_best, "functional group")
+datatable(zeros, options = list(pageLength = 10))
 
 
 ```
@@ -167,15 +182,27 @@ print_all_models(fg_model_best, "functional group")
 
 Sorry in advance for the extensive amounts of scatterplots below. I plotted the biomass measurement based on observation ID as well as Percent cover in order to compare the predicted vs observed biomass values. The plot with the observation ID is meant more to flag any points that I may need to remove in order to help the predictions.
 
-```{r}
-#|warning: False
-#|Message: False
+### Species
 
+```{r}
 library(ggplot2)
 library(dplyr)
 library(purrr)
-library(glue) 
-library(patchwork)  # for combining plots side by side
+library(glue)
+library(patchwork)
+
+spp_pred_species <- predictions %>%
+  filter(pred_source == "Spp") %>%
+  pull(Spp) %>%
+  unique()
+
+# 2. Keep Spp predictions and matching Observed rows
+spp_predictions_filtered <- predictions %>%
+  filter(
+    pred_source == "Spp" |
+      (pred_source == "Observed" & Spp %in% spp_pred_species)
+  )%>% 
+  arrange(Spp)
 
 plot_species_predictions <- function(species_name, predictions, save_plots = FALSE) {
   
@@ -233,9 +260,243 @@ plot_species_predictions <- function(species_name, predictions, save_plots = FAL
   }
 }
 
-# Run for all species
-species_list <- unique(predictions$Spp)
-walk(species_list, ~plot_species_predictions(.x, predictions))
+
+
+# Run for this subset
+walk(unique(spp_predictions_filtered$Spp), ~plot_species_predictions(.x, spp_predictions_filtered))
+```
+
+### Genus 
+
+```{r}
+
+genus_pred_species <- predictions %>%
+  filter(pred_source == "Genus") %>%
+  pull(Genus) %>%
+  unique()
+
+# 2. Keep Spp predictions and matching Observed rows
+genus_predictions_filtered <- predictions %>%
+  filter(
+    pred_source == "Genus" |
+      (pred_source == "Observed" & Genus %in% genus_pred_species)
+  )%>% 
+  arrange(Genus)
+
+plot_genus_predictions <- function(genus_name, predictions, save_plots = FALSE) {
+  
+  # Filter for this species
+  dat <- predictions %>% filter(Genus == genus_name)
+  
+  # Prepare annotation text
+  formula_text <- unique(dat$Formula[dat$source_group == "Predicted"])
+  r2_text <- unique(dat$R2[dat$source_group == "Predicted"])
+  pred_source_text <- unique(dat$pred_source[dat$source_group == "Predicted"])
+  
+  annotation_text <- if (length(formula_text) > 0) {
+    glue("Source: {pred_source_text}\n{formula_text}\nR² = {r2_text}")
+  } else {
+    ""
+  }
+  
+  # Base theme
+  base_theme <- theme_bw(base_size = 12) +
+    theme(
+      legend.title = element_blank(),
+      plot.subtitle = element_text(size = 10, face = "italic")
+    )
+  
+  # Plot 1: pred_DryWeight vs Percent
+  p1 <- ggplot(dat, aes(x = Percent, y = pred_DryWeight, color = source_group)) +
+    geom_point(size = 2, alpha = 0.8) +
+    labs(
+      title = glue("{genus_name} — Predicted Dry Weight"),
+      subtitle = annotation_text,
+      x = "Percent Cover",
+      y = "Predicted Dry Weight (g)"
+    ) +
+    base_theme
+  
+  # Plot 2: pred_DryWeight vs ID
+  p2 <- ggplot(dat, aes(x = ID, y = pred_DryWeight, color = source_group)) +
+    geom_point(size = 2, alpha = 0.8) +
+    labs(
+      x = "Observation ID",
+      y = "Predicted Dry Weight (g)"
+    ) +
+    base_theme
+  
+  # Combine plots side by side with legend at bottom
+  combined_plot <- p1 + p2 + 
+    plot_layout(guides = "collect") & 
+    theme(legend.position = "bottom", legend.direction = "horizontal")
+  
+  # Save or display
+  if (save_plots) {
+    ggsave(glue("plots/{genus_name}_pred_plot.png"), combined_plot, width = 10, height = 5, dpi = 300)
+  } else {
+    print(combined_plot)
+  }
+}
+
+
+walk(unique(genus_predictions_filtered$Genus), ~plot_genus_predictions(.x, genus_predictions_filtered))
+```
+
+### Family
+
+```{r}
+fam_pred_species <- predictions %>%
+  filter(pred_source == "Family") %>%
+  pull(Family) %>%
+  unique()
+
+# 2. Keep Spp predictions and matching Observed rows
+fam_predictions_filtered <- predictions %>%
+  filter(
+    pred_source == "Family" |
+      (pred_source == "Observed" & Family %in% fam_pred_species)
+  )%>% 
+  arrange(Family)
+
+plot_fam_predictions <- function(fam_name, predictions, save_plots = FALSE) {
+  
+  # Filter for this species
+  dat <- predictions %>% filter(Family == fam_name)
+  
+  # Prepare annotation text
+  formula_text <- unique(dat$Formula[dat$source_group == "Predicted"])
+  r2_text <- unique(dat$R2[dat$source_group == "Predicted"])
+  pred_source_text <- unique(dat$pred_source[dat$source_group == "Predicted"])
+  
+  annotation_text <- if (length(formula_text) > 0) {
+    glue("Source: {pred_source_text}\n{formula_text}\nR² = {r2_text}")
+  } else {
+    ""
+  }
+  
+  # Base theme
+  base_theme <- theme_bw(base_size = 12) +
+    theme(
+      legend.title = element_blank(),
+      plot.subtitle = element_text(size = 10, face = "italic")
+    )
+  
+  # Plot 1: pred_DryWeight vs Percent
+  p1 <- ggplot(dat, aes(x = Percent, y = pred_DryWeight, color = source_group)) +
+    geom_point(size = 2, alpha = 0.8) +
+    labs(
+      title = glue("{fam_name} — Predicted Dry Weight"),
+      subtitle = annotation_text,
+      x = "Percent Cover",
+      y = "Predicted Dry Weight (g)"
+    ) +
+    base_theme
+  
+  # Plot 2: pred_DryWeight vs ID
+  p2 <- ggplot(dat, aes(x = ID, y = pred_DryWeight, color = source_group)) +
+    geom_point(size = 2, alpha = 0.8) +
+    labs(
+      x = "Observation ID",
+      y = "Predicted Dry Weight (g)"
+    ) +
+    base_theme
+  
+  # Combine plots side by side with legend at bottom
+  combined_plot <- p1 + p2 + 
+    plot_layout(guides = "collect") & 
+    theme(legend.position = "bottom", legend.direction = "horizontal")
+  
+  # Save or display
+  if (save_plots) {
+    ggsave(glue("plots/{fam_name}_pred_plot.png"), combined_plot, width = 10, height = 5, dpi = 300)
+  } else {
+    print(combined_plot)
+  }
+}
+
+
+# Run for this subset
+walk(unique(fam_predictions_filtered$Family), ~plot_fam_predictions(.x, fam_predictions_filtered))
+```
+
+### Functional Group
+
+```{r}
+#|warning: False
+#|Message: False
+
+fg_pred_species <- predictions %>%
+  filter(pred_source == "FunctionalGroup") %>%
+  pull(FunctionalGroup) %>%
+  unique()
+
+# 2. Keep Spp predictions and matching Observed rows
+fg_predictions_filtered <- predictions %>%
+  filter(
+    pred_source == "FunctionalGroup" |
+      (pred_source == "Observed" & FunctionalGroup %in% fg_pred_species)
+  )%>% 
+  arrange(FunctionalGroup)
+
+plot_fg_predictions <- function(fg_name, predictions, save_plots = FALSE) {
+  
+  # Filter for this species
+  dat <- predictions %>% filter(FunctionalGroup == fg_name)
+  
+  # Prepare annotation text
+  formula_text <- unique(dat$Formula[dat$source_group == "Predicted"])
+  r2_text <- unique(dat$R2[dat$source_group == "Predicted"])
+  pred_source_text <- unique(dat$pred_source[dat$source_group == "Predicted"])
+  
+  annotation_text <- if (length(formula_text) > 0) {
+    glue("Source: {pred_source_text}\n{formula_text}\nR² = {r2_text}")
+  } else {
+    ""
+  }
+  
+  # Base theme
+  base_theme <- theme_bw(base_size = 12) +
+    theme(
+      legend.title = element_blank(),
+      plot.subtitle = element_text(size = 10, face = "italic")
+    )
+  
+  # Plot 1: pred_DryWeight vs Percent
+  p1 <- ggplot(dat, aes(x = Percent, y = pred_DryWeight, color = source_group)) +
+    geom_point(size = 2, alpha = 0.8) +
+    labs(
+      title = glue("{fg_name} — Predicted Dry Weight"),
+      subtitle = annotation_text,
+      x = "Percent Cover",
+      y = "Predicted Dry Weight (g)"
+    ) +
+    base_theme
+  
+  # Plot 2: pred_DryWeight vs ID
+  p2 <- ggplot(dat, aes(x = ID, y = pred_DryWeight, color = source_group)) +
+    geom_point(size = 2, alpha = 0.8) +
+    labs(
+      x = "Observation ID",
+      y = "Predicted Dry Weight (g)"
+    ) +
+    base_theme
+  
+  # Combine plots side by side with legend at bottom
+  combined_plot <- p1 + p2 + 
+    plot_layout(guides = "collect") & 
+    theme(legend.position = "bottom", legend.direction = "horizontal")
+  
+  # Save or display
+  if (save_plots) {
+    ggsave(glue("plots/{fg_name}_pred_plot.png"), combined_plot, width = 10, height = 5, dpi = 300)
+  } else {
+    print(combined_plot)
+  }
+}
+
+# Run for this subset
+walk(unique(fg_predictions_filtered$FunctionalGroup), ~plot_fg_predictions(.x, fg_predictions_filtered))
 ```
 
 ## Questions?
