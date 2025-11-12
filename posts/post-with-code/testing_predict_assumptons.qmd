@@ -35,6 +35,8 @@ all_models <- list(
 
 ## Predicted Biomass 
 
+This data frame includes all the predicted biomass measurements in a table if you are curious to look at them. All of this data should be reflected below in the graphs though.
+
 ```{r}
 #| warning: FALSE
 library(tidyverse)
@@ -137,7 +139,7 @@ zeros <- predictions %>%
 
 ## Scatterplots of Predicted vs Observed Biomass
 
-The stars indicate that it has both a low R-Squared value as well as it predicting low biomass for high percent cover in at least one instance.
+I went ahead and plotted each of the used equations to make sure I wasn't missing anything. The lists for each section highlight which equations have an R-squared value \<0.6. The stars next to any names indicate that it has both a low R-Squared value as well as it predicting low biomass for high percent cover in at least one instance. All of the graphs should contain the important information at the top, so you do not have to scroll back and forth as much.
 
 ### Species
 
@@ -502,7 +504,7 @@ walk(unique(fg_predictions_filtered$FunctionalGroup), ~plot_fg_predictions(.x, f
 
 ## Regression Coefficients 
 
-Here are the updated R-squared, AIC, and Coeffecient values of the used regression equations that include an interaction term between various transformations of Julian Day and Percent cover. Ryan helped me code the interaction term into the dredging model, so every combination should have been considered.
+I am not sure if these are helpful, but we talked about looking at the coefficients previously so I thought I would include them just incase. Here are the R-squared, AIC, and Coeffecient values of the used regression equations that include an interaction term between various transformations of Julian Day and Percent cover. Ryan helped me code the interaction term into the dredging model, so every combination should have been considered.
 
 ### Species Level Regressions
 
