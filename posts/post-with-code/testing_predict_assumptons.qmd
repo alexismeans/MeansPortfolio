@@ -33,7 +33,7 @@ all_models <- list(
 
 ```
 
-## Predicted Biomass 
+## Predicted Biomass
 
 This data frame includes all the predicted biomass measurements in a table if you are curious to look at them. All of this data should be reflected below in the graphs though.
 
@@ -86,8 +86,6 @@ datatable(
 
 ```{r}
 #| warning: FALSE
-#| eval: false
-#| echo: false
 
 #left join this to covariate dbs
 used_equations <- predictions %>% 
@@ -139,25 +137,9 @@ zeros <- predictions %>%
 
 ## Scatterplots of Predicted vs Observed Biomass
 
-I went ahead and plotted each of the used equations to make sure I wasn't missing anything. The lists for each section highlight which equations have an R-squared value \<0.6. The stars next to any names indicate that it has both a low R-Squared value as well as it predicting low biomass for high percent cover in at least one instance. All of the graphs should contain the important information at the top, so you do not have to scroll back and forth as much.
+I went ahead and plotted each of the used equations to make sure I wasn't missing anything. The lists for each section highlight which equations have an R-squared value \<0.6. All of the graphs should contain the important information at the top.
 
 ### Species
-
--   BRTE_BROWN
-
--   BRTE_GREEN\*\*\*
-
--   ELEL5_GREEN
-
--   ERST4_ENTIRE
-
--   PHLO2_ENTIRE
-
--   POSE_BROWN\*\*\*
-
--   PSSP6_GREEN
-
--   VUMIM_BROWN
 
 ```{r}
 library(ggplot2)
@@ -241,25 +223,7 @@ plot_species_predictions <- function(species_name, predictions, save_plots = FAL
 walk(unique(spp_predictions_filtered$Spp), ~plot_species_predictions(.x, spp_predictions_filtered))
 ```
 
-### Genus 
-
--   ASTRAGULUS
-
--   BALSAMORHIZA
-
--   BROMUS
-
--   ERIOCOMA
-
--   ERIOGONUM
-
--   FESTUCA
-
--   LOMATIUM
-
--   POA\*\*\*\*
-
--   PSEUDOROEGNERIA\*\*\*
+### Genus
 
 ```{r}
 
@@ -338,12 +302,6 @@ walk(unique(genus_predictions_filtered$Genus), ~plot_genus_predictions(.x, genus
 
 ### Family
 
--   APIACEAE
-
--   ASTERACEAE
-
--   POACEAE\*\*\*
-
 ```{r}
 fam_pred_species <- predictions %>%
   filter(pred_source == "Family") %>%
@@ -420,10 +378,6 @@ walk(unique(fam_predictions_filtered$Family), ~plot_fam_predictions(.x, fam_pred
 ```
 
 ### Functional Group
-
--   AF\*\*\*
-
--   PF
 
 ```{r}
 #|warning: False
@@ -502,13 +456,8 @@ plot_fg_predictions <- function(fg_name, predictions, save_plots = FALSE) {
 walk(unique(fg_predictions_filtered$FunctionalGroup), ~plot_fg_predictions(.x, fg_predictions_filtered))
 ```
 
-## Regression Coefficients 
-
-I am not sure if these are helpful, but we talked about looking at the coefficients previously so I thought I would include them just incase. Here are the R-squared, AIC, and Coeffecient values of the used regression equations that include an interaction term between various transformations of Julian Day and Percent cover. Ryan helped me code the interaction term into the dredging model, so every combination should have been considered.
-
-### Species Level Regressions
-
 ```{r}
+#Species Level Regression Coefficients 
 #| warning: FALSE
 
 used_spp_predictions <- used_equations %>% 
@@ -520,25 +469,23 @@ used_spp_predictions <- used_equations %>%
   mutate(across(where(is.numeric), ~ round(.x, 4)))
 
 
-datatable(
-  used_spp_predictions,
-  options = list(
-    pageLength = 20,        # show more rows per page
-    scrollX = TRUE,         # horizontal scrolling for wide tables
-    scrollY = "400px",      # limit vertical size
-    dom = "tip",            # minimal controls (t = table, i = info, p = pagination)
-    columnDefs = list(
-      list(className = 'dt-center', targets = "_all")  # center-align
-    )
-  ),
-  class = "compact stripe hover",
-  caption = "Species Coefficients"
-)
-```
+# datatable(
+#   used_spp_predictions,
+#   options = list(
+#     pageLength = 20,        # show more rows per page
+#     scrollX = TRUE,         # horizontal scrolling for wide tables
+#     scrollY = "400px",      # limit vertical size
+#     dom = "tip",            # minimal controls (t = table, i = info, p = pagination)
+#     columnDefs = list(
+#       list(className = 'dt-center', targets = "_all")  # center-align
+#     )
+#   ),
+#   class = "compact stripe hover",
+#   caption = "Species Coefficients"
+# )
 
-### Genus Level Regressions
 
-```{r}
+#Genus Level Regression Coefficients 
 used_genus_predictions <- used_equations %>% 
   filter(pred_source == "Genus") %>% 
   select(Genus, R2, Formula) %>% 
@@ -546,26 +493,23 @@ used_genus_predictions <- used_equations %>%
   select(-Spp) %>% 
     mutate(across(where(is.numeric), ~ round(.x, 4)))
 
-datatable(
-  used_genus_predictions,
-  options = list(
-    pageLength = 20,        # show more rows per page
-    scrollX = TRUE,         # horizontal scrolling for wide tables
-    scrollY = "400px",      # limit vertical size
-    dom = "tip",            # minimal controls (t = table, i = info, p = pagination)
-    columnDefs = list(
-      list(className = 'dt-center', targets = "_all")  # center-align
-    )
-  ),
-  class = "compact stripe hover",
-  caption = "Genus Coefficients"
-)
+# datatable(
+#   used_genus_predictions,
+#   options = list(
+#     pageLength = 20,        # show more rows per page
+#     scrollX = TRUE,         # horizontal scrolling for wide tables
+#     scrollY = "400px",      # limit vertical size
+#     dom = "tip",            # minimal controls (t = table, i = info, p = pagination)
+#     columnDefs = list(
+#       list(className = 'dt-center', targets = "_all")  # center-align
+#     )
+#   ),
+#   class = "compact stripe hover",
+#   caption = "Genus Coefficients"
+# )
 
-```
 
-### Family Level Regressions
-
-```{r}
+#Family Level Regression Coefficients 
 used_fam_predictions <- used_equations %>% 
   filter(pred_source == "Family") %>% 
   select(Family, R2, Formula) %>% 
@@ -573,26 +517,23 @@ used_fam_predictions <- used_equations %>%
   select(-Spp) %>% 
     mutate(across(where(is.numeric), ~ round(.x, 4)))
 
-datatable(
-  used_fam_predictions,
-  options = list(
-    pageLength = 20,        # show more rows per page
-    scrollX = TRUE,         # horizontal scrolling for wide tables
-    scrollY = "400px",      # limit vertical size
-    dom = "tip",            # minimal controls (t = table, i = info, p = pagination)
-    columnDefs = list(
-      list(className = 'dt-center', targets = "_all")  # center-align
-    )
-  ),
-  class = "compact stripe hover",
-  caption = "Familu Coefficients"
-)
+# datatable(
+#   used_fam_predictions,
+#   options = list(
+#     pageLength = 20,        # show more rows per page
+#     scrollX = TRUE,         # horizontal scrolling for wide tables
+#     scrollY = "400px",      # limit vertical size
+#     dom = "tip",            # minimal controls (t = table, i = info, p = pagination)
+#     columnDefs = list(
+#       list(className = 'dt-center', targets = "_all")  # center-align
+#     )
+#   ),
+#   class = "compact stripe hover",
+#   caption = "Familu Coefficients"
+# )
 
-```
 
-### FG Level Regressions 
-
-```{r}
+#FG Level Regression Coefficients 
 used_fg_predictions <- used_equations %>% 
   filter(pred_source == "FunctionalGroup") %>% 
   select(FunctionalGroup, R2, Formula) %>% 
@@ -600,18 +541,18 @@ used_fg_predictions <- used_equations %>%
   select(-Spp) %>% 
     mutate(across(where(is.numeric), ~ round(.x, 4)))
 
-datatable(
-  used_fg_predictions,
-  options = list(
-    pageLength = 20,        # show more rows per page
-    scrollX = TRUE,         # horizontal scrolling for wide tables
-    scrollY = "400px",      # limit vertical size
-    dom = "tip",            # minimal controls (t = table, i = info, p = pagination)
-    columnDefs = list(
-      list(className = 'dt-center', targets = "_all")  # center-align
-    )
-  ),
-  class = "compact stripe hover",
-  caption = "Functional Group Coefficients"
-)
+# datatable(
+#   used_fg_predictions,
+#   options = list(
+#     pageLength = 20,        # show more rows per page
+#     scrollX = TRUE,         # horizontal scrolling for wide tables
+#     scrollY = "400px",      # limit vertical size
+#     dom = "tip",            # minimal controls (t = table, i = info, p = pagination)
+#     columnDefs = list(
+#       list(className = 'dt-center', targets = "_all")  # center-align
+#     )
+#   ),
+#   class = "compact stripe hover",
+#   caption = "Functional Group Coefficients"
+# )
 ```
