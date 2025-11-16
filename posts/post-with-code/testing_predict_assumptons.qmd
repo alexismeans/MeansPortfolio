@@ -48,8 +48,18 @@ library(openxlsx)
 spp <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/processed.data/spp_models_diagnostics.xlsx"
 genus <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/processed.data/genus_models_diagnostics.xlsx"
 fam <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/processed.data/family_models_diagnostics.xlsx"
-fg <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/processed.data/fg_models_diagnostics.xlsx"
+fg <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/processed.data/PS_update_fg_models_diagnostics.xlsx"
 df <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/24and25predictions.xlsx"
+
+sp_eq <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/processed.data/spp_models_equations.xlsx"
+ge_eq <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/processed.data/genus_models_equations.xlsx"
+fa_eq <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/processed.data/family_models_equations.xlsx"
+fg_eq <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/processed.data/fg_models_equations.xlsx"
+
+spp_equations <- read_excel(sp_eq, "Sheet1")
+genus_equations <- read_excel(ge_eq, "Sheet1")
+fam_equations <- read_excel(fa_eq, "Sheet1")
+fg_equations <- read_excel(fg_eq, "Sheet1")
 
 spp_predictions <- read_excel(spp, "Sheet1")
 genus_predictions <- read_excel(genus, "Sheet1")
@@ -62,10 +72,29 @@ pred <- predictions %>%
 
 #left join this to covariate dbs
 used_equations <- predictions %>% 
-  distinct(Formula,.keep_all = TRUE) %>% 
+  distinct(R2,.keep_all = TRUE) %>% 
   filter(!if_any(everything(), ~ grepl("observed", .x, ignore.case = TRUE))) %>% 
   select(-DryWeight, -pred_DryWeight, -Percent, -source_group, -ID, -PlotID)
 
+se <- spp_equations %>% 
+  select(R2, AIC, formula)
+ge <- genus_equations %>% 
+  select(R2, AIC, formula)
+fame <- fam_equations %>% 
+  select(R2, AIC, formula)
+fge <- fg_equations %>% 
+  select(R2, AIC, formula)
+eq_lookup <- bind_rows(se, ge, fame, fge)
+
+used_equations <- used_equations %>% 
+  left_join(eq_lookup, by = "R2") %>% 
+  distinct(R2,.keep_all = TRUE) 
+
+eq <- used_equations %>% 
+  select(R2, formula)
+predictions <- predictions %>% 
+  left_join(eq, by = "R2") %>% 
+  rename(Formula = formula)
 
 datatable(
   pred,
@@ -88,14 +117,14 @@ datatable(
 #| warning: FALSE
 
 #left join this to covariate dbs
-used_equations <- predictions %>% 
-  distinct(Formula, .keep_all = TRUE) 
+# used_equations <- predictions %>% 
+#   distinct(formula, .keep_all = TRUE) 
 
-
-low_r <- predictions %>% 
-  distinct(R2, .keep_all = TRUE) %>% 
-  filter(R2 < 0.6) %>% 
-  select(Spp, Family, Genus, FunctionalGroup, pred_source, R2, Formula)
+# 
+# low_r <- predictions %>% 
+#   distinct(R2, .keep_all = TRUE) %>% 
+#   filter(R2 < 0.6) %>% 
+#   select(Spp, Family, Genus, FunctionalGroup, pred_source, R2, AIC, formula)
 
 # datatable(
 #   low_r,
@@ -113,9 +142,9 @@ low_r <- predictions %>%
 # )
 
 
-zeros <- predictions %>% 
- filter(Percent > 20 & pred_DryWeight == 0) %>% 
-  select(ID, Spp, Family, Genus, FunctionalGroup, pred_DryWeight, Percent,pred_source, R2, Formula)
+# zeros <- predictions %>% 
+#  filter(Percent > 20 & pred_DryWeight == 0) %>% 
+#   select(ID, Spp, Family, Genus, FunctionalGroup, pred_DryWeight, Percent,pred_source, R2, Formula)
 
 
 
@@ -459,14 +488,14 @@ walk(unique(fg_predictions_filtered$FunctionalGroup), ~plot_fg_predictions(.x, f
 ```{r}
 #Species Level Regression Coefficients 
 #| warning: FALSE
-
-used_spp_predictions <- used_equations %>% 
-  filter(pred_source == "Spp") %>%  
-  select(Spp, R2, Formula) %>%
-  left_join(spp_predictions, by = "R2") %>% 
-  select(-Spp.y) %>% 
-  rename(Spp = Spp.x) %>% 
-  mutate(across(where(is.numeric), ~ round(.x, 4)))
+# 
+# used_spp_predictions <- used_equations %>% 
+#   filter(pred_source == "Spp") %>%  
+#   select(Spp, R2, Formula) %>%
+#   left_join(spp_predictions, by = "R2") %>% 
+#   select(-Spp.y) %>% 
+#   rename(Spp = Spp.x) %>% 
+#   mutate(across(where(is.numeric), ~ round(.x, 4)))
 
 
 # datatable(
@@ -485,13 +514,13 @@ used_spp_predictions <- used_equations %>%
 # )
 
 
-#Genus Level Regression Coefficients 
-used_genus_predictions <- used_equations %>% 
-  filter(pred_source == "Genus") %>% 
-  select(Genus, R2, Formula) %>% 
-  left_join(genus_predictions, by = "R2") %>% 
-  select(-Spp) %>% 
-    mutate(across(where(is.numeric), ~ round(.x, 4)))
+# #Genus Level Regression Coefficients 
+# used_genus_predictions <- used_equations %>% 
+#   filter(pred_source == "Genus") %>% 
+#   select(Genus, R2, Formula) %>% 
+#   left_join(genus_predictions, by = "R2") %>% 
+#   select(-Spp) %>% 
+#     mutate(across(where(is.numeric), ~ round(.x, 4)))
 
 # datatable(
 #   used_genus_predictions,
@@ -509,13 +538,13 @@ used_genus_predictions <- used_equations %>%
 # )
 
 
-#Family Level Regression Coefficients 
-used_fam_predictions <- used_equations %>% 
-  filter(pred_source == "Family") %>% 
-  select(Family, R2, Formula) %>% 
-  left_join(fam_predictions, by = "R2") %>% 
-  select(-Spp) %>% 
-    mutate(across(where(is.numeric), ~ round(.x, 4)))
+# #Family Level Regression Coefficients 
+# used_fam_predictions <- used_equations %>% 
+#   filter(pred_source == "Family") %>% 
+#   select(Family, R2, Formula) %>% 
+#   left_join(fam_predictions, by = "R2") %>% 
+#   select(-Spp) %>% 
+#     mutate(across(where(is.numeric), ~ round(.x, 4)))
 
 # datatable(
 #   used_fam_predictions,
@@ -533,13 +562,13 @@ used_fam_predictions <- used_equations %>%
 # )
 
 
-#FG Level Regression Coefficients 
-used_fg_predictions <- used_equations %>% 
-  filter(pred_source == "FunctionalGroup") %>% 
-  select(FunctionalGroup, R2, Formula) %>% 
-  left_join(fg_predictions, by = "R2") %>% 
-  select(-Spp) %>% 
-    mutate(across(where(is.numeric), ~ round(.x, 4)))
+# #FG Level Regression Coefficients 
+# used_fg_predictions <- used_equations %>% 
+#   filter(pred_source == "FunctionalGroup") %>% 
+#   select(FunctionalGroup, R2, Formula) %>% 
+#   left_join(fg_predictions, by = "R2") %>% 
+#   select(-Spp) %>% 
+#     mutate(across(where(is.numeric), ~ round(.x, 4)))
 
 # datatable(
 #   used_fg_predictions,
