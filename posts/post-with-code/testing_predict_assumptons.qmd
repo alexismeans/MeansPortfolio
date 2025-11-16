@@ -116,30 +116,15 @@ datatable(
 ```{r}
 #| warning: FALSE
 
-#left join this to covariate dbs
-# used_equations <- predictions %>% 
-#   distinct(formula, .keep_all = TRUE) 
+# library(writexl)
+# write.xlsx(used_equations, "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/regress.equation.compare.xlsx" )
 
-# 
+
 # low_r <- predictions %>% 
 #   distinct(R2, .keep_all = TRUE) %>% 
 #   filter(R2 < 0.6) %>% 
 #   select(Spp, Family, Genus, FunctionalGroup, pred_source, R2, AIC, formula)
 
-# datatable(
-#   low_r,
-#   options = list(
-#     pageLength = 20,        # show more rows per page
-#     scrollX = TRUE,         # horizontal scrolling for wide tables
-#     scrollY = "400px",      # limit vertical size
-#     dom = "tip",            # minimal controls (t = table, i = info, p = pagination)
-#     columnDefs = list(
-#       list(className = 'dt-center', targets = "_all")  # center-align
-#     )
-#   ),
-#   class = "compact stripe hover",
-#   caption = "Low R-Squared"
-# )
 
 
 # zeros <- predictions %>% 
@@ -148,20 +133,7 @@ datatable(
 
 
 
-# datatable(
-#   zeros,
-#   options = list(
-#     pageLength = 20,        # show more rows per page
-#     scrollX = TRUE,         # horizontal scrolling for wide tables
-#     scrollY = "400px",      # limit vertical size
-#     dom = "tip",            # minimal controls (t = table, i = info, p = pagination)
-#     columnDefs = list(
-#       list(className = 'dt-center', targets = "_all")  # center-align
-#     )
-#   ),
-#   class = "compact stripe hover",
-#   caption = "Flagged Predictions with Low Biomass"
-# )
+
 ```
 
 ## Scatterplots of Predicted vs Observed Biomass
@@ -489,13 +461,13 @@ walk(unique(fg_predictions_filtered$FunctionalGroup), ~plot_fg_predictions(.x, f
 #Species Level Regression Coefficients 
 #| warning: FALSE
 # 
-# used_spp_predictions <- used_equations %>% 
-#   filter(pred_source == "Spp") %>%  
-#   select(Spp, R2, Formula) %>%
-#   left_join(spp_predictions, by = "R2") %>% 
-#   select(-Spp.y) %>% 
-#   rename(Spp = Spp.x) %>% 
-#   mutate(across(where(is.numeric), ~ round(.x, 4)))
+ used_spp_predictions <- used_equations %>% 
+   filter(pred_source == "Spp") %>%  
+   select(Spp, R2, formula) %>%
+   left_join(spp_predictions, by = "R2") %>% 
+   select(-Spp.y) %>% 
+   rename(Spp = Spp.x) %>% 
+   mutate(across(where(is.numeric), ~ round(.x, 4)))
 
 
 # datatable(
@@ -515,12 +487,12 @@ walk(unique(fg_predictions_filtered$FunctionalGroup), ~plot_fg_predictions(.x, f
 
 
 # #Genus Level Regression Coefficients 
-# used_genus_predictions <- used_equations %>% 
-#   filter(pred_source == "Genus") %>% 
-#   select(Genus, R2, Formula) %>% 
-#   left_join(genus_predictions, by = "R2") %>% 
-#   select(-Spp) %>% 
-#     mutate(across(where(is.numeric), ~ round(.x, 4)))
+ used_genus_predictions <- used_equations %>% 
+   filter(pred_source == "Genus") %>% 
+   select(Genus, R2, formula) %>% 
+   left_join(genus_predictions, by = "R2") %>% 
+   select(-Spp) %>% 
+     mutate(across(where(is.numeric), ~ round(.x, 4)))
 
 # datatable(
 #   used_genus_predictions,
@@ -539,12 +511,12 @@ walk(unique(fg_predictions_filtered$FunctionalGroup), ~plot_fg_predictions(.x, f
 
 
 # #Family Level Regression Coefficients 
-# used_fam_predictions <- used_equations %>% 
-#   filter(pred_source == "Family") %>% 
-#   select(Family, R2, Formula) %>% 
-#   left_join(fam_predictions, by = "R2") %>% 
-#   select(-Spp) %>% 
-#     mutate(across(where(is.numeric), ~ round(.x, 4)))
+ used_fam_predictions <- used_equations %>% 
+   filter(pred_source == "Family") %>% 
+   select(Family, R2, formula) %>% 
+   left_join(fam_predictions, by = "R2") %>% 
+   select(-Spp) %>% 
+     mutate(across(where(is.numeric), ~ round(.x, 4)))
 
 # datatable(
 #   used_fam_predictions,
@@ -563,12 +535,12 @@ walk(unique(fg_predictions_filtered$FunctionalGroup), ~plot_fg_predictions(.x, f
 
 
 # #FG Level Regression Coefficients 
-# used_fg_predictions <- used_equations %>% 
-#   filter(pred_source == "FunctionalGroup") %>% 
-#   select(FunctionalGroup, R2, Formula) %>% 
-#   left_join(fg_predictions, by = "R2") %>% 
-#   select(-Spp) %>% 
-#     mutate(across(where(is.numeric), ~ round(.x, 4)))
+ used_fg_predictions <- used_equations %>% 
+  filter(pred_source == "FunctionalGroup") %>% 
+   select(FunctionalGroup, R2, formula) %>% 
+   left_join(fg_predictions, by = "R2") %>% 
+   select(-Spp) %>% 
+    mutate(across(where(is.numeric), ~ round(.x, 4)))
 
 # datatable(
 #   used_fg_predictions,
@@ -584,4 +556,24 @@ walk(unique(fg_predictions_filtered$FunctionalGroup), ~plot_fg_predictions(.x, f
 #   class = "compact stripe hover",
 #   caption = "Functional Group Coefficients"
 # )
+ 
+# library(openxlsx)
+# 
+# # Create a new workbook
+# wb <- createWorkbook()
+# 
+# # Add multiple sheets
+# addWorksheet(wb, "Spp")
+# addWorksheet(wb, "Genus")
+# addWorksheet(wb, "Family")
+# addWorksheet(wb, "FG")
+# 
+# # Write data frames to each sheet
+# writeData(wb, sheet = "Spp", used_spp_predictions)
+# writeData(wb, sheet = "Genus", used_genus_predictions)
+# writeData(wb, sheet = "Family", used_fam_predictions)
+# writeData(wb, sheet = "FG", used_fg_predictions)
+# 
+# # Save workbook
+# saveWorkbook(wb, file = "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/processed.data/model.coefficients.xlsx", overwrite = TRUE)
 ```
