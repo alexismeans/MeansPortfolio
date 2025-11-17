@@ -120,20 +120,6 @@ datatable(
 # write.xlsx(used_equations, "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/regress.equation.compare.xlsx" )
 
 
-# low_r <- predictions %>% 
-#   distinct(R2, .keep_all = TRUE) %>% 
-#   filter(R2 < 0.6) %>% 
-#   select(Spp, Family, Genus, FunctionalGroup, pred_source, R2, AIC, formula)
-
-
-
-# zeros <- predictions %>% 
-#  filter(Percent > 20 & pred_DryWeight == 0) %>% 
-#   select(ID, Spp, Family, Genus, FunctionalGroup, pred_DryWeight, Percent,pred_source, R2, Formula)
-
-
-
-
 ```
 
 ## Scatterplots of Predicted vs Observed Biomass
@@ -470,21 +456,6 @@ walk(unique(fg_predictions_filtered$FunctionalGroup), ~plot_fg_predictions(.x, f
    mutate(across(where(is.numeric), ~ round(.x, 4)))
 
 
-# datatable(
-#   used_spp_predictions,
-#   options = list(
-#     pageLength = 20,        # show more rows per page
-#     scrollX = TRUE,         # horizontal scrolling for wide tables
-#     scrollY = "400px",      # limit vertical size
-#     dom = "tip",            # minimal controls (t = table, i = info, p = pagination)
-#     columnDefs = list(
-#       list(className = 'dt-center', targets = "_all")  # center-align
-#     )
-#   ),
-#   class = "compact stripe hover",
-#   caption = "Species Coefficients"
-# )
-
 
 # #Genus Level Regression Coefficients 
  used_genus_predictions <- used_equations %>% 
@@ -494,20 +465,7 @@ walk(unique(fg_predictions_filtered$FunctionalGroup), ~plot_fg_predictions(.x, f
    select(-Spp) %>% 
      mutate(across(where(is.numeric), ~ round(.x, 4)))
 
-# datatable(
-#   used_genus_predictions,
-#   options = list(
-#     pageLength = 20,        # show more rows per page
-#     scrollX = TRUE,         # horizontal scrolling for wide tables
-#     scrollY = "400px",      # limit vertical size
-#     dom = "tip",            # minimal controls (t = table, i = info, p = pagination)
-#     columnDefs = list(
-#       list(className = 'dt-center', targets = "_all")  # center-align
-#     )
-#   ),
-#   class = "compact stripe hover",
-#   caption = "Genus Coefficients"
-# )
+
 
 
 # #Family Level Regression Coefficients 
@@ -518,20 +476,7 @@ walk(unique(fg_predictions_filtered$FunctionalGroup), ~plot_fg_predictions(.x, f
    select(-Spp) %>% 
      mutate(across(where(is.numeric), ~ round(.x, 4)))
 
-# datatable(
-#   used_fam_predictions,
-#   options = list(
-#     pageLength = 20,        # show more rows per page
-#     scrollX = TRUE,         # horizontal scrolling for wide tables
-#     scrollY = "400px",      # limit vertical size
-#     dom = "tip",            # minimal controls (t = table, i = info, p = pagination)
-#     columnDefs = list(
-#       list(className = 'dt-center', targets = "_all")  # center-align
-#     )
-#   ),
-#   class = "compact stripe hover",
-#   caption = "Familu Coefficients"
-# )
+
 
 
 # #FG Level Regression Coefficients 
@@ -542,23 +487,10 @@ walk(unique(fg_predictions_filtered$FunctionalGroup), ~plot_fg_predictions(.x, f
    select(-Spp) %>% 
     mutate(across(where(is.numeric), ~ round(.x, 4)))
 
-# datatable(
-#   used_fg_predictions,
-#   options = list(
-#     pageLength = 20,        # show more rows per page
-#     scrollX = TRUE,         # horizontal scrolling for wide tables
-#     scrollY = "400px",      # limit vertical size
-#     dom = "tip",            # minimal controls (t = table, i = info, p = pagination)
-#     columnDefs = list(
-#       list(className = 'dt-center', targets = "_all")  # center-align
-#     )
-#   ),
-#   class = "compact stripe hover",
-#   caption = "Functional Group Coefficients"
-# )
+
  
 # library(openxlsx)
-# 
+
 # # Create a new workbook
 # wb <- createWorkbook()
 # 
