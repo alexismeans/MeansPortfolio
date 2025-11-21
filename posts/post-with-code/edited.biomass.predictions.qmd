@@ -177,11 +177,15 @@ fg_predictions_filtered <- fg %>%
   mutate(
     pred_source = ifelse(pred_source == "Model_FunctionalGroup", "Predicted", pred_source)
   ) %>%
-  filter(Spp %in% c(
-    "HOUM_ENTIRE", "COPA3_ENTIRE", "EQHY_ENTIRE", "HYCA4_ENTIRE",
-    "PHHE2_ENTIRE", "MIGU_ENTIRE", "CLLI2_ENTIRE", "POGLG4_ENTIRE",
-    "SANI5_ENTIRE", "VETH_ENTIRE"
-  )) %>%
+  filter(
+    (pred_source == "Observed" | 
+     (pred_source == "Predicted" & Spp %in% c(
+       "HOUM_ENTIRE", "COPA3_ENTIRE", "EQHY_ENTIRE", "HYCA4_ENTIRE",
+       "PHHE2_ENTIRE", "MIGU_ENTIRE", "CLLI2_ENTIRE", "POGLG4_ENTIRE",
+       "SANI5_ENTIRE", "VETH_ENTIRE"
+     ))) &
+    !ID %in% c(2178, 2087)
+  ) %>%
   arrange(FunctionalGroup)
 
 plot_fg_predictions <- function(fg_name, predictions, save_plots = FALSE) {
