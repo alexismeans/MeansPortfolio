@@ -1,0 +1,239 @@
+---
+title: "Edited Predictions"
+author: "Alexis Means"
+date: "2025-11-20"
+format:
+  html:
+    toc: true
+    toc-location: left
+    toc-depth: 3
+editor: visual
+code-fold: true
+execute: 
+  warning: false
+  message: false
+---
+
+```{r}
+
+library(tidyverse)
+library(readxl)
+s <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/edited.spp.pred.xlsx"
+g <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/edited.genus.pred.xlsx"
+f <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/biomass/edited.fg.pred.xlsx"
+
+spp <- read_excel(s, "Sheet1")
+genus <-read_excel(g, "Sheet1") 
+fg <- read_excel(f, "Sheet1")
+```
+
+## Species
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(purrr)
+library(glue)
+library(patchwork)
+
+# 2. Keep Spp predictions and matching Observed rows
+spp_predictions_filtered <- spp %>%
+  mutate(pred_source = ifelse(pred_source == "Model_Spp", "Predicted", pred_source)) %>%
+  arrange(Spp)
+
+plot_species_predictions <- function(species_name, predictions, save_plots = FALSE) {
+  
+  # Filter for this species
+  dat <- predictions %>% filter(Spp == species_name)
+  
+  # Prepare annotation text
+  formula_text <- unique(dat$formula[dat$pred_source == "Predicted"])
+  r2_text      <- unique(dat$R2[dat$pred_source == "Predicted"])
+  pred_source_text <- unique(dat$pred_source[dat$pred_source == "Predicted"])
+  
+  annotation_text <- if (length(formula_text) > 0) {
+    glue("Source: {pred_source_text}\n{formula_text}\nR² = {r2_text}")
+  } else {
+    ""
+  }
+  
+  # Base theme
+  base_theme <- theme_bw(base_size = 12) +
+    theme(
+      legend.title = element_blank(),
+      plot.subtitle = element_text(size = 10, face = "italic")
+    )
+  
+  # Plot 1: pred_DryWeight vs Percent
+  p1 <- ggplot(dat, aes(x = Percent, y = pred_DryWeight, color = pred_source)) +
+    geom_point(size = 2, alpha = 0.8) +
+    labs(
+      title = glue("{species_name} — Predicted Dry Weight"),
+      subtitle = annotation_text,
+      x = "Percent Cover",
+      y = "Predicted Dry Weight (g)"
+    ) +
+    base_theme
+  
+  # Plot 2: pred_DryWeight vs ID
+  p2 <- ggplot(dat, aes(x = ID, y = pred_DryWeight, color = pred_source)) +
+    geom_point(size = 2, alpha = 0.8) +
+    labs(
+      x = "Observation ID",
+      y = "Predicted Dry Weight (g)"
+    ) +
+    base_theme
+  
+  # Combine plots
+  combined_plot <- p1 + p2 + 
+    plot_layout(guides = "collect") & 
+    theme(legend.position = "bottom", legend.direction = "horizontal")
+  
+  # Save or display
+  if (save_plots) {
+    ggsave(glue("plots/{species_name}_pred_plot.png"),
+           combined_plot, width = 10, height = 5, dpi = 300)
+  } else {
+    print(combined_plot)
+  }
+}
+
+# Run for this subset
+walk(unique(spp_predictions_filtered$Spp), ~plot_species_predictions(.x, spp_predictions_filtered))
+```
+
+## Genus 
+
+```{r}
+genus_predictions_filtered <- genus %>%
+  mutate(pred_source = ifelse(pred_source == "Model_Genus", "Predicted", pred_source)) %>%
+  arrange(Genus)
+
+plot_genus_predictions <- function(genus_name, predictions, save_plots = FALSE) {
+  
+  # Filter for this genus
+  dat <- predictions %>% filter(Genus == genus_name)
+  
+  # Prepare annotation text
+  formula_text <- unique(dat$formula[dat$pred_source == "Predicted"])
+  r2_text      <- unique(dat$R2[dat$pred_source == "Predicted"])
+  pred_source_text <- unique(dat$pred_source[dat$pred_source == "Predicted"])
+  
+  annotation_text <- if (length(formula_text) > 0) {
+    glue("Source: {pred_source_text}\n{formula_text}\nR² = {r2_text}")
+  } else {
+    ""
+  }
+  
+  # Base theme
+  base_theme <- theme_bw(base_size = 12) +
+    theme(
+      legend.title = element_blank(),
+      plot.subtitle = element_text(size = 10, face = "italic")
+    )
+  
+  # Plot 1: pred_DryWeight vs Percent
+  p1 <- ggplot(dat, aes(x = Percent, y = pred_DryWeight, color = pred_source)) +
+    geom_point(size = 2, alpha = 0.8) +
+    labs(
+      title = glue("{genus_name} — Predicted Dry Weight"),
+      subtitle = annotation_text,
+      x = "Percent Cover",
+      y = "Predicted Dry Weight (g)"
+    ) +
+    base_theme
+  
+  # Plot 2: pred_DryWeight vs ID
+  p2 <- ggplot(dat, aes(x = ID, y = pred_DryWeight, color = pred_source)) +
+    geom_point(size = 2, alpha = 0.8) +
+    labs(
+      x = "Observation ID",
+      y = "Predicted Dry Weight (g)"
+    ) +
+    base_theme
+  
+  # Combine plots side by side
+  combined_plot <- p1 + p2 + 
+    plot_layout(guides = "collect") & 
+    theme(legend.position = "bottom", legend.direction = "horizontal")
+  
+  # Save or display
+  if (save_plots) {
+    ggsave(glue("plots/{genus_name}_pred_plot.png"),
+           combined_plot, width = 10, height = 5, dpi = 300)
+  } else {
+    print(combined_plot)
+  }
+}
+
+walk(unique(genus_predictions_filtered$Genus),
+     ~plot_genus_predictions(.x, genus_predictions_filtered))
+```
+
+## Functional Group
+
+```{r}
+fg_predictions_filtered <- fg %>%
+  mutate(pred_source = ifelse(pred_source == "Model_FunctionalGroup", "Predicted", pred_source)) %>%
+  arrange(FunctionalGroup)
+
+plot_fg_predictions <- function(fg_name, predictions, save_plots = FALSE) {
+  
+  # Filter for this functional group
+  dat <- predictions %>% filter(FunctionalGroup == fg_name)
+  
+  # Prepare annotation text
+  formula_text <- unique(dat$formula[dat$pred_source == "Predicted"])
+  r2_text      <- unique(dat$R2[dat$pred_source == "Predicted"])
+  pred_source_text <- unique(dat$pred_source[dat$pred_source == "Predicted"])
+  
+  annotation_text <- if (length(formula_text) > 0) {
+    glue("Source: {pred_source_text}\n{formula_text}\nR² = {r2_text}")
+  } else {
+    ""
+  }
+  
+  # Base theme
+  base_theme <- theme_bw(base_size = 12) +
+    theme(
+      legend.title = element_blank(),
+      plot.subtitle = element_text(size = 10, face = "italic")
+    )
+  
+  # Plot 1: pred_DryWeight vs Percent
+  p1 <- ggplot(dat, aes(x = Percent, y = pred_DryWeight, color = pred_source)) +
+    geom_point(size = 2, alpha = 0.8) +
+    labs(
+      title = glue("{fg_name} — Predicted Dry Weight"),
+      subtitle = annotation_text,
+      x = "Percent Cover",
+      y = "Predicted Dry Weight (g)"
+    ) +
+    base_theme
+  
+  # Plot 2: pred_DryWeight vs ID
+  p2 <- ggplot(dat, aes(x = ID, y = pred_DryWeight, color = pred_source)) +
+    geom_point(size = 2, alpha = 0.8) +
+    labs(
+      x = "Observation ID",
+      y = "Predicted Dry Weight (g)"
+    ) +
+    base_theme
+  
+  # Combine plots
+  combined_plot <- p1 + p2 + 
+    plot_layout(guides = "collect") & 
+    theme(legend.position = "bottom", legend.direction = "horizontal")
+  
+  # Save or display
+  if (save_plots) {
+    ggsave(glue("plots/{fg_name}_pred_plot.png"),
+           combined_plot, width = 10, height = 5, dpi = 300)
+  } else {
+    print(combined_plot)
+  }
+}
+
+walk(unique(fg_predictions_filtered$FunctionalGroup),
+     ~plot_fg_predictions(.x, fg_predictions_filtered))
+```
