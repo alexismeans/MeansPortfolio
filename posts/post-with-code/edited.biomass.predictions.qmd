@@ -29,6 +29,8 @@ fg <- read_excel(f, "Sheet1")
 
 ## Species
 
+ERST4_ENTIRE, POSE_BROWN, PSSP6_GREEN? look better, the rest look the same or worse
+
 ```{r}
 library(ggplot2)
 library(dplyr)
@@ -39,6 +41,7 @@ library(patchwork)
 # 2. Keep Spp predictions and matching Observed rows
 spp_predictions_filtered <- spp %>%
   mutate(pred_source = ifelse(pred_source == "Model_Spp", "Predicted", pred_source)) %>%
+  filter(!ID %in% 661) %>% 
   arrange(Spp)
 
 plot_species_predictions <- function(species_name, predictions, save_plots = FALSE) {
@@ -103,6 +106,8 @@ walk(unique(spp_predictions_filtered$Spp), ~plot_species_predictions(.x, spp_pre
 ```
 
 ## Genus 
+
+POA, PSEUDOGENERIA, TAENATHARIUM look better
 
 ```{r}
 genus_predictions_filtered <- genus %>%
@@ -171,6 +176,8 @@ walk(unique(genus_predictions_filtered$Genus),
 ```
 
 ## Functional Group
+
+Removing the outliers did not change these at all
 
 ```{r}
 fg_predictions_filtered <- fg %>%
