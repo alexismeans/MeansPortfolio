@@ -29,7 +29,7 @@ fg <- read_excel(f, "Sheet1")
 
 ## Species
 
-ERST4_ENTIRE, POSE_BROWN, PSSP6_GREEN? look better, the rest look the same or worse
+ERST4_ENTIRE - looks better. POSE_BROWN, PSSP6_GREEN - I think look better, but I am not confident. The rest look the same or worse
 
 ```{r}
 library(ggplot2)
@@ -105,9 +105,11 @@ plot_species_predictions <- function(species_name, predictions, save_plots = FAL
 walk(unique(spp_predictions_filtered$Spp), ~plot_species_predictions(.x, spp_predictions_filtered))
 ```
 
-## Genus 
+## Genus
 
-POA, PSEUDOGENERIA, TAENATHARIUM look better
+ASTRAGULUS, POA, PSEUDOGENERIA, TAENATHARIUM look better.
+
+Since Taenatharium (The Genus for TACA8) is predicting a lot better at the genus level, can I use this equations instead of TACA8_GREEN at the species level because that one is still predicting zeros at high percent covers where this one is not.
 
 ```{r}
 genus_predictions_filtered <- genus %>%
@@ -177,7 +179,7 @@ walk(unique(genus_predictions_filtered$Genus),
 
 ## Functional Group
 
-Removing the outliers did not change these at all
+Removing the outliers did not change these at all, the predictions are the same
 
 ```{r}
 fg_predictions_filtered <- fg %>%
