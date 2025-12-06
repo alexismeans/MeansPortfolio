@@ -1,0 +1,163 @@
+---
+title: "Suitable Biomass Comparisons"
+author: "Alexis Means"
+code-fold: TRUE
+---
+
+```{r}
+library(readr)
+library(readxl)
+library(tidyverse)
+#| warning: FALSE
+#| message: FALSE
+
+r <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/FRESH/processed.data/2024.results.xlsx"
+
+plot.totals <- read_excel(r, "Plot-Level-Summary")
+indiv.value <- read_excel(r, "2024.Output")
+
+transect_area_m2 <- 5  # 5 quadrats of 1x1 m each
+
+total <- plot.totals %>%
+  mutate(SuitableBiomass_kg_ha = (SuitableBiomass / 1000) / transect_area_m2 * 10000)
+```
+
+# Scatterplots
+
+## Total Suitable Biomass Over Time by PVT
+
+```{r}
+#| warning: FALSE
+#| message: FALSE
+library(lubridate)
+
+plot.totals$Date <- ymd(plot.totals$Date)
+
+ggplot(plot.totals, aes(x = Date, y = SuitableBiomass)) +
+  geom_point() +
+  geom_line(aes(group = TransectID), alpha = 0.4) +
+  facet_wrap(~ PVT) +  # same y-axis across all panels
+  scale_y_continuous(limits = c(0, 1000)) +
+  theme_minimal() +
+  labs(
+    title = "Suitable Biomass Over Time by PVT",
+    x = "Date",
+    y = "Suitable Biomass"
+  )
+```
+
+## Average DE Over Time by PVT
+
+```{r}
+#| warning: FALSE
+#| message: FALSE
+ggplot(plot.totals, aes(x = Date, y = AveDE)) +
+  geom_point() +
+  geom_line(aes(group = TransectID), alpha = 0.4) +
+  geom_hline(yintercept = 11.5, linetype = "dashed", color = "red", size = 0.8) +
+  facet_wrap(~ PVT) +  # same y-axis across all panels
+  scale_y_continuous(limits = c(9, 14)) +
+  theme_minimal() +
+  labs(
+    title = "Average Digestible Energy Over Time by PVT",
+    x = "Date",
+    y = "Average DE (KJ/g)"
+  )
+```
+
+## Average DP Over Time by PVT
+
+```{r}
+#| warning: FALSE
+#| message: FALSE
+ggplot(plot.totals, aes(x = Date, y = AveDP)) +
+  geom_point() +
+  geom_line(aes(group = TransectID), alpha = 0.4) +
+  geom_hline(yintercept = 7.5, linetype = "dashed", color = "red", size = 0.8) +
+  facet_wrap(~ PVT) +
+  scale_y_continuous(limits = c(2, 16)) +
+  theme_minimal() +
+  labs(
+    title = "Average Digestible Protien Over Time by PVT",
+    x = "Date",
+    y = "Average DP (g/100g)"
+  )
+```
+
+# Bargraphs
+
+## Average Suitable Biomass
+
+```{r}
+avg_sb <- plot.totals %>% 
+  group_by(PVT) %>% 
+  summarise(
+    mean_sb = mean(SuitableBiomass, na.rm = TRUE),
+    se_sb   = sd(SuitableBiomass, na.rm = TRUE) / sqrt(n())
+  )
+
+# Create bar plot with standard error bars
+ggplot(avg_sb, aes(x = factor(PVT), y = mean_sb)) +
+  geom_col(fill = "steelblue") +
+  geom_errorbar(aes(ymin = mean_sb - se_sb, ymax = mean_sb + se_sb),
+                width = 0.2, color = "black") +
+  scale_y_continuous(limits = c(0, 700)) +
+  theme_minimal() +
+  labs(
+    title = "Average Suitable Biomass by PVT",
+    x = "PVT",
+    y = "Mean Suitable Biomass"
+  )
+```
+
+## Average DE
+
+```{r}
+# Calculate mean and standard error for AveDE by PVT
+avg_DE <- plot.totals %>% 
+  group_by(PVT) %>% 
+  summarise(
+    mean_DE = mean(AveDE, na.rm = TRUE),
+    se_DE   = sd(AveDE, na.rm = TRUE) / sqrt(n())
+  )
+
+# Bar plot with dashed line and standard error bars
+ggplot(avg_DE, aes(x = factor(PVT), y = mean_DE)) +
+  geom_col(fill = "steelblue") +
+  geom_errorbar(aes(ymin = mean_DE - se_DE, ymax = mean_DE + se_DE),
+                width = 0.2, color = "black") +
+  geom_hline(yintercept = 11.5, linetype = "dashed", color = "red", size = 0.8) +
+  scale_y_continuous(limits = c(0, 15)) +
+  theme_minimal() +
+  labs(
+    title = "Average DE by PVT",
+    x = "PVT",
+    y = "Mean DE (KJ/g)"
+  )
+```
+
+## Average DP
+
+```{r}
+# Calculate mean and standard error for AveDP by PVT
+avg_DP <- plot.totals %>% 
+  group_by(PVT) %>% 
+  summarise(
+    mean_DP = mean(AveDP, na.rm = TRUE),
+    se_DP   = sd(AveDP, na.rm = TRUE) / sqrt(n())
+  )
+
+# Bar plot with dashed line and standard error bars
+ggplot(avg_DP, aes(x = factor(PVT), y = mean_DP)) +
+  geom_col(fill = "steelblue") +
+  geom_errorbar(aes(ymin = mean_DP - se_DP, ymax = mean_DP + se_DP),
+                width = 0.2, color = "black") +
+  geom_hline(yintercept = 7.5, linetype = "dashed", color = "red", size = 0.8) +
+  scale_y_continuous(limits = c(0, 13)) +
+  theme_minimal() +
+  labs(
+    title = "Average DP by PVT",
+    x = "PVT",
+    y = "Mean DP (g/100g)"
+  )
+```
