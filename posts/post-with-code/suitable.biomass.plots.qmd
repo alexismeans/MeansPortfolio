@@ -5,11 +5,12 @@ code-fold: TRUE
 ---
 
 ```{r}
+#| warning: FALSE
+#| message: FALSE
 library(readr)
 library(readxl)
 library(tidyverse)
-#| warning: FALSE
-#| message: FALSE
+
 
 r <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/FRESH/processed.data/2024.results.xlsx"
 
@@ -40,9 +41,9 @@ ggplot(plot.totals, aes(x = Date, y = SuitableBiomass)) +
   scale_y_continuous(limits = c(0, 1000)) +
   theme_minimal() +
   labs(
-    title = "Suitable Biomass (kg/ha) Over Time by PVT",
+    title = "Suitable Biomass Over Time by PVT",
     x = "Date",
-    y = "Suitable Biomass"
+    y = "Suitable Biomass (kg/ha)"
   )
 ```
 
@@ -104,7 +105,7 @@ ggplot(avg_sb, aes(x = factor(PVT), y = mean_sb)) +
   scale_y_continuous(limits = c(0, 700)) +
   theme_minimal() +
   labs(
-    title = "Average Suitable Biomass (kg/ha) by PVT",
+    title = "Average Suitable Biomass by PVT",
     x = "PVT",
     y = "Mean Suitable Biomass (kg/ha)"
   )
