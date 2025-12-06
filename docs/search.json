@@ -627,7 +627,7 @@
     "href": "posts/post-with-code/suitable.biomass.plots.html",
     "title": "Suitable Biomass Comparisons",
     "section": "",
-    "text": "Code\nlibrary(readr)\nlibrary(readxl)\nlibrary(tidyverse)\n\n\nr &lt;- \"C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/FRESH/processed.data/2024.results.xlsx\"\n\nplot.totals &lt;- read_excel(r, \"Plot-Level-Summary\")\nindiv.value &lt;- read_excel(r, \"2024.Output\")\n\ntransect_area_m2 &lt;- 5  # 5 quadrats of 1x1 m each\n\ntotal &lt;- plot.totals %&gt;%\n  mutate(SuitableBiomass_kg_ha = (SuitableBiomass / 1000) / transect_area_m2 * 10000)"
+    "text": "Code\nlibrary(readr)\nlibrary(readxl)\nlibrary(tidyverse)\n\n\nr &lt;- \"C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/FRESH/processed.data/2024.results.xlsx\"\n\nplot.totals &lt;- read_excel(r, \"Plot-Level-Summary\")\nindiv.value &lt;- read_excel(r, \"2024.Output\")"
   },
   {
     "objectID": "posts/post-with-code/suitable.biomass.plots.html#total-suitable-biomass-over-time-by-pvt",

@@ -191,12 +191,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>r <span class="ot">&lt;-</span> <span class="st">"C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/FRESH/processed.data/2024.results.xlsx"</span></span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>plot.totals <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(r, <span class="st">"Plot-Level-Summary"</span>)</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>indiv.value <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(r, <span class="st">"2024.Output"</span>)</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>transect_area_m2 <span class="ot">&lt;-</span> <span class="dv">5</span>  <span class="co"># 5 quadrats of 1x1 m each</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>total <span class="ot">&lt;-</span> plot.totals <span class="sc">%&gt;%</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">SuitableBiomass_kg_ha =</span> (SuitableBiomass <span class="sc">/</span> <span class="dv">1000</span>) <span class="sc">/</span> transect_area_m2 <span class="sc">*</span> <span class="dv">10000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>indiv.value <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(r, <span class="st">"2024.Output"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <section id="scatterplots" class="level1">
