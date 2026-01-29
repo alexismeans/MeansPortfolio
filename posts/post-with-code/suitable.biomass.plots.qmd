@@ -12,10 +12,10 @@ library(readxl)
 library(tidyverse)
 
 
-r <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/FRESH/processed.data/2024.results.xlsx"
+r <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/FRESH/processed.data/total.results.xlsx"
 
 plot.totals <- read_excel(r, "Plot-Level-Summary")
-indiv.value <- read_excel(r, "2024.Output")
+indiv.value <- read_excel(r, "Total.Output")
 
 
 ```
@@ -30,8 +30,13 @@ indiv.value <- read_excel(r, "2024.Output")
 library(lubridate)
 
 plot.totals$Date <- ymd(plot.totals$Date)
+plot.totals$Julian_Day <- yday(plot.totals$Date)
 
-ggplot(plot.totals, aes(x = Date, y = SuitableBiomass)) +
+plot.totals <- plot.totals %>% 
+  select(-PVT, -PVTedit) %>% 
+  rename(PVT = PVT_Observed)
+
+ggplot(plot.totals, aes(x = Julian_Day, y = SuitableBiomass)) +
   geom_point() +
   geom_line(aes(group = TransectID), alpha = 0.4) +
   facet_wrap(~ PVT) +  # same y-axis across all panels
@@ -49,9 +54,8 @@ ggplot(plot.totals, aes(x = Date, y = SuitableBiomass)) +
 ```{r}
 #| warning: FALSE
 #| message: FALSE
-ggplot(plot.totals, aes(x = Date, y = AveDE)) +
+ggplot(plot.totals, aes(x = Julian_Day, y = AveDE)) +
   geom_point() +
-  geom_line(aes(group = TransectID), alpha = 0.4) +
   geom_hline(yintercept = 11.5, linetype = "dashed", color = "red", size = 0.8) +
   facet_wrap(~ PVT) +  # same y-axis across all panels
   scale_y_continuous(limits = c(9, 14)) +
@@ -68,9 +72,8 @@ ggplot(plot.totals, aes(x = Date, y = AveDE)) +
 ```{r}
 #| warning: FALSE
 #| message: FALSE
-ggplot(plot.totals, aes(x = Date, y = AveDP)) +
+ggplot(plot.totals, aes(x = Julian_Day, y = AveDP)) +
   geom_point() +
-  geom_line(aes(group = TransectID), alpha = 0.4) +
   geom_hline(yintercept = 7.5, linetype = "dashed", color = "red", size = 0.8) +
   facet_wrap(~ PVT) +
   scale_y_continuous(limits = c(2, 16)) +
