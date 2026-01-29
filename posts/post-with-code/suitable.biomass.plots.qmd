@@ -36,17 +36,31 @@ plot.totals <- plot.totals %>%
   select(-PVT, -PVTedit) %>% 
   rename(PVT = PVT_Observed)
 
+# Create month breaks based on your actual data
+month_breaks <- plot.totals %>%
+  mutate(Month = floor_date(Date, "month")) %>%
+  distinct(Month) %>%
+  arrange(Month) %>%
+  mutate(Julian_Day = yday(Month),
+         Label = format(Month, "%b"))  # Abbreviated month name
+
 ggplot(plot.totals, aes(x = Julian_Day, y = SuitableBiomass)) +
   geom_point() +
   geom_line(aes(group = TransectID), alpha = 0.4) +
-  facet_wrap(~ PVT) +  # same y-axis across all panels
+  facet_wrap(~ PVT) +
   scale_y_continuous(limits = c(0, 1000)) +
+  scale_x_continuous(
+    breaks = month_breaks$Julian_Day,
+    labels = month_breaks$Label
+  ) +
   theme_minimal() +
   labs(
     title = "Suitable Biomass Over Time by PVT",
     x = "Date",
     y = "Suitable Biomass (kg/ha)"
   )
+
+
 ```
 
 ## Average DE Over Time by PVT
@@ -57,8 +71,12 @@ ggplot(plot.totals, aes(x = Julian_Day, y = SuitableBiomass)) +
 ggplot(plot.totals, aes(x = Julian_Day, y = AveDE)) +
   geom_point() +
   geom_hline(yintercept = 11.5, linetype = "dashed", color = "red", size = 0.8) +
-  facet_wrap(~ PVT) +  # same y-axis across all panels
+  facet_wrap(~ PVT) +
   scale_y_continuous(limits = c(9, 14)) +
+  scale_x_continuous(
+    breaks = month_breaks$Julian_Day,
+    labels = month_breaks$Label
+  ) +
   theme_minimal() +
   labs(
     title = "Average Digestible Energy Over Time by PVT",
@@ -77,6 +95,10 @@ ggplot(plot.totals, aes(x = Julian_Day, y = AveDP)) +
   geom_hline(yintercept = 7.5, linetype = "dashed", color = "red", size = 0.8) +
   facet_wrap(~ PVT) +
   scale_y_continuous(limits = c(2, 16)) +
+   scale_x_continuous(
+    breaks = month_breaks$Julian_Day,
+    labels = month_breaks$Label
+  ) +
   theme_minimal() +
   labs(
     title = "Average Digestible Protien Over Time by PVT",

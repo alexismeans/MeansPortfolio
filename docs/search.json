@@ -634,21 +634,21 @@
     "href": "posts/post-with-code/suitable.biomass.plots.html#total-suitable-biomass-over-time-by-pvt",
     "title": "Suitable Biomass Comparisons",
     "section": "Total Suitable Biomass Over Time by PVT",
-    "text": "Total Suitable Biomass Over Time by PVT\n\n\nCode\nlibrary(lubridate)\n\nplot.totals$Date &lt;- ymd(plot.totals$Date)\nplot.totals$Julian_Day &lt;- yday(plot.totals$Date)\n\nplot.totals &lt;- plot.totals %&gt;% \n  select(-PVT, -PVTedit) %&gt;% \n  rename(PVT = PVT_Observed)\n\nggplot(plot.totals, aes(x = Julian_Day, y = SuitableBiomass)) +\n  geom_point() +\n  geom_line(aes(group = TransectID), alpha = 0.4) +\n  facet_wrap(~ PVT) +  # same y-axis across all panels\n  scale_y_continuous(limits = c(0, 1000)) +\n  theme_minimal() +\n  labs(\n    title = \"Suitable Biomass Over Time by PVT\",\n    x = \"Date\",\n    y = \"Suitable Biomass (kg/ha)\"\n  )"
+    "text": "Total Suitable Biomass Over Time by PVT\n\n\nCode\nlibrary(lubridate)\n\nplot.totals$Date &lt;- ymd(plot.totals$Date)\nplot.totals$Julian_Day &lt;- yday(plot.totals$Date)\n\nplot.totals &lt;- plot.totals %&gt;% \n  select(-PVT, -PVTedit) %&gt;% \n  rename(PVT = PVT_Observed)\n\n# Create month breaks based on your actual data\nmonth_breaks &lt;- plot.totals %&gt;%\n  mutate(Month = floor_date(Date, \"month\")) %&gt;%\n  distinct(Month) %&gt;%\n  arrange(Month) %&gt;%\n  mutate(Julian_Day = yday(Month),\n         Label = format(Month, \"%b\"))  # Abbreviated month name\n\nggplot(plot.totals, aes(x = Julian_Day, y = SuitableBiomass)) +\n  geom_point() +\n  geom_line(aes(group = TransectID), alpha = 0.4) +\n  facet_wrap(~ PVT) +\n  scale_y_continuous(limits = c(0, 1000)) +\n  scale_x_continuous(\n    breaks = month_breaks$Julian_Day,\n    labels = month_breaks$Label\n  ) +\n  theme_minimal() +\n  labs(\n    title = \"Suitable Biomass Over Time by PVT\",\n    x = \"Date\",\n    y = \"Suitable Biomass (kg/ha)\"\n  )"
   },
   {
     "objectID": "posts/post-with-code/suitable.biomass.plots.html#average-de-over-time-by-pvt",
     "href": "posts/post-with-code/suitable.biomass.plots.html#average-de-over-time-by-pvt",
     "title": "Suitable Biomass Comparisons",
     "section": "Average DE Over Time by PVT",
-    "text": "Average DE Over Time by PVT\n\n\nCode\nggplot(plot.totals, aes(x = Julian_Day, y = AveDE)) +\n  geom_point() +\n  geom_hline(yintercept = 11.5, linetype = \"dashed\", color = \"red\", size = 0.8) +\n  facet_wrap(~ PVT) +  # same y-axis across all panels\n  scale_y_continuous(limits = c(9, 14)) +\n  theme_minimal() +\n  labs(\n    title = \"Average Digestible Energy Over Time by PVT\",\n    x = \"Date\",\n    y = \"Average DE (KJ/g)\"\n  )"
+    "text": "Average DE Over Time by PVT\n\n\nCode\nggplot(plot.totals, aes(x = Julian_Day, y = AveDE)) +\n  geom_point() +\n  geom_hline(yintercept = 11.5, linetype = \"dashed\", color = \"red\", size = 0.8) +\n  facet_wrap(~ PVT) +\n  scale_y_continuous(limits = c(9, 14)) +\n  scale_x_continuous(\n    breaks = month_breaks$Julian_Day,\n    labels = month_breaks$Label\n  ) +\n  theme_minimal() +\n  labs(\n    title = \"Average Digestible Energy Over Time by PVT\",\n    x = \"Date\",\n    y = \"Average DE (KJ/g)\"\n  )"
   },
   {
     "objectID": "posts/post-with-code/suitable.biomass.plots.html#average-dp-over-time-by-pvt",
     "href": "posts/post-with-code/suitable.biomass.plots.html#average-dp-over-time-by-pvt",
     "title": "Suitable Biomass Comparisons",
     "section": "Average DP Over Time by PVT",
-    "text": "Average DP Over Time by PVT\n\n\nCode\nggplot(plot.totals, aes(x = Julian_Day, y = AveDP)) +\n  geom_point() +\n  geom_hline(yintercept = 7.5, linetype = \"dashed\", color = \"red\", size = 0.8) +\n  facet_wrap(~ PVT) +\n  scale_y_continuous(limits = c(2, 16)) +\n  theme_minimal() +\n  labs(\n    title = \"Average Digestible Protien Over Time by PVT\",\n    x = \"Date\",\n    y = \"Average DP (g/100g)\"\n  )"
+    "text": "Average DP Over Time by PVT\n\n\nCode\nggplot(plot.totals, aes(x = Julian_Day, y = AveDP)) +\n  geom_point() +\n  geom_hline(yintercept = 7.5, linetype = \"dashed\", color = \"red\", size = 0.8) +\n  facet_wrap(~ PVT) +\n  scale_y_continuous(limits = c(2, 16)) +\n   scale_x_continuous(\n    breaks = month_breaks$Julian_Day,\n    labels = month_breaks$Label\n  ) +\n  theme_minimal() +\n  labs(\n    title = \"Average Digestible Protien Over Time by PVT\",\n    x = \"Date\",\n    y = \"Average DP (g/100g)\"\n  )"
   },
   {
     "objectID": "posts/post-with-code/suitable.biomass.plots.html#average-suitable-biomass",
