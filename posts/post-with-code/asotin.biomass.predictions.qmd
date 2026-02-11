@@ -7,7 +7,7 @@ warning: FALSE
 message: FALSE
 ---
 
-## Asotin Data 
+## Asotin Data
 
 Below is the final Asotin model and an example of Katey's dataset. I made some adjustments to the John Day categorical variables (PVT and Fire Category) to match her data structure. The "Intermediate" and "Scabland" PVT types were combined into "Shrubland" because Katey's dataset didn't include these categories. I also classified all Fire Category observations as "pre-fire".
 

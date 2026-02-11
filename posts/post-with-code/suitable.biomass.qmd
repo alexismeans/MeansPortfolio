@@ -16,16 +16,23 @@ Using the subset of my data that I have created, I want to set up some visualiza
 library(tidyverse) 
 library(lubridate) 
 library(sf)
+ 
+t <- ("C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/FRESH/processed.data/total.results.xlsx")
+totals <- read_excel(t,"Plot-Level-Summary")
 
-setwd("C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/FRESH/processed.data/") 
-totals <- read.csv("test.totals.csv")
-fdata <- read.csv("test.fdata.csv") 
-transect <- read.csv("../raw.data/transect.csv") #formatting plot database 
+fdata <- read.csv("C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/FRESH/processed.data/total.fdata.csv") 
 
-plot <- transect %>% rename(TransectID = PlotID, Lat = BeginLat, Long = BeginLong) %>% select(Dates, TransectID, PVT, Lat, Long)
+a <- ("C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/VegDatabases/Working.composition.data.xlsx")
+
+transect <- read_excel(a, "Transect") 
+
+plot <- transect %>% 
+  rename(TransectID = PlotID, Lat = BeginLat, Long = BeginLong) %>% 
+  select(Date, TransectID, PVT, Lat, Long) 
+
 
 plot <- plot %>% 
-  mutate(Dates = mdy(Dates), JulianDay = yday(Dates)) %>%
+  mutate( JulianDay = yday(Date)) %>%
   st_as_sf(coords = c("Long", "Lat"), crs = 4326) %>% 
   st_transform(crs = 32611) %>% 
   mutate(Easting = st_coordinates(.)[,1], Northing = st_coordinates(.)[,2]) %>% select(JulianDay, TransectID, PVT, Easting, Northing) %>% st_drop_geometry()
@@ -40,11 +47,15 @@ data <- plot %>%
 
 #I hate the way it is arranged, so I am going to rearrange it 
 data <- data %>% 
-  select(JulianDay, PVT, TransectID, Plant.Code, Phenology, Part, Biomass, Biomass_Used, Pct_Suitable_Biomass, SuitableBiomass, DE, TotalDE, AveDE, DP, TotalDP, AveDP, Easting, Northing) 
+  rename(PVT = PVT.x) %>% 
+  select(-PVT.y) 
+
+data <- data %>% 
+  select(JulianDay, PVT, PVT_Observed, TransectID, Plant.Code, Phenology, Part, Biomass, Biomass_Used, Pct_Suitable_Biomass, SuitableBiomass, DE, TotalDE, AveDE, DP, TotalDP, AveDP, Easting, Northing) 
 
 #recategorize PVT
 data <- data %>%
-  mutate(PVT = recode(PVT, `672` = "Grassland", `668` = "Scabland", `669` = "Sagebrush Shrubland", `674` = "Sagebrush Steppe", `682` = "Riparian"))
+  mutate(PVT = recode(PVT, `672` = "Grassland", `668` = "Scabland", `669` = "Shrubland", `674` = "Intermediate", `682` = "Riparian", `100` = "Fall", `660`= "Sparse"))
 
 rm(fdata, plot, totals, transect)
 

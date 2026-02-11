@@ -46,7 +46,8 @@ transect <- transect %>%
                       `668` = "Scabland",
                       `669` = "Shrubland",
                       `674` = "Intermediate",
-                      `660` = "Sparse"))
+                      `660` = "Sparse",
+                      `100` = "Fall"))
 
 ```
 
@@ -308,25 +309,36 @@ I’m still working on biomass predictions, which will help determine how much s
 
 library(DT)
 db <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/VegDatabases/Working.composition.data.xlsx"
-q <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/quality/processed.data/24_quality_results.xlsx"
+q <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/quality/processed.data/total.qualitydata.xlsx"
 
-quality <- read_excel(q, "24_quality_results")
+quality <- read_excel(q, "Sheet 1")
 plant <- read_excel(db, "PlantList")
 
 plant <- plant %>% 
-  select(Spp, Genus, Species, CommonName, FunctionalGroup, Status)
+  rename(FG = FunctionalGroup) %>% 
+  select(Spp, Family, Genus, Species, CommonName, FG,  Status) %>% 
+  rename(Code = Spp)
 
 quality <- quality %>% 
-  select(Sample_ID, PVT, Spp, Pheno, Part, DP, DE) %>% 
-  left_join(plant, by = "Spp")
+  mutate(
+    Pheno = str_split(Description, "_", simplify = TRUE)[, 3],
+    Part = sub("^([^_]*_){3}", "", Description),
+    PVT = substr(Description, 1, 3)
+  ) %>% 
+  rename(DE = `DE_KJ/g`,
+         DP = `DP_g100g`)
+
+
+quality <- quality %>% 
+  left_join(plant, by = "Code")
 
 grass <- quality %>% 
-  filter(str_detect(FunctionalGroup, "G")) %>% 
+  filter(str_detect(FG, "G")) %>% 
   filter(Spp != "UNK GRASS") %>% 
   filter(!Sample_ID %in% c(251, 275, 264))
 
 grass.list <- plant %>% 
-  filter(str_detect(FunctionalGroup, "G"))
+  filter(str_detect(FG, "G"))
 
 datatable(grass.list, options = list(pageLength = 10))
 
@@ -382,12 +394,10 @@ This graph is a zoomed-in look at the previous one, focusing only on the species
 #| warning: FALSE
 #| message: false
 
-library(ggrepel) 
+library(plotly) 
 
-
-ggplot(grass, aes(x = DE, y = DP)) +
+p <- ggplot(grass, aes(x = DE, y = DP, text = paste(Spp, Pheno, sep = "_"))) +
   geom_point(aes(color = Status), size = 3) +  
-  geom_text_repel(aes(label = paste(Spp, Pheno, sep = "_")), size = 3) +  
   xlim(11, max(grass$DE) + 0.5) +
   ylim(7, max(grass$DP) + 0.5) +
   labs(
@@ -397,6 +407,9 @@ ggplot(grass, aes(x = DE, y = DP)) +
     color = "Status"
   ) +
   theme_minimal(base_size = 12)
+
+# Convert to interactive plotly
+ggplotly(p, tooltip = "text")
 ```
 
 ## Top Forb Species
@@ -411,7 +424,7 @@ forb <- quality %>%
   filter(!Sample_ID %in% "308")
 
 forb.list <- plant %>% 
-  filter(str_detect(FunctionalGroup, "F"))
+  filter(str_detect(FG, "F"))
 
 datatable(forb.list, options = list(pageLength = 10))
 
@@ -464,9 +477,8 @@ It is interesting to see that most of the species that fall above both the DE an
 #| warning: FALSE
 #| message: false
 
-ggplot(forb, aes(x = DE, y = DP)) +
+p <- ggplot(forb, aes(x = DE, y = DP, text = paste(Spp, Pheno, sep = "_"))) +
   geom_point(aes(color = Status), size = 3) + 
-  geom_text_repel(aes(label = paste(Spp, Pheno, sep = "_")), size = 3) +  
   xlim(11, max(grass$DE) + 0.5) +
   ylim(7, 18) +
   labs(
@@ -476,6 +488,9 @@ ggplot(forb, aes(x = DE, y = DP)) +
     color = "Status"
   ) +
   theme_minimal(base_size = 12)
+
+# Convert to interactive plotly
+ggplotly(p, tooltip = "text")
 ```
 
 ## Top Shrub Species
@@ -489,7 +504,7 @@ shrub <- quality %>%
  filter(FunctionalGroup %in% c("ES", "S", "T", "V"))
 
 shrub.list <- plant %>% 
-  filter(FunctionalGroup %in% c("ES", "S", "T", "V"))
+  filter(FG %in% c("ES", "S", "T", "V"))
 
 datatable(shrub.list, options = list(pageLength = 10))
 
@@ -536,18 +551,11 @@ p3_plotly
 #| warning: FALSE
 #| message: false
 
-ggplot(shrub, aes(x = DE, y = DP)) +
+p <- ggplot(shrub, aes(x = DE, y = DP, text = paste(Spp, Pheno, sep = "_"))) +
   geom_point(aes(color = Status), size = 3) + 
-  geom_text_repel(aes(label = paste(Spp, Pheno, sep = "_")), size = 3) + 
-  xlim(11, max(grass$DE) + 0.5) +
-  ylim(7, max(grass$DP) + 0.5) +
-  labs(
-    title = "Top Shrub or Tree Species",
-    x = "DE",
-    y = "DP",
-    color = "Status"
-  ) +
-  theme_minimal(base_size = 12)
+  labs(title = "Top Shrub or Tree Species", x = "DE", y = "DP")
+
+ggplotly(p, tooltip = "text")
 ```
 
 It was interesting to notice that DP values stayed pretty low across most species, no matter the functional group or phenology stage. This matches up with what Katey was seeing in Asotin Creek. I’m hoping the suitable biomass measurements will give us a better idea of how this population does so well even when many of the plants don’t seem all that nutrient-rich. My guess is that the sheer volume they’re able to consume of some of the species has a lot to do with it.
@@ -593,7 +601,8 @@ I also looked at whether the percentage of non-native species observed at our tr
 
 ```{r}
 status <- plant %>% 
-  select(Spp, Status, FunctionalGroup)
+  rename(Spp = Code) %>% 
+  select(Spp, Status, FG)
 
 df <- comp %>% 
   left_join(status, by = "Spp")
@@ -658,7 +667,7 @@ fecal <- read_excel(f, "Sheet1")
 
 
 fecal.time <- fecal %>% 
-  filter(!ID %in% c("25_045", "25_061")) %>% 
+  filter(!ID %in% c("25_JDR_093", "25_JDR_094")) %>% 
   mutate(
     DATE = as.Date(
       suppressWarnings(as.numeric(DATE)),  
@@ -695,7 +704,7 @@ Lastly, this plot shows the locations of all the samples we collected, both from
 #| warning: FALSE
 fecal.loc <- fecal %>% 
   filter(!is.na(LAT) & !is.na(LONG)) %>% 
-  filter(!ID %in% c("25_045", "25_061", "25_048")) %>%
+  filter(!ID %in% c("25_JDR_093", "25_JDR_094", "25_JDR_024")) %>%
   st_as_sf(coords = c("LONG", "LAT"), crs = 4326) 
 
 jd <- st_transform(st_zm(jd), crs = 4326)
