@@ -53,7 +53,7 @@ transect <- transect %>%
 
 ## Total Transects Sampled
 
-Between 2024 and 2025, we sampled 109 transects across six different vegetation communities in the canyon. Most of these were in Grassland (58 transects), with fewer in Intermediate (13), Riparian (12), Scabland (11), Shrubland (11), and Sparse (4). The number of transects in each community reflected how much of the study area that community covered, based on Landfire data. Since Grassland makes up more than 85% of the site, it naturally had the most sampling, while the other communities only covered about 1–5% each. As you all know, there are plenty of rocky(sparse) areas that sheep often use, but because they were tough to get to and didn't usually have much plant diversity, we ended up sampling fewer transects within these communities. Still, I think the sampling we did was enough to capture any variation in that community.
+Between 2024 and 2025, we sampled 115 transects across six different vegetation communities in the canyon. Most of these were in Grassland (58 transects), with fewer in Intermediate (13), Riparian (12), Scabland (11), Shrubland (11), Sparse (4) and 6 transects in the Fall of 2025 that did not belong to a specific PVT. The number of transects in each community reflected how much of the study area that community covered, based on Landfire data. Since Grassland makes up more than 85% of the site, it naturally had the most sampling, while the other communities only covered about 1–5% each. As you all know, there are plenty of rocky(sparse) areas that sheep often use, but because they were tough to get to and didn't usually have much plant diversity, we ended up sampling fewer transects within these communities. Still, I think the sampling we did was enough to capture any variation in that community.
 
 ```{r}
 #| warning: FALSE
@@ -154,7 +154,8 @@ ggplot() +
     "Sparse" = "brown",
     "Intermediate" = "yellow",
     "Scabland" = "purple",
-    "Shrubland" = "red"
+    "Shrubland" = "red",
+    "Fall"= "black"
   )) +
     labs(
     title = "Sample Locations within the John Day",
@@ -213,6 +214,7 @@ comp <- comp %>%
       PVT == "668" ~ "Scabland",
       PVT == "669" ~ "Shrubland",
       PVT == "674" ~ "Intermediate",
+      PVT == "100" ~ "Fall"
       
     )
   ) 
@@ -266,7 +268,7 @@ ggplotly(p, tooltip = "text")
 
 ## Timing by Vegetation Community
 
-I was curious to see how green-up timing varied across the different vegetation communities, especially in the riparian areas. The timing in Grassland, Intermediate, and Shrubland communities was fairly similar, while Scabland and Sparse areas progressed the fastest. As expected, the Riparian areas showed a slower progression through green-up compared to the other communities, likely providing more nutritious forage into late June or early July—just as lactation is hopefully slowing for many of the ewes.
+I was curious to see how green-up timing varied across the different vegetation communities, especially in the riparian areas. The timing in Grassland, Intermediate, and Shrubland communities was fairly similar, while Scabland and Sparse areas progressed the fastest. As expected, the Riparian areas showed a slower progression through green-up compared to the other communities, likely providing more nutritious forage into late June or early July, just as lactation is hopefully slowing for many of the ewes. I think we did a pretty good job at capturing the beginning of the fall green-up as well. I suspect it gets a little greener through November/December than what we were able to capture, but I think this will be enough to get at the inferences we need to make from Fall selection.
 
 ```{r}
 pvt_comp <- comp %>%
@@ -293,13 +295,11 @@ ggplotly(p2, tooltip = "text")
 
 # Quality Metrics
 
-All results in this section are based on the 2024 samples. The 2025 quality samples are still being processed. Once they’re complete, we’ll have much more information, especially for the species observed in the smaller vegetation communities. I’ve also included a key for each section so that no one has to guess the species codes.
+All results now include quality metrics from 2024 as well as 2025 (finally). There is a key included for each section so that no one has to guess the species codes.
 
 ## Top Grass Species
 
 The first graph shows the overall trend in quality metrics for different grasses that we observed. The dashed lines represent the nutritional requirement for a lactating female sheep (Digestible Energy "DE" = 11.5, Digestible Protein "DP" 7.5). In theory, any species falling in the upper-right quadrant meets these nutritional requirements. That said, these metrics don’t account for biomass, so take them with a grain of salt, some species may still make a substantial contribution to the total suitable biomass when available in larger quantities.
-
-I’m still working on biomass predictions, which will help determine how much suitable forage exists within the areas we sampled before scaling up to the landscape level. I hope to have those results soon.
 
 *(this one is interactive too)*
 
@@ -311,34 +311,23 @@ library(DT)
 db <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/VegDatabases/Working.composition.data.xlsx"
 q <- "C:/Users/Alexis Means/Documents/Project/Nutrition Sampling/R code/quality/processed.data/total.qualitydata.xlsx"
 
-quality <- read_excel(q, "Sheet 1")
+quality <- read_excel(q, "Sheet1")
 plant <- read_excel(db, "PlantList")
 
-plant <- plant %>% 
-  rename(FG = FunctionalGroup) %>% 
-  select(Spp, Family, Genus, Species, CommonName, FG,  Status) %>% 
-  rename(Code = Spp)
-
 quality <- quality %>% 
-  mutate(
-    Pheno = str_split(Description, "_", simplify = TRUE)[, 3],
-    Part = sub("^([^_]*_){3}", "", Description),
-    PVT = substr(Description, 1, 3)
-  ) %>% 
   rename(DE = `DE_KJ/g`,
-         DP = `DP_g100g`)
-
-
-quality <- quality %>% 
-  left_join(plant, by = "Code")
+         DP = `DP_g100g`) %>% 
+  distinct(CompID, .keep_all = TRUE)
+  
 
 grass <- quality %>% 
-  filter(str_detect(FG, "G")) %>% 
-  filter(Spp != "UNK GRASS") %>% 
-  filter(!Sample_ID %in% c(251, 275, 264))
+  filter(FG %in% c("PG", "AG")) 
+
+# %>%  filter(!CompID %in% c(251, 275, 264))
 
 grass.list <- plant %>% 
-  filter(str_detect(FG, "G"))
+  filter(FG_New %in% c("PG", "AG"))
+  
 
 datatable(grass.list, options = list(pageLength = 10))
 
@@ -349,8 +338,8 @@ p <- ggplot(grass, aes(
   y = DP,
   color = Status,
   text = paste0( 
-    "Spp: ", Spp, 
-    "<br>Pheno: ", Pheno, 
+    "Spp: ", Code, 
+    "<br>Pheno: ", Phenology, 
     "<br>Part: ", Part,
     "<br>Status: ", Status,
     "<br>DE: ", round(DE, 2),
@@ -396,7 +385,7 @@ This graph is a zoomed-in look at the previous one, focusing only on the species
 
 library(plotly) 
 
-p <- ggplot(grass, aes(x = DE, y = DP, text = paste(Spp, Pheno, sep = "_"))) +
+p <- ggplot(grass, aes(x = DE, y = DP, text = paste(Code, Phenology, sep = "_"))) +
   geom_point(aes(color = Status), size = 3) +  
   xlim(11, max(grass$DE) + 0.5) +
   ylim(7, max(grass$DP) + 0.5) +
@@ -420,11 +409,10 @@ Looking at the forbs is a bit more chaotic because of the larger number of speci
 #| warning: FALSE
 #| message: false
 forb <- quality %>% 
-  filter(str_detect(FunctionalGroup, "F")) %>% 
-  filter(!Sample_ID %in% "308")
+  filter(FG %in% c("PF", "AF"))%>% filter(!CompID %in% "308")
 
 forb.list <- plant %>% 
-  filter(str_detect(FG, "F"))
+  filter(FG_New %in% c("PF", "AF")) 
 
 datatable(forb.list, options = list(pageLength = 10))
 
@@ -433,8 +421,8 @@ p2 <- ggplot(forb, aes(
   y = DP,
   color = Status,
   text = paste0( 
-    "Spp: ", Spp, 
-    "<br>Pheno: ", Pheno, 
+    "Spp: ", Code, 
+    "<br>Pheno: ", Phenology, 
     "<br>Part: ", Part,
     "<br>Status: ", Status,
     "<br>DE: ", round(DE, 2),
@@ -477,7 +465,7 @@ It is interesting to see that most of the species that fall above both the DE an
 #| warning: FALSE
 #| message: false
 
-p <- ggplot(forb, aes(x = DE, y = DP, text = paste(Spp, Pheno, sep = "_"))) +
+p <- ggplot(forb, aes(x = DE, y = DP, text = paste(Code, Phenology, sep = "_"))) +
   geom_point(aes(color = Status), size = 3) + 
   xlim(11, max(grass$DE) + 0.5) +
   ylim(7, 18) +
@@ -501,10 +489,10 @@ Lastly I lumped all of the Tree/Vine/Shrubs species into one group to compare.
 #| warning: FALSE
 #| message: false
 shrub <- quality %>% 
- filter(FunctionalGroup %in% c("ES", "S", "T", "V"))
+ filter(FG %in% c("ES", "ET", "DS", "PS"))
 
 shrub.list <- plant %>% 
-  filter(FG %in% c("ES", "S", "T", "V"))
+  filter(FG_New %in% c("ES", "ET", "DS", "PS"))
 
 datatable(shrub.list, options = list(pageLength = 10))
 
@@ -513,8 +501,8 @@ p3 <- ggplot(shrub, aes(
   y = DP,
   color = Status,   
   text = paste0( 
-    "Spp: ", Spp, 
-    "<br>Pheno: ", Pheno, 
+    "Spp: ", Code, 
+    "<br>Pheno: ", Phenology, 
     "<br>Part: ", Part,
     "<br>Status: ", Status,
     "<br>DE: ", round(DE, 2),
@@ -551,14 +539,14 @@ p3_plotly
 #| warning: FALSE
 #| message: false
 
-p <- ggplot(shrub, aes(x = DE, y = DP, text = paste(Spp, Pheno, sep = "_"))) +
+p <- ggplot(shrub, aes(x = DE, y = DP, text = paste(Code, Phenology, sep = "_"))) +
   geom_point(aes(color = Status), size = 3) + 
   labs(title = "Top Shrub or Tree Species", x = "DE", y = "DP")
 
 ggplotly(p, tooltip = "text")
 ```
 
-It was interesting to notice that DP values stayed pretty low across most species, no matter the functional group or phenology stage. This matches up with what Katey was seeing in Asotin Creek. I’m hoping the suitable biomass measurements will give us a better idea of how this population does so well even when many of the plants don’t seem all that nutrient-rich. My guess is that the sheer volume they’re able to consume of some of the species has a lot to do with it.
+It was interesting to notice that DP values stayed pretty low across most species, no matter the functional group or phenology stage. This matches up with what Katey was seeing in Asotin Creek.
 
 # Invasive vs Native Species
 
@@ -573,8 +561,8 @@ invasive <- ggplot(grass, aes(
   y = DP,
   color = Status,
   text = paste0(
-    "Spp: ", Spp,
-    "<br>Pheno: ", Pheno,
+    "Spp: ", Code,
+    "<br>Pheno: ", Phenology,
     "<br>Part: ", Part,
     "<br>Status: ", Status,
     "<br>DE: ", round(DE, 2),
@@ -601,8 +589,8 @@ I also looked at whether the percentage of non-native species observed at our tr
 
 ```{r}
 status <- plant %>% 
-  rename(Spp = Code) %>% 
-  select(Spp, Status, FG)
+  select(Spp, Status, FG_New) %>% 
+  rename(FG = FG_New)
 
 df <- comp %>% 
   left_join(status, by = "Spp")
@@ -616,7 +604,8 @@ df <- df %>%
                       `668` = "Scabland",
                       `669` = "Shrubland",
                       `674` = "Intermediate",
-                      `660` = "Sparse"))
+                      `660` = "Sparse",
+                      `100` = "Fall"))
 
 df %>%
   count(Month, Status) %>%
@@ -732,9 +721,3 @@ ggplot() +
 ```
 
 # Next Steps
-
--   I’m getting really close to finalizing my biomass predictions. Right now, I’m refining the linear regression models to make sure they’re accurately predicting unclipped biomass before I can use the FRESH model to predict suitable biomass at each of the sampled transects.
-
--   I’m still processing the quality samples from this summer, but I should have everything ground and submitted for analysis before Thanksgiving. Hopefully, we’ll have the 2025 quality results back shortly following that. In the meantime, I can start building most of my models using the 2024 quality results and rerun them once the 2025 results are available.
-
--   I’ve also been working on extracting and reprojecting the remaining covariates I’ll include in my GAM (the nutritional landscape map). It’s mostly a tedious process, but I’m almost done and will soon be ready to build the model.
