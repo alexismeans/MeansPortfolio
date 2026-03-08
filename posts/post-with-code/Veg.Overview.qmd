@@ -295,7 +295,9 @@ ggplotly(p2, tooltip = "text")
 
 # Quality Metrics
 
-All results now include quality metrics from 2024 as well as 2025 (finally). There is a key included for each section so that no one has to guess the species codes.
+All results now include quality metrics from both 2024 and 2025. I also added a separate table listing the nutritional metrics to make them easier to reference rather than hunting through the graphs.
+
+The column **"Metric_Source"** indicates whether the nutritional metrics for a given species and phenological stage were directly measured or estimated from a broader grouping. The finest level is **"Descrip_Year"**, which represents a unique combination of Year, PVT, Species Code, Phenology, Plant Part, and Season. If no sample exists for that exact combination, the mean of observations sharing the same PVT, Code, Phenology, Part, and Season is used instead. From there, the process works up through a hierarchy — Code, Genus, Family, and finally Functional Group — until a match is found. Functional Group is the broadest level and applies to only one observation; the vast majority of entries have original measured metrics. A species code key is also included for each section so no guessing is required.
 
 ## Top Grass Species
 
@@ -321,16 +323,23 @@ quality <- quality %>%
   
 
 grass <- quality %>% 
-  filter(FG %in% c("PG", "AG")) 
+  filter(FG %in% c("PG", "AG")) %>% 
+  distinct(Descrip_Year, .keep_all = TRUE)
 
 # %>%  filter(!CompID %in% c(251, 275, 264))
+
+grass_metrics <- grass %>% 
+  select(quality_level, Code, Phenology, Part,  DE, DP, Year, PVT, Season, Status, Descrip_Year, Descrip, Description) %>% 
+  rename(Metric_Source = quality_level) %>% 
+  mutate(DE = round(DE, 2),
+         DP = round(DP, 2))
 
 grass.list <- plant %>% 
   filter(FG_New %in% c("PG", "AG"))
   
 
 datatable(grass.list, options = list(pageLength = 10))
-
+datatable(grass_metrics, options = list(pageLength = 10))
 
 
 p <- ggplot(grass, aes(
@@ -377,7 +386,7 @@ p_plotly
 
 This graph is a zoomed-in look at the previous one, focusing only on the species that landed in the upper right quadrant. As expected, cheatgrass(BRTE) and ripgut brome (BRDI3) came out as the top for grass species with the highest quality metrics, with bluebunch wheatgrass(PSSP6) and basin wildrye (LECI4) not far behind.
 
-*(this one is not sorry)*
+I am still trying to figure out why the DE of some of my newly emergent grass species is so low compared to the metrics from 2024. I rejoined my databases and made sure everything was being calculated using the exact same method. I need to dig into this a little further.
 
 ```{r}
 #| warning: FALSE
@@ -409,12 +418,22 @@ Looking at the forbs is a bit more chaotic because of the larger number of speci
 #| warning: FALSE
 #| message: false
 forb <- quality %>% 
-  filter(FG %in% c("PF", "AF"))%>% filter(!CompID %in% "308")
+  filter(FG %in% c("PF", "AF"))%>% filter(!CompID %in% "308") %>% 
+  distinct(CompID, .keep_all = TRUE)
+  
+
+forb_metrics <- forb %>% 
+  select(quality_level, Code, Phenology, Part,  DE, DP, Year, PVT, Season, Status, Descrip_Year, Descrip, Description) %>% 
+  rename(Metric_Source = quality_level) %>% 
+  mutate(DE = round(DE, 2),
+         DP = round(DP, 2))
 
 forb.list <- plant %>% 
   filter(FG_New %in% c("PF", "AF")) 
 
+
 datatable(forb.list, options = list(pageLength = 10))
+datatable(forb_metrics, options = list(pageLength = 10))
 
 p2 <- ggplot(forb, aes(
   x = DE,
@@ -459,7 +478,7 @@ p2_plotly
 
 ```
 
-It is interesting to see that most of the species that fall above both the DE and DP thresholds are various Lomatiums and Balsamroots which are everywhere in the spring and typically what we observed the sheep snacking on the most during our hours of observation. There also is several phenologies of the Lupine species—but obviously those aren’t edible for the sheep.
+We maintained the trend after adding the 2025 data that the DE and DP thresholds of various Lomatiums and Balsamroots are typically the highest. These species are everywhere in the spring and typically what we observed the sheep snacking on the most during our hours of observation. It will be really interesting to see which species come out in the metabarcoding results and if this aligns with these trends.
 
 ```{r}
 #| warning: FALSE
@@ -489,12 +508,21 @@ Lastly I lumped all of the Tree/Vine/Shrubs species into one group to compare.
 #| warning: FALSE
 #| message: false
 shrub <- quality %>% 
- filter(FG %in% c("ES", "ET", "DS", "PS"))
+ filter(FG %in% c("ES", "ET", "DS", "PS")) %>% 
+  distinct(CompID, .keep_all = TRUE)
+
+shrub_metrics <- shrub %>% 
+  select(quality_level, Code, Phenology, Part,  DE, DP, Year, PVT, Season, Status, Descrip_Year, Descrip, Description) %>% 
+  rename(Metric_Source = quality_level) %>% 
+  mutate(DE = round(DE, 2),
+         DP = round(DP, 2))
 
 shrub.list <- plant %>% 
   filter(FG_New %in% c("ES", "ET", "DS", "PS"))
 
+
 datatable(shrub.list, options = list(pageLength = 10))
+datatable(shrub_metrics, options = list(pageLength = 10))
 
 p3 <- ggplot(shrub, aes(
   x = DE,
@@ -585,7 +613,7 @@ invasive <- ggplot(grass, aes(
 ggplotly(invasive, tooltip = "text")
 ```
 
-I also looked at whether the percentage of non-native species observed at our transects increased at any point during the season. Overall, the number of non-native species remained fairly consistent throughout the year, with a small spike in the spring. However, since much fewer transects were sampled in April compared to any other month, it’s unclear whether this pattern accurately reflects conditions across the landscape at that time.
+I also looked at whether the percentage of non-native species observed at our transects increased at any point during the season. Overall, the number of non-native species remained fairly consistent throughout the year, with a small spike in the spring. However, since much fewer transects were sampled in April compared to any other month, it’s unclear whether this pattern accurately reflects conditions across the landscape at that time. There also seems to be an uptick in invasive species when we sampled in the fall which makes sense because anectdotally are largest biomass seemed to be cheatgrass in most of our plots.
 
 ```{r}
 status <- plant %>% 
